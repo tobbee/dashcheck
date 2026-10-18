@@ -79,6 +79,8 @@ lists all 408 checks of the DASH-IF Conformance tool and which dashcheck rules
 cover them. It is generated from `docs/dashif-checks.json`; after changing that
 file, run `go test ./internal/coverage -update`. To refresh the list from a newer
 version of the DASH-IF tool, run `tools/dashif-inventory.py <clone> docs/dashif-checks.json`.
+Bugs found in the DASH-IF tool while porting its checks are listed in
+[docs/dashif-upstream-bugs.md](docs/dashif-upstream-bugs.md), ready to be reported.
 
 Planned next steps:
 
