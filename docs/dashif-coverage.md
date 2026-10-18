@@ -10,7 +10,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Schematron: dvb-dash.sch | 13 | 13 | 0 | 0 | 0 |
 | Schematron: ac4-generic.sch | 17 | 17 | 0 | 0 | 0 |
 | Module: Common | 5 | 2 | 0 | 2 | 1 |
-| Module: IOP | 15 | 3 | 0 | 11 | 1 |
+| Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 1 | 0 | 22 | 0 |
 | Module: Low Latency | 54 | 5 | 3 | 46 | 0 |
 | Module: DVB | 103 | 2 | 3 | 98 | 0 |
@@ -18,7 +18,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **162** | **9** | **229** | **8** |
+| **Total** | **408** | **173** | **9** | **218** | **8** |
 
 ## Schematron: schematron.sch
 
@@ -206,17 +206,17 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | IOP-2 | `3.10.3`: SegmentTemplate@media attribute SHALL be present | done | ADDR-TEMPLATE |  |
 | IOP-3 | `3.10.4`: @profiles signalling SHALL be present in each Period | n/a |  | Period@profiles is not in the 6th edition schema, which rejects it |
 | IOP-4 | `3.10.3`: SegmentTemplate@indexRange attribute SHALL be present | done | MPD-IOP-ONDEMAND |  |
-| IOP-5 | `6.2.5.2`: All AVC representations SHALL be encoded using avc3 | todo |  |  |
-| IOP-6 | `6.2.5.2`: All AVC representations SHALL include an 'avcC' box containing SPS and PPS NALs | todo |  |  |
-| IOP-7 | `6.2.5.2`: The level of the adaptation set SHALL match the maximum of the corresponding representations | todo |  |  |
-| IOP-8 | `6.2.5.2`: The profile of the adaptation set SHALL match the maximum of the corresponding representations | todo |  |  |
-| IOP-9 | `6.2.5.2`: The edit list, if present in one, SHALL be present in all representations | todo |  |  |
-| IOP-10 | `6.2.5.2`: All HEVC representations SHALL be encoded using hev1 | todo |  |  |
-| IOP-11 | `6.2.5.2`: All HEVC representations SHALL include an 'hvcC' box containing SPS, PPS and VPS NALs | todo |  |  |
-| IOP-12 | `3.10.3.2`: Only a single 'sidx' box shall be present | todo |  |  |
-| IOP-13 | `3.10.3.2`: Each representation SHALL have on segment | todo |  |  |
-| IOP-14 | `6.2.5.2`: Edit lists SHALL NOT be present unless On-Demand profile is signalled | todo |  |  |
-| IOP-15 | `6.2.5.2`: The composition time and decoded time for the first sample SHALL match | todo |  |  |
+| IOP-5 | `6.2.5.2`: All AVC representations SHALL be encoded using avc3 | done | SEG-IOP-BITSTREAM | dashcheck checks the sample entry and requires @bitstreamSwitching true; upstream checks @codecs whenever @bitstreamSwitching is present |
+| IOP-6 | `6.2.5.2`: All AVC representations SHALL include an 'avcC' box containing SPS and PPS NALs | done | SEG-IOP-PARAMSETS |  |
+| IOP-7 | `6.2.5.2`: The level of the adaptation set SHALL match the maximum of the corresponding representations | done | SEG-IOP-ASCODECS | upstream compares the AVC level in @codecs (hex) with L plus the decimal level, so it always fails for AVC, and it fails when the AdaptationSet has no @codecs |
+| IOP-8 | `6.2.5.2`: The profile of the adaptation set SHALL match the maximum of the corresponding representations | done | SEG-IOP-ASCODECS |  |
+| IOP-9 | `6.2.5.2`: The edit list, if present in one, SHALL be present in all representations | done | SEG-IOP-EDITLIST |  |
+| IOP-10 | `6.2.5.2`: All HEVC representations SHALL be encoded using hev1 | done | SEG-IOP-BITSTREAM | dashcheck checks the sample entry and requires @bitstreamSwitching true |
+| IOP-11 | `6.2.5.2`: All HEVC representations SHALL include an 'hvcC' box containing SPS, PPS and VPS NALs | done | SEG-IOP-PARAMSETS |  |
+| IOP-12 | `3.10.3.2`: Only a single 'sidx' box shall be present | done | SEG-IOP-SIDX | dashcheck counts the sidx boxes in @indexRange |
+| IOP-13 | `3.10.3.2`: Each representation SHALL have on segment | done | MPD-IOP-ONDEMAND | dashcheck requires SegmentBase addressing, which means a single segment |
+| IOP-14 | `6.2.5.2`: Edit lists SHALL NOT be present unless On-Demand profile is signalled | done | SEG-IOP-EDITLIST |  |
+| IOP-15 | `6.2.5.2`: The composition time and decoded time for the first sample SHALL match | done | SEG-IOP-FIRSTCT |  |
 
 ## Module: CMAF
 

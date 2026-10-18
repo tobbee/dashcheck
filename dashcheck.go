@@ -167,6 +167,7 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 
 	results := make([][]report.Finding, len(reps))
 	counts := make([]int, len(reps))
+	inits := make([]*segcheck.Init, len(reps))
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, opts.Concurrency)
 	var mu sync.Mutex
@@ -182,6 +183,7 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 			defer func() { <-sem }()
 			rc := &repChecker{rep: rep, opts: opts, clk: clk, dynamic: dynamic}
 			results[i], counts[i] = rc.run(ctx)
+			inits[i] = rc.init
 			mu.Lock()
 			done++
 			opts.progress("segments", done, len(reps), "checked %s", rep.ID)
@@ -193,6 +195,18 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 		rpt.Findings = append(rpt.Findings, results[i]...)
 		rpt.Segments += counts[i]
 	}
+	// Checks across the Representations of each AdaptationSet.
+	var asReps []*addressing.Rep
+	var asInits []*segcheck.Init
+	for i, rep := range reps {
+		if len(asReps) > 0 && asReps[0].ASPath != rep.ASPath {
+			rpt.Findings = append(rpt.Findings, segcheck.CheckAdaptationSet(asReps, asInits)...)
+			asReps, asInits = nil, nil
+		}
+		asReps = append(asReps, rep)
+		asInits = append(asInits, inits[i])
+	}
+	rpt.Findings = append(rpt.Findings, segcheck.CheckAdaptationSet(asReps, asInits)...)
 }
 
 // repChecker checks the segments of one Representation.
@@ -203,6 +217,7 @@ type repChecker struct {
 	dynamic  bool
 	findings []report.Finding
 	checked  int
+	init     *segcheck.Init
 }
 
 func (rc *repChecker) add(f ...report.Finding) { rc.findings = append(rc.findings, f...) }
@@ -237,6 +252,7 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 	if init == nil {
 		return rc.findings, rc.checked
 	}
+	rc.init = init
 	if rep.Kind == addressing.KindSegmentBase {
 		segs = rc.selectStatic(segs)
 	} else if rc.dynamic {

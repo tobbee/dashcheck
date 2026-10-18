@@ -3255,17 +3255,21 @@
    "source": "IOP/Segments/AVC.php",
    "context": "6.2.5.2",
    "text": "All AVC representations SHALL be encoded using avc3",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-IOP-BITSTREAM"
+   ],
+   "note": "dashcheck checks the sample entry and requires @bitstreamSwitching true; upstream checks @codecs whenever @bitstreamSwitching is present"
   },
   {
    "id": "IOP-6",
    "source": "IOP/Segments/AVC.php",
    "context": "6.2.5.2",
    "text": "All AVC representations SHALL include an 'avcC' box containing SPS and PPS NALs",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-IOP-PARAMSETS"
+   ],
    "note": ""
   },
   {
@@ -3273,17 +3277,21 @@
    "source": "IOP/Segments/CrossAdaptation.php",
    "context": "6.2.5.2",
    "text": "The level of the adaptation set SHALL match the maximum of the corresponding representations",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-IOP-ASCODECS"
+   ],
+   "note": "upstream compares the AVC level in @codecs (hex) with L plus the decimal level, so it always fails for AVC, and it fails when the AdaptationSet has no @codecs"
   },
   {
    "id": "IOP-8",
    "source": "IOP/Segments/CrossAdaptation.php",
    "context": "6.2.5.2",
    "text": "The profile of the adaptation set SHALL match the maximum of the corresponding representations",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-IOP-ASCODECS"
+   ],
    "note": ""
   },
   {
@@ -3291,8 +3299,10 @@
    "source": "IOP/Segments/CrossAdaptation.php",
    "context": "6.2.5.2",
    "text": "The edit list, if present in one, SHALL be present in all representations",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-IOP-EDITLIST"
+   ],
    "note": ""
   },
   {
@@ -3300,17 +3310,21 @@
    "source": "IOP/Segments/HEVC.php",
    "context": "6.2.5.2",
    "text": "All HEVC representations SHALL be encoded using hev1",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-IOP-BITSTREAM"
+   ],
+   "note": "dashcheck checks the sample entry and requires @bitstreamSwitching true"
   },
   {
    "id": "IOP-11",
    "source": "IOP/Segments/HEVC.php",
    "context": "6.2.5.2",
    "text": "All HEVC representations SHALL include an 'hvcC' box containing SPS, PPS and VPS NALs",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-IOP-PARAMSETS"
+   ],
    "note": ""
   },
   {
@@ -3318,26 +3332,32 @@
    "source": "IOP/Segments/OnDemand.php",
    "context": "3.10.3.2",
    "text": "Only a single 'sidx' box shall be present",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-IOP-SIDX"
+   ],
+   "note": "dashcheck counts the sidx boxes in @indexRange"
   },
   {
    "id": "IOP-13",
    "source": "IOP/Segments/OnDemand.php",
    "context": "3.10.3.2",
    "text": "Each representation SHALL have on segment",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-IOP-ONDEMAND"
+   ],
+   "note": "dashcheck requires SegmentBase addressing, which means a single segment"
   },
   {
    "id": "IOP-14",
    "source": "IOP/Segments/Video.php",
    "context": "6.2.5.2",
    "text": "Edit lists SHALL NOT be present unless On-Demand profile is signalled",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-IOP-EDITLIST"
+   ],
    "note": ""
   },
   {
@@ -3345,8 +3365,10 @@
    "source": "IOP/Segments/Video.php",
    "context": "6.2.5.2",
    "text": "The composition time and decoded time for the first sample SHALL match",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-IOP-FIRSTCT"
+   ],
    "note": ""
   },
   {

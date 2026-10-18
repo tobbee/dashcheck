@@ -10,6 +10,7 @@ import (
 	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/fetch"
+	"github.com/tobbee/dashcheck/segcheck"
 )
 
 // sidxSegments reads the sidx box of a SegmentBase Representation and returns
@@ -35,6 +36,11 @@ func (rc *repChecker) sidxSegments(ctx context.Context) ([]addressing.Segment, e
 	sidx, ok := box.(*mp4.SidxBox)
 	if !ok {
 		return nil, fmt.Errorf("index range %s holds %s, not sidx", rep.IndexRange, box.Type())
+	}
+	if segcheck.IsIOPOnDemand(rep) {
+		if n := countSidx(first, resp.Body); n != 1 {
+			rc.add(segcheck.RuleIOPSidx.New(rep.Loc(), "%d sidx boxes in @indexRange %s", n, rep.IndexRange))
+		}
 	}
 	if sidx.Timescale == 0 {
 		return nil, fmt.Errorf("sidx timescale is 0")
@@ -62,6 +68,24 @@ func (rc *repChecker) sidxSegments(ctx context.Context) ([]addressing.Segment, e
 		t += uint64(ref.SubSegmentDuration)
 	}
 	return segs, nil
+}
+
+// countSidx counts the sidx boxes among the top-level boxes in data.
+func countSidx(startPos uint64, data []byte) int {
+	n := 0
+	r := bytes.NewReader(data)
+	pos := startPos
+	for r.Len() > 0 {
+		box, err := mp4.DecodeBox(pos, r)
+		if err != nil {
+			break
+		}
+		if box.Type() == "sidx" {
+			n++
+		}
+		pos += box.Size()
+	}
+	return n
 }
 
 func parseRange(r string) (first, last uint64, err error) {

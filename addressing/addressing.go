@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"strings"
 	"time"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
@@ -69,6 +70,11 @@ type Rep struct {
 	Path        string // element path, e.g. Period[0]/AdaptationSet[1]/Representation[V300]
 	PeriodID    string
 	PeriodIndex int
+	ASPath      string // element path of the AdaptationSet
+	ASCodecs    string // @codecs on the AdaptationSet itself
+
+	Profiles           []string // effective @profiles
+	BitstreamSwitching bool     // effective @bitstreamSwitching
 
 	ContentType       string
 	MimeType          string
@@ -213,27 +219,31 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 				rBase, f := resolveBase(asBase, rep.BaseURLs, rPath)
 				findings = append(findings, f...)
 				r := &Rep{
-					ID:                rep.Id,
-					Path:              rPath,
-					PeriodID:          p.Id,
-					PeriodIndex:       pi,
-					ContentType:       string(as.ContentType),
-					MimeType:          first(rep.MimeType, as.MimeType),
-					Codecs:            first(rep.Codecs, as.Codecs),
-					Bandwidth:         rep.Bandwidth,
-					Width:             firstU(rep.Width, as.Width),
-					Height:            firstU(rep.Height, as.Height),
-					Sar:               first(string(rep.Sar), string(as.Sar)),
-					AudioSamplingRate: firstVec(rep.AudioSamplingRate, as.AudioSamplingRate),
-					StartWithSAP:      firstU(rep.StartWithSAP, as.StartWithSAP),
-					BaseURL:           rBase.String(),
-					Dynamic:           dynamic,
-					AST:               ast,
-					PeriodStart:       starts[pi],
-					PeriodDur:         durs[pi],
-					TSBD:              tsbd,
-					ATO:               baseURLATO(md.BaseURL, p.BaseURLs, as.BaseURLs, rep.BaseURLs),
-					repID:             rep.Id,
+					ID:                 rep.Id,
+					Path:               rPath,
+					PeriodID:           p.Id,
+					PeriodIndex:        pi,
+					ASPath:             asPath,
+					ASCodecs:           as.Codecs,
+					Profiles:           splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
+					BitstreamSwitching: boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),
+					ContentType:        string(as.ContentType),
+					MimeType:           first(rep.MimeType, as.MimeType),
+					Codecs:             first(rep.Codecs, as.Codecs),
+					Bandwidth:          rep.Bandwidth,
+					Width:              firstU(rep.Width, as.Width),
+					Height:             firstU(rep.Height, as.Height),
+					Sar:                first(string(rep.Sar), string(as.Sar)),
+					AudioSamplingRate:  firstVec(rep.AudioSamplingRate, as.AudioSamplingRate),
+					StartWithSAP:       firstU(rep.StartWithSAP, as.StartWithSAP),
+					BaseURL:            rBase.String(),
+					Dynamic:            dynamic,
+					AST:                ast,
+					PeriodStart:        starts[pi],
+					PeriodDur:          durs[pi],
+					TSBD:               tsbd,
+					ATO:                baseURLATO(md.BaseURL, p.BaseURLs, as.BaseURLs, rep.BaseURLs),
+					repID:              rep.Id,
 				}
 				findings = append(findings, r.setAddressing(p, as, rep)...)
 				reps = append(reps, r)
@@ -597,6 +607,46 @@ func parseDateTime(s string) (time.Time, error) {
 
 // ParseDateTime parses an xs:dateTime as used in MPDs. A missing time zone means UTC.
 func ParseDateTime(s string) (time.Time, error) { return parseDateTime(s) }
+
+// HasProfile reports whether the Representation's effective @profiles include profile.
+func (r *Rep) HasProfile(profile string) bool {
+	for _, p := range r.Profiles {
+		if p == profile {
+			return true
+		}
+	}
+	return false
+}
+
+// HasProfilePrefix reports whether any effective profile starts with prefix.
+func (r *Rep) HasProfilePrefix(prefix string) bool {
+	for _, p := range r.Profiles {
+		if strings.HasPrefix(p, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func splitProfiles(s string) []string {
+	var out []string
+	for p := range strings.SplitSeq(s, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// boolAttr returns the first set value of an inherited boolean attribute.
+func boolAttr(levels ...*bool) bool {
+	for _, b := range levels {
+		if b != nil {
+			return *b
+		}
+	}
+	return false
+}
 
 func first(vals ...string) string {
 	for _, v := range vals {

@@ -21,6 +21,16 @@ type sampleEntryInfo struct {
 	height     uint16
 	sampleRate uint32
 	channels   uint16
+	video      videoConfig
+}
+
+// videoConfig describes an AVC or HEVC decoder configuration record.
+type videoConfig struct {
+	codec          string // "avc", "hevc" or ""
+	hasConfig      bool   // avcC or hvcC present
+	hasSPS, hasPPS bool
+	hasVPS         bool // HEVC only
+	profile, level int
 }
 
 func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
@@ -37,6 +47,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 			info.encrypted = true
 		}
 		info.codec, info.derived = visualCodec(info.fourCC, se)
+		info.video = describeVideoConfig(se)
 	case *mp4.AudioSampleEntryBox:
 		info.fourCC = se.Type()
 		info.sampleRate = uint32(se.SampleRate)
@@ -72,6 +83,22 @@ func visualCodec(fourCC string, se *mp4.VisualSampleEntryBox) (string, bool) {
 		return se.Av1C.CodecString(fourCC), true
 	}
 	return fourCC, false
+}
+
+func describeVideoConfig(se *mp4.VisualSampleEntryBox) videoConfig {
+	var vc videoConfig
+	switch {
+	case se.AvcC != nil:
+		vc = videoConfig{codec: "avc", hasConfig: true, hasSPS: len(se.AvcC.SPSnalus) > 0, hasPPS: len(se.AvcC.PPSnalus) > 0,
+			profile: int(se.AvcC.AVCProfileIndication), level: int(se.AvcC.AVCLevelIndication)}
+	case se.HvcC != nil:
+		vc = videoConfig{codec: "hevc", hasConfig: true,
+			hasVPS:  len(se.HvcC.GetNalusForType(hevc.NALU_VPS)) > 0,
+			hasSPS:  len(se.HvcC.GetNalusForType(hevc.NALU_SPS)) > 0,
+			hasPPS:  len(se.HvcC.GetNalusForType(hevc.NALU_PPS)) > 0,
+			profile: int(se.HvcC.GeneralProfileIDC), level: int(se.HvcC.GeneralLevelIDC)}
+	}
+	return vc
 }
 
 func audioCodec(fourCC string, se *mp4.AudioSampleEntryBox) (string, bool) {

@@ -100,6 +100,8 @@ type Init struct {
 	SampleEntry string
 	Codec       string
 	EditOffset  int64 // media time of the first edit, subtracted from composition times
+	HasEditList bool
+	Video       videoConfig
 	trex        *mp4.TrexBox
 }
 
@@ -147,6 +149,7 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 		}
 	}
 	if trak.Edts != nil && len(trak.Edts.Elst) > 0 {
+		init.HasEditList = true
 		for _, e := range trak.Edts.Elst[0].Entries {
 			if e.MediaTime >= 0 {
 				init.EditOffset = e.MediaTime
@@ -164,7 +167,9 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	}
 	init.SampleEntry = info.fourCC
 	init.Codec = info.codec
+	init.Video = info.video
 	f = append(f, crossCheckInit(rep, init, info, loc)...)
+	f = append(f, iopInitRules(rep, init, loc)...)
 	return init, f
 }
 
@@ -215,6 +220,7 @@ type Media struct {
 	Duration   uint64  // sum of sample durations, media timescale
 	EPT        float64 // earliest presentation time in seconds, before presentationTimeOffset
 	Samples    int
+	FirstCTO   int32 // composition time offset of the first sample
 }
 
 // End returns the decode time after the last sample.
@@ -272,6 +278,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 			for _, s := range samples {
 				if firstSample {
 					firstSample = false
+					media.FirstCTO = s.CompositionTimeOffset
 					sapRequired := rep.StartWithSAP == 1 || rep.StartWithSAP == 2
 					if sapRequired && init.Handler == "vide" && !isSync(s.Flags) {
 						f = append(f, RuleSegSAP.New(loc, "first sample is not a sync sample (startWithSAP=%d)", rep.StartWithSAP))
@@ -292,6 +299,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	mediaTS := float64(init.Timescale)
 	media.EPT = float64(minCT-init.EditOffset) / mediaTS
 	f = append(f, checkTiming(rep, seg, media, mediaTS, last, loc)...)
+	f = append(f, iopMediaRules(rep, init, media, loc)...)
 	return media, f
 }
 
