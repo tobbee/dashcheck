@@ -3335,17 +3335,21 @@
    "source": "Dolby/Segments/TocDac4.php",
    "context": "E.6.3 [13197]",
    "text": "Bitstream version must match between TOC and DAC4",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-AC4-TOC"
+   ],
+   "note": "the TOC of the first AC-4 frame of each checked segment against dac4 (unencrypted tracks)"
   },
   {
    "id": "DOLBY-2",
    "source": "Dolby/Segments/TocDac4.php",
    "context": "E.6.4 [14309]",
    "text": "FS index must match between TOC and DAC4",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-AC4-TOC"
+   ],
    "note": ""
   },
   {
@@ -3353,8 +3357,10 @@
    "source": "Dolby/Segments/TocDac4.php",
    "context": "E.6.5 [14209]",
    "text": "Framerate index version must match between TOC and DAC4",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-AC4-TOC"
+   ],
    "note": ""
   },
   {
@@ -3362,8 +3368,10 @@
    "source": "Dolby/Segments/TocDac4.php",
    "context": "E.6.6 [14215]",
    "text": "Number of presentations must match between TOC and DAC4",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-AC4-TOC"
+   ],
    "note": ""
   },
   {
@@ -3371,9 +3379,11 @@
    "source": "Dolby/Segments/TocDac4.php",
    "context": "E.6.7 [14221]",
    "text": "Short program id must match between TOC and DAC4",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-AC4-TOC"
+   ],
+   "note": "compared when the TOC has bitstream_version 2 or more, where short_program_id exists"
   },
   {
    "id": "HBBTV-1",

@@ -17,8 +17,8 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 15 | 1 | 3 | 0 |
-| Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **366** | **6** | **19** | **17** |
+| Module: Dolby | 5 | 5 | 0 | 0 | 0 |
+| **Total** | **408** | **371** | **6** | **14** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -482,8 +482,8 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
-| DOLBY-1 | `E.6.3 [13197]`: Bitstream version must match between TOC and DAC4 | todo |  |  |
-| DOLBY-2 | `E.6.4 [14309]`: FS index must match between TOC and DAC4 | todo |  |  |
-| DOLBY-3 | `E.6.5 [14209]`: Framerate index version must match between TOC and DAC4 | todo |  |  |
-| DOLBY-4 | `E.6.6 [14215]`: Number of presentations must match between TOC and DAC4 | todo |  |  |
-| DOLBY-5 | `E.6.7 [14221]`: Short program id must match between TOC and DAC4 | todo |  |  |
+| DOLBY-1 | `E.6.3 [13197]`: Bitstream version must match between TOC and DAC4 | done | SEG-AC4-TOC | the TOC of the first AC-4 frame of each checked segment against dac4 (unencrypted tracks) |
+| DOLBY-2 | `E.6.4 [14309]`: FS index must match between TOC and DAC4 | done | SEG-AC4-TOC |  |
+| DOLBY-3 | `E.6.5 [14209]`: Framerate index version must match between TOC and DAC4 | done | SEG-AC4-TOC |  |
+| DOLBY-4 | `E.6.6 [14215]`: Number of presentations must match between TOC and DAC4 | done | SEG-AC4-TOC |  |
+| DOLBY-5 | `E.6.7 [14221]`: Short program id must match between TOC and DAC4 | done | SEG-AC4-TOC | compared when the TOC has bitstream_version 2 or more, where short_program_id exists |

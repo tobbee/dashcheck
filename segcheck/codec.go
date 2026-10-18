@@ -21,6 +21,7 @@ type sampleEntryInfo struct {
 	defaultKID    string // tenc default KID of encrypted content
 	tenc          *mp4.TencBox
 	noAudioConfig string // the missing audio decoder configuration box, if any
+	dac4          *mp4.Dac4Box
 	stppNS        string // namespace of an stpp sample entry
 	codec         string // full codecs string if it can be derived, else the 4CC
 	derived       bool   // codec is a full derived string
@@ -116,6 +117,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 		case info.fourCC == "ac-4" && se.Dac4 == nil:
 			info.noAudioConfig = "a dac4 box"
 		}
+		info.dac4 = se.Dac4
 	case *mp4.StppBox:
 		info.fourCC = se.Type()
 		info.codec = info.fourCC
