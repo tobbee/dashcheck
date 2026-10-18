@@ -46,6 +46,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 	nSegs := fs.Int("n", dashcheck.DefaultMaxSegments, "media segments to check per Representation")
 	all := fs.Bool("all", false, "check all segments (static MPDs)")
+	hlsInterop := fs.Bool("hls-interop", false, "also check the DASH-HLS interoperability rules of CTA-5005-B")
 	updates := fs.Int("updates", dashcheck.DefaultMPDUpdates, "times a dynamic MPD is fetched again to check its updates (0 for none)")
 	jsonOut := fs.Bool("json", false, "write the report as JSON")
 	minSev := fs.String("level", "info", "lowest severity to show: info, warning or error")
@@ -84,6 +85,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		opts.MaxSegments = -1
 	}
 	opts.MPDUpdates = *updates
+	opts.HLSInterop = *hlsInterop
 	if *updates <= 0 {
 		opts.MPDUpdates = -1
 	}

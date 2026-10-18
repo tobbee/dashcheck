@@ -43,6 +43,9 @@ type Options struct {
 	// MPDUpdates is the number of times a dynamic MPD is fetched again to
 	// check its updates. Zero means DefaultMPDUpdates; negative disables it.
 	MPDUpdates int
+	// HLSInterop adds the checks of the DASH-HLS Interoperability
+	// Specification CTA-5005-B, which MPDs do not signal.
+	HLSInterop bool
 	// UpdateInterval is the time between MPD fetches. Zero means about one
 	// segment duration, between 2 and 10 seconds.
 	UpdateInterval time.Duration
@@ -306,6 +309,9 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		// The index range precedes the media by construction of the sidx offsets.
 		rc.add(segcheck.CheckSelfInitSidx(rep, init, rc.sidx, rc.nSidx, true, first)...)
 		rc.add(segcheck.CheckDVBSidx(rep, rc.sidx, rc.nSidx)...)
+		if rc.opts.HLSInterop {
+			rc.add(segcheck.CheckHLSInteropSidx(rep, rc.sidx, rc.nSidx)...)
+		}
 	}
 	if rc.dynamic && len(segs) > 0 {
 		rc.probeEarly(ctx, segs[len(segs)-1])
@@ -357,6 +363,10 @@ func (rc *repChecker) checkInit(ctx context.Context) *segcheck.Init {
 	}
 	init, f := segcheck.CheckInit(resp.Body, rep, loc)
 	rc.add(f...)
+	if init != nil && rc.opts.HLSInterop {
+		init.HLSInterop = true
+		rc.add(segcheck.CheckHLSInteropInit(rep, init, loc)...)
+	}
 	return init
 }
 

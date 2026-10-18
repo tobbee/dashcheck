@@ -60,6 +60,7 @@ yet unless stated.
 | 45 | DVB BitStream | Colour checked against 'colr' instead of the VUI; HDR checks never fail; @codecs too strict | Verified in code and spec |
 | 46 | DVB SEILocations | hvc1 never checked; prefix SEI after VCL not found | Verified in code |
 | 47 | CTAWave | Outdated: required profiles per AdaptationSet, splice constraints always enforced | Verified in spec |
+| 48 | WaveHLSInterop | Valid cenc tracks fail; sidx required in every segment; key count wrong | Verified in code and spec |
 
 ## Manifest handling
 
@@ -741,6 +742,38 @@ content fails for allowed changes.
 per selection set, and report splice constraints as information, with the
 table 6 items as recommendations.
 
+### 48. Several DASH-HLS interoperability checks fail valid content
+
+**Where:** [EncryptionScheme.php](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/EncryptionScheme.php),
+[SegmentEncryption.php](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/SegmentEncryption.php),
+[AddressableMediaObject.php](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/AddressableMediaObject.php)
+
+**Problem:** Compared with CTA-5005-B:
+
+- The encrypt:skip pattern check ([L90](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/EncryptionScheme.php#L90)) also
+  runs for `cenc` tracks, which have no pattern, so every cenc video and audio
+  track fails. For cbcs it accepts any N:9N video and N:0 audio pattern,
+  not 1:9 and 10:0.
+- `cenc` tracks must have a constant 8-byte IV
+  ([L206](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/EncryptionScheme.php#L206)). CMAF 8.2.3.1, which clause 4.3.2
+  refers to, limits cenc IVs to 8 bytes; cenc normally uses per-sample IVs,
+  which this rejects.
+- "A single encryption key per segment" is tested by counting the KIDs in all
+  pssh boxes of the segment ([L71](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/SegmentEncryption.php#L71)), so one
+  key listed for two DRM systems fails. "A single IV" is tested by requiring
+  no per-sample IVs in senc ([L94](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/SegmentEncryption.php#L94)), which
+  fails every cenc track.
+- The single 'sidx' of clause 4.1.2 applies to CMAF track files delivered to
+  clients (byte-range addressing), but it is required in every media segment,
+  so SegmentTemplate content fails.
+- The check that a cenc component has a cbcs equivalent (4.3.3) is a TODO.
+
+**Effect:** All cenc content and all SegmentTemplate content fail.
+
+**Fix:** Check patterns only for cbcs (1:9 video, 10:0 audio), require 8-byte
+cenc IVs, compare the KID and IV of each fragment in a segment (from 'seig' or
+'tenc'), and check 'sidx' only for SegmentBase track files.
+
 ## Other projects
 
 Found during the same work in projects that dashcheck builds on or tests with.
@@ -754,4 +787,5 @@ Found during the same work in projects that dashcheck builds on or tests with.
 | [livesim2](https://github.com/Dash-Industry-Forum/livesim2) | In SegmentTimeline mode, audio segments of up to 2.005333 s exceed `maxSegmentDuration="PT2S"`. |
 | livesim2 | The test asset `cmd/livesim2/app/testdata/assets/testpic_2s/Manifest.mpd` has `DASH-MPD.xsd"bprofiles=` (malformed XML) since commit d6fd0a2. |
 | livesim2 | With `continuous_1`, the period-continuity descriptors have `value="1"` instead of the @id of the earlier Period, and the AdaptationSets have no @id (ISO/IEC 23009-1 5.3.2.4 needs both). The first Period also carries the descriptor. |
+| CTA WAVE test content | The cenc vectors (for example `clg1_sets/12.5_25_50/t41-cenc/2025-01-15`) use 16-byte IVs; ISO/IEC 23000-19 8.2.3.1 (DIS text) limits cenc IVs to 8 bytes. |
 | BBC test card | The live test card's subtitle initialization segments (`testcard2020/*-subs/IS.mp4`) have an 8-byte 'sthd' box without the FullBox version and flags, so mp4ff cannot parse them. |

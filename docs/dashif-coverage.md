@@ -16,9 +16,9 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: DVB | 103 | 94 | 1 | 6 | 2 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
-| Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
+| Module: WAVE HLS interop | 19 | 15 | 1 | 3 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **346** | **5** | **40** | **17** |
+| **Total** | **408** | **361** | **6** | **24** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -458,25 +458,25 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
-| WAVEHLS-1 | `4.1.2 - Basic On-Demand and Live Streaming`: CMAF Track Files [..] SHALL contain a single 'sidx' following the CMAF header … | todo |  |  |
-| WAVEHLS-2 | `4.1.2 -  Basic On-Demand and Live Streaming`: The Average Bitrate of a CMAF Fragment [..] SHOULD be within 10% of the Average Bitrate … | todo |  |  |
-| WAVEHLS-3 | The common encryption `cbcs` scheme SHALL be used for encryption | todo |  |  |
-| WAVEHLS-4 | Constant 16-byte Initialization Vectors SHALL be used | todo |  |  |
-| WAVEHLS-5 | An alternative using the `cenc` scheme MAY be produced | todo |  |  |
-| WAVEHLS-6 | Constant 8-byte Initialization Vectors SHALL be used for 'cenc' encrypted material | todo |  |  |
-| WAVEHLS-7 | Sample auxiliary information, if present, SHALL be addressed by [.. a 'saio' box] | todo |  |  |
-| WAVEHLS-8 | Video components SHALL be encrypted with a 1:9 pattern | todo |  |  |
-| WAVEHLS-9 | Audio components SHALL be encrypted with a 10:0 pattern | todo |  |  |
-| WAVEHLS-10 | `4.6.2 - Rotation of Encryption Keys`: CMAF Segments [.. with differing encryption keys] SHALL provide an 'sbgp' box [..] | todo |  |  |
-| WAVEHLS-11 | `4.6.2 - Rotation of Encryption Keys`: CMAF Segments [.. with differing encryption keys] SHALL provide a 'pssh' box [..] | todo |  |  |
-| WAVEHLS-12 | `4.3.2 - Encrypted Media Presentations`: Any individual CMAF Segment SHALL have a single encryption key | todo |  |  |
-| WAVEHLS-13 | `4.3.2 - Encrypted Media Presentations`: Any individual CMAF Segment SHALL have a single Initialization Vector | todo |  |  |
-| WAVEHLS-14 | `4.4.2 - Presentation Splicing`: CMAF Fragment boundaries SHALL be created at all splice points. | todo |  |  |
-| WAVEHLS-15 | `4.4.2 - Presentation Splicing`: CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration | todo |  |  |
-| WAVEHLS-16 | `4.1.2 - Basic On-Demand and Live Streaming`: Text components SHALL be packaged in ISMC1, ISMC1.1 or WebVTT Tracks | todo |  |  |
-| WAVEHLS-17 | `4.5.2 - Carriage of Timed Event Data`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | todo |  |  |
-| WAVEHLS-18 | Track roles SHALL be stored in one or more 'kind' boxes [..] | todo |  |  |
-| WAVEHLS-19 | Track roles SHALL be representaed by the DASH Role scheme when possible | todo |  |  |
+| WAVEHLS-1 | `4.1.2 - Basic On-Demand and Live Streaming`: CMAF Track Files [..] SHALL contain a single 'sidx' following the CMAF header … | done | SEG-HLS-SIDX | for SegmentBase track files, which are the CMAF track files delivered to clients; upstream requires a sidx in every media segment (bug 48). Checks of CTA-5005 run with -hls-interop |
+| WAVEHLS-2 | `4.1.2 -  Basic On-Demand and Live Streaming`: The Average Bitrate of a CMAF Fragment [..] SHOULD be within 10% of the Average Bitrate … | partial | SEG-HLS-BITRATE | on demand, from the sidx of SegmentBase track files; the live 1-hour rule and SegmentTemplate content would need all segment sizes |
+| WAVEHLS-3 | The common encryption `cbcs` scheme SHALL be used for encryption | done | SEG-HLS-ENCRYPTION |  |
+| WAVEHLS-4 | Constant 16-byte Initialization Vectors SHALL be used | done | SEG-HLS-ENCRYPTION | tenc default_Per_Sample_IV_Size 0 and a 16-byte constant IV |
+| WAVEHLS-5 | An alternative using the `cenc` scheme MAY be produced | done | SEG-HLS-CBCS-VARIANT | per Period and media type, a cenc AdaptationSet needs a cbcs one (4.3.3); upstream leaves this as a TODO |
+| WAVEHLS-6 | Constant 8-byte Initialization Vectors SHALL be used for 'cenc' encrypted material | done | SEG-HLS-ENCRYPTION | 8-byte IVs as CMAF 8.2.3.1 says; upstream requires a constant 8-byte IV, which fails normal cenc (bug 48) |
+| WAVEHLS-7 | Sample auxiliary information, if present, SHALL be addressed by [.. a 'saio' box] | done | SEG-HLS-ENCRYPTION | a saio box wherever senc or saiz is present |
+| WAVEHLS-8 | Video components SHALL be encrypted with a 1:9 pattern | done | SEG-HLS-ENCRYPTION | 1:9 for cbcs video; upstream also tests cenc tracks (bug 48) |
+| WAVEHLS-9 | Audio components SHALL be encrypted with a 10:0 pattern | done | SEG-HLS-ENCRYPTION | 10:0 for cbcs audio; 0:0 is accepted as the equivalent whole-block full-sample encryption of ISO/IEC 23001-7 10.4.1 |
+| WAVEHLS-10 | `4.6.2 - Rotation of Encryption Keys`: CMAF Segments [.. with differing encryption keys] SHALL provide an 'sbgp' box [..] | done | SEG-HLS-KEY-ROTATION | a seig sample group with another KID needs a seig sbgp box |
+| WAVEHLS-11 | `4.6.2 - Rotation of Encryption Keys`: CMAF Segments [.. with differing encryption keys] SHALL provide a 'pssh' box [..] | done | SEG-HLS-KEY-ROTATION | pssh boxes in the segment when the CMAF header has them |
+| WAVEHLS-12 | `4.3.2 - Encrypted Media Presentations`: Any individual CMAF Segment SHALL have a single encryption key | done | SEG-HLS-SEGMENT-KEY | compares the KID of each fragment (seig or tenc); upstream counts pssh KIDs (bug 48) |
+| WAVEHLS-13 | `4.3.2 - Encrypted Media Presentations`: Any individual CMAF Segment SHALL have a single Initialization Vector | done | SEG-HLS-SEGMENT-KEY | compares the constant IV of each fragment; upstream rejects per-sample IVs (bug 48) |
+| WAVEHLS-14 | `4.4.2 - Presentation Splicing`: CMAF Fragment boundaries SHALL be created at all splice points. | todo |  | needs the segments at the end of each Period for all media types |
+| WAVEHLS-15 | `4.4.2 - Presentation Splicing`: CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration | todo |  | as WAVEHLS-14 |
+| WAVEHLS-16 | `4.1.2 - Basic On-Demand and Live Streaming`: Text components SHALL be packaged in ISMC1, ISMC1.1 or WebVTT Tracks | done | SEG-HLS-TEXT | IMSC1/IMSC1.1 Text from @codecs, or wvtt |
+| WAVEHLS-17 | `4.5.2 - Carriage of Timed Event Data`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | todo |  | emsg repetition across segments, as LL-28 |
+| WAVEHLS-18 | Track roles SHALL be stored in one or more 'kind' boxes [..] | done | SEG-HLS-ROLES | every AdaptationSet Role needs a kind box with the same scheme and value |
+| WAVEHLS-19 | Track roles SHALL be representaed by the DASH Role scheme when possible | done | SEG-HLS-ROLES | kind boxes without the DASH Role scheme |
 
 ## Module: Dolby
 

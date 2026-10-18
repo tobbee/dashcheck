@@ -4225,26 +4225,32 @@
    "source": "WaveHLSInterop/Segments/AddressableMediaObject.php",
    "context": "4.1.2 - Basic On-Demand and Live Streaming",
    "text": "CMAF Track Files [..] SHALL contain a single 'sidx' following the CMAF header …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-SIDX"
+   ],
+   "note": "for SegmentBase track files, which are the CMAF track files delivered to clients; upstream requires a sidx in every media segment (bug 48). Checks of CTA-5005 run with -hls-interop"
   },
   {
    "id": "WAVEHLS-2",
    "source": "WaveHLSInterop/Segments/Bitrate.php",
    "context": "4.1.2 -  Basic On-Demand and Live Streaming",
    "text": "The Average Bitrate of a CMAF Fragment [..] SHOULD be within 10% of the Average Bitrate …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "partial",
+   "rules": [
+    "SEG-HLS-BITRATE"
+   ],
+   "note": "on demand, from the sidx of SegmentBase track files; the live 1-hour rule and SegmentTemplate content would need all segment sizes"
   },
   {
    "id": "WAVEHLS-3",
    "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
    "context": "",
    "text": "The common encryption `cbcs` scheme SHALL be used for encryption",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ENCRYPTION"
+   ],
    "note": ""
   },
   {
@@ -4252,90 +4258,110 @@
    "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
    "context": "",
    "text": "Constant 16-byte Initialization Vectors SHALL be used",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ENCRYPTION"
+   ],
+   "note": "tenc default_Per_Sample_IV_Size 0 and a 16-byte constant IV"
   },
   {
    "id": "WAVEHLS-5",
    "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
    "context": "",
    "text": "An alternative using the `cenc` scheme MAY be produced",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-CBCS-VARIANT"
+   ],
+   "note": "per Period and media type, a cenc AdaptationSet needs a cbcs one (4.3.3); upstream leaves this as a TODO"
   },
   {
    "id": "WAVEHLS-6",
    "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
    "context": "",
    "text": "Constant 8-byte Initialization Vectors SHALL be used for 'cenc' encrypted material",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ENCRYPTION"
+   ],
+   "note": "8-byte IVs as CMAF 8.2.3.1 says; upstream requires a constant 8-byte IV, which fails normal cenc (bug 48)"
   },
   {
    "id": "WAVEHLS-7",
    "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
    "context": "",
    "text": "Sample auxiliary information, if present, SHALL be addressed by [.. a 'saio' box]",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ENCRYPTION"
+   ],
+   "note": "a saio box wherever senc or saiz is present"
   },
   {
    "id": "WAVEHLS-8",
    "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
    "context": "",
    "text": "Video components SHALL be encrypted with a 1:9 pattern",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ENCRYPTION"
+   ],
+   "note": "1:9 for cbcs video; upstream also tests cenc tracks (bug 48)"
   },
   {
    "id": "WAVEHLS-9",
    "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
    "context": "",
    "text": "Audio components SHALL be encrypted with a 10:0 pattern",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ENCRYPTION"
+   ],
+   "note": "10:0 for cbcs audio; 0:0 is accepted as the equivalent whole-block full-sample encryption of ISO/IEC 23001-7 10.4.1"
   },
   {
    "id": "WAVEHLS-10",
    "source": "WaveHLSInterop/Segments/KeyRotation.php",
    "context": "4.6.2 - Rotation of Encryption Keys",
    "text": "CMAF Segments [.. with differing encryption keys] SHALL provide an 'sbgp' box [..]",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-KEY-ROTATION"
+   ],
+   "note": "a seig sample group with another KID needs a seig sbgp box"
   },
   {
    "id": "WAVEHLS-11",
    "source": "WaveHLSInterop/Segments/KeyRotation.php",
    "context": "4.6.2 - Rotation of Encryption Keys",
    "text": "CMAF Segments [.. with differing encryption keys] SHALL provide a 'pssh' box [..]",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-KEY-ROTATION"
+   ],
+   "note": "pssh boxes in the segment when the CMAF header has them"
   },
   {
    "id": "WAVEHLS-12",
    "source": "WaveHLSInterop/Segments/SegmentEncryption.php",
    "context": "4.3.2 - Encrypted Media Presentations",
    "text": "Any individual CMAF Segment SHALL have a single encryption key",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-SEGMENT-KEY"
+   ],
+   "note": "compares the KID of each fragment (seig or tenc); upstream counts pssh KIDs (bug 48)"
   },
   {
    "id": "WAVEHLS-13",
    "source": "WaveHLSInterop/Segments/SegmentEncryption.php",
    "context": "4.3.2 - Encrypted Media Presentations",
    "text": "Any individual CMAF Segment SHALL have a single Initialization Vector",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-SEGMENT-KEY"
+   ],
+   "note": "compares the constant IV of each fragment; upstream rejects per-sample IVs (bug 48)"
   },
   {
    "id": "WAVEHLS-14",
@@ -4344,7 +4370,7 @@
    "text": "CMAF Fragment boundaries SHALL be created at all splice points.",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "needs the segments at the end of each Period for all media types"
   },
   {
    "id": "WAVEHLS-15",
@@ -4353,16 +4379,18 @@
    "text": "CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "as WAVEHLS-14"
   },
   {
    "id": "WAVEHLS-16",
    "source": "WaveHLSInterop/Segments/TextComponentConstraints.php",
    "context": "4.1.2 - Basic On-Demand and Live Streaming",
    "text": "Text components SHALL be packaged in ISMC1, ISMC1.1 or WebVTT Tracks",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-TEXT"
+   ],
+   "note": "IMSC1/IMSC1.1 Text from @codecs, or wvtt"
   },
   {
    "id": "WAVEHLS-17",
@@ -4371,25 +4399,29 @@
    "text": "All 'emsg' boxes inserted [..] after the start of the first CMAF chunk …",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "emsg repetition across segments, as LL-28"
   },
   {
    "id": "WAVEHLS-18",
    "source": "WaveHLSInterop/Segments/TrackRoles.php",
    "context": "",
    "text": "Track roles SHALL be stored in one or more 'kind' boxes [..]",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ROLES"
+   ],
+   "note": "every AdaptationSet Role needs a kind box with the same scheme and value"
   },
   {
    "id": "WAVEHLS-19",
    "source": "WaveHLSInterop/Segments/TrackRoles.php",
    "context": "",
    "text": "Track roles SHALL be representaed by the DASH Role scheme when possible",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HLS-ROLES"
+   ],
+   "note": "kind boxes without the DASH Role scheme"
   }
  ]
 }

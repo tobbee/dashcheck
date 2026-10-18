@@ -80,8 +80,9 @@ type Rep struct {
 	BitstreamSwitching bool     // effective @bitstreamSwitching
 
 	ContentType       string
-	Lang              string   // AdaptationSet@lang
-	ContainerProfiles []string // effective @containerProfiles (CMAF media profile brands)
+	Lang              string              // AdaptationSet@lang
+	ContainerProfiles []string            // effective @containerProfiles (CMAF media profile brands)
+	Roles             []*m.DescriptorType // Role elements of the AdaptationSet
 	MimeType          string
 	Codecs            string
 	Bandwidth         uint32
@@ -244,6 +245,7 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 					ASID:                 optUint(as.Id),
 					Lang:                 as.Lang,
 					ContainerProfiles:    containerProfiles(rep.ContainerProfiles, as.ContainerProfiles),
+					Roles:                as.Roles,
 					ASCodecs:             as.Codecs,
 					TargetLatency:        targetLatency(md),
 					HasContentProtection: len(rep.ContentProtections)+len(as.ContentProtections) > 0,

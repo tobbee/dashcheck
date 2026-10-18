@@ -24,6 +24,9 @@ It checks:
   (`-updates N` sets how many times) and compared with the version before:
   @publishTime, ids, Representation attributes and the timing of segments that
   both versions describe, plus the DVB-DASH update constraints.
+* **Profiles:** DASH-IF IOP, CMAF, low latency, DVB-DASH, CTA WAVE and more,
+  selected by the MPD's @profiles. The DASH-HLS interoperability rules of
+  CTA-5005, which MPDs do not signal, are added with `-hls-interop`.
 
 All findings carry a stable rule ID; `dashcheck -rules` lists them.
 

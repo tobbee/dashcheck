@@ -19,6 +19,7 @@ type sampleEntryInfo struct {
 	scheme     string // protection scheme type, e.g. cenc or cbcs
 	colrNclx   bool   // a colr box of type nclx is present
 	defaultKID string // tenc default KID of encrypted content
+	tenc       *mp4.TencBox
 	stppNS     string // namespace of an stpp sample entry
 	codec      string // full codecs string if it can be derived, else the 4CC
 	derived    bool   // codec is a full derived string
@@ -77,6 +78,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 			}
 			if se.Sinf.Schi != nil && se.Sinf.Schi.Tenc != nil {
 				info.defaultKID = se.Sinf.Schi.Tenc.DefaultKID.String()
+				info.tenc = se.Sinf.Schi.Tenc
 			}
 		}
 		for _, c := range se.Children {
@@ -98,6 +100,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 			}
 			if se.Sinf.Schi != nil && se.Sinf.Schi.Tenc != nil {
 				info.defaultKID = se.Sinf.Schi.Tenc.DefaultKID.String()
+				info.tenc = se.Sinf.Schi.Tenc
 			}
 		}
 		info.codec, info.derived = audioCodec(info.fourCC, se)

@@ -112,6 +112,10 @@ type Init struct {
 	cmafBrand   string   // the highest CMAF media profile brand of the track
 	trex        *mp4.TrexBox
 	aac         *audioConfig // AAC AudioSpecificConfig, if any
+	tenc        *mp4.TencBox // track encryption defaults, if encrypted
+	kinds       []*mp4.KindBox
+	// HLSInterop turns on the CTA-5005 checks in CheckMedia; the runner sets it.
+	HLSInterop bool
 }
 
 // CheckInit parses and checks an initialization segment.
@@ -186,6 +190,14 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	init.DefaultKID = info.defaultKID
 	init.Channels = int(info.channels)
 	init.aac = info.aac
+	init.tenc = info.tenc
+	if trak.Udta != nil {
+		for _, c := range trak.Udta.Children {
+			if k, ok := c.(*mp4.KindBox); ok {
+				init.kinds = append(init.kinds, k)
+			}
+		}
+	}
 	for _, p := range moov.Psshs {
 		init.PsshSystems = append(init.PsshSystems, p.SystemID.String())
 	}
@@ -333,6 +345,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	f = append(f, cmafMediaRules(rep, init, mf, loc)...)
 	f = append(f, llMediaRules(rep, media, mf, mediaTS, last, loc)...)
 	f = append(f, dvbMediaRules(rep, init, media, mf, mediaTS, last, loc)...)
+	f = append(f, hlsMediaRules(init, mf, loc)...)
 	return media, f
 }
 

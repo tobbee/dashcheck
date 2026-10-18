@@ -33,6 +33,7 @@ function options() {
     maxSegments: Number($('maxSegments').value) || 4,
     // 0 in the form means no update checks, which the Go side spells -1.
     mpdUpdates: Number($('mpdUpdates').value) || -1,
+    hlsInterop: $('hlsInterop').checked,
     reference: $('reference').value.trim() || 'none',
   };
 }
