@@ -472,11 +472,11 @@
    "source": "schematron/schematron.sch",
    "context": "dash:SegmentTemplate",
    "text": "If indexRange is not present indexRangeExact shall not be present.",
-   "status": "partial",
+   "status": "done",
    "rules": [
     "MPD-INDEXRANGEEXACT"
    ],
-   "note": "dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact=\"true\" is detected"
+   "note": "checked on the attributes as written"
   },
   {
    "id": "SCH-44",
@@ -549,22 +549,22 @@
    "source": "schematron/schematron.sch",
    "context": "dash:SegmentList",
    "text": "If indexRange is not present indexRangeExact shall not be present.",
-   "status": "partial",
+   "status": "done",
    "rules": [
     "MPD-INDEXRANGEEXACT"
    ],
-   "note": "dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact=\"true\" is detected"
+   "note": "checked on the attributes as written"
   },
   {
    "id": "SCH-51",
    "source": "schematron/schematron.sch",
    "context": "dash:SegmentBase",
    "text": "If indexRange is not present indexRangeExact shall not be present.",
-   "status": "partial",
+   "status": "done",
    "rules": [
     "MPD-INDEXRANGEEXACT"
    ],
-   "note": "dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact=\"true\" is detected"
+   "note": "checked on the attributes as written"
   },
   {
    "id": "SCH-52",
@@ -2185,8 +2185,10 @@
    "source": "DVB/MPD.php",
    "context": "Unknown",
    "text": "MPD@minimumUpdatePeriod SHOULD have a value of 1 second or higher",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-MUP"
+   ],
    "note": ""
   },
   {
@@ -2194,8 +2196,10 @@
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 7.2.1.1",
    "text": "A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-FONT"
+   ],
    "note": ""
   },
   {
@@ -2203,17 +2207,21 @@
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.3.1",
    "text": "The AudioChannelConfiguration shall be compliant with the dolby scheme",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO"
+   ],
+   "note": "dashcheck requires the Dolby 2014 scheme for E-AC-3 only; AC-4 schemes are checked by the ac4-generic.sch rules; upstream never checks AC-4 because of reversed arguments"
   },
   {
    "id": "DVB-4",
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.1.2",
    "text": "Each audio AdaptationSet shall include at least one Role Element",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO"
+   ],
    "note": ""
   },
   {
@@ -2221,8 +2229,10 @@
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.1.1",
    "text": "All audio Representations SHALL have the attributes and elements in Table 4",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO"
+   ],
    "note": ""
   },
   {
@@ -2230,35 +2240,43 @@
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.1.1",
    "text": "@mimeType SHALL be common for all audio Representations within an AdaptationSet",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-COMMON"
+   ],
+   "note": "upstream tests an empty array and always fails"
   },
   {
    "id": "DVB-7",
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.1.1",
    "text": "@codec SHOULD be common for all audio Representations within an Adapation Set",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-SIMILAR"
+   ],
+   "note": "upstream tests an empty array and always fails"
   },
   {
    "id": "DVB-8",
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.1.1",
    "text": "@audioSamplingRate SHOULD be common for all audio Representations within an Adapation Set",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-SIMILAR"
+   ],
+   "note": "upstream tests an empty array and always fails"
   },
   {
    "id": "DVB-9",
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.1.1",
    "text": "AudioChannelConfiguration SHOULD be common for all audio Representations within an Adapation Set",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-SIMILAR"
+   ],
    "note": ""
   },
   {
@@ -2266,8 +2284,10 @@
    "source": "DVB/MPD/AudioChecks.php",
    "context": "Section 6.6.3",
    "text": "An audio fallback set shall have @value equal to the @id of the base set",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-FALLBACK"
+   ],
    "note": ""
   },
   {
@@ -2275,17 +2295,21 @@
    "source": "DVB/MPD/BandwidthChecks.php",
    "context": "Section 11.3.0",
    "text": "Audio should be 20% or less of the total stream bandwith",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-SHARE"
+   ],
+   "note": "dashcheck reports the combination with the largest audio share per Period, upstream every combination"
   },
   {
    "id": "DVB-12",
    "source": "DVB/MPD/Codecs.php",
    "context": "Codec Information",
    "text": "The codec should be supported by the specification",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-CODEC"
+   ],
    "note": ""
   },
   {
@@ -2293,8 +2317,10 @@
    "source": "DVB/MPD/ContentProtectionChecks.php",
    "context": "Section 8.3",
    "text": "ContentProtection descriptor(s) shall be placed at the AdaptationSet level",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-CP"
+   ],
    "note": ""
   },
   {
@@ -2302,17 +2328,21 @@
    "source": "DVB/MPD/Dimensions.php",
    "context": "Section 4.5",
    "text": "The MPD size SHALL NOT exceed 256 Kbytes",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-LIMITS"
+   ],
+   "note": "dashcheck measures the MPD as received; upstream measures the XLink-resolved MPD"
   },
   {
    "id": "DVB-15",
    "source": "DVB/MPD/Dimensions.php",
    "context": "Section 4.5",
    "text": "The MPD has a maximum of 64 periods",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-LIMITS"
+   ],
    "note": ""
   },
   {
@@ -2320,8 +2350,10 @@
    "source": "DVB/MPD/Dimensions.php",
    "context": "Section 4.5",
    "text": "Each Period has a maximum of 16 Adaptation Sets",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-LIMITS"
+   ],
    "note": ""
   },
   {
@@ -2329,8 +2361,10 @@
    "source": "DVB/MPD/Dimensions.php",
    "context": "Section 4.5",
    "text": "Each Adaptation Set has a maximum of 16 Representations",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-LIMITS"
+   ],
    "note": ""
   },
   {
@@ -2338,8 +2372,10 @@
    "source": "DVB/MPD/EventChecks.php",
    "context": "Section 9.1.2.1",
    "text": "Events SHALL have @presentationTime set",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-EVENT"
+   ],
    "note": ""
   },
   {
@@ -2347,8 +2383,10 @@
    "source": "DVB/MPD/EventChecks.php",
    "context": "Section 9.1.2.1",
    "text": "The event data shall be valid XML, either escaped or place in a CDATA section",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-EVENT"
+   ],
    "note": ""
   },
   {
@@ -2356,8 +2394,10 @@
    "source": "DVB/MPD/MetricReporting.php",
    "context": "Section 10.12.3.3",
    "text": "Reporting URL is required to be an absolute HTTP(S) url",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-REPORTING"
+   ],
    "note": ""
   },
   {
@@ -2365,8 +2405,10 @@
    "source": "DVB/MPD/MetricReporting.php",
    "context": "Section 10.12.3.4",
    "text": "Probability - if present - is required to be an integer between 1 and 1000",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-REPORTING"
+   ],
    "note": ""
   },
   {
@@ -2374,8 +2416,10 @@
    "source": "DVB/MPD/PeriodConstraints.php",
    "context": "Section 4.2.2",
    "text": "'The Period.SegmentList element SHALL NOT be present'",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PERIOD"
+   ],
    "note": ""
   },
   {
@@ -2383,8 +2427,10 @@
    "source": "DVB/MPD/PeriodConstraints.php",
    "context": "Section 4.2.2",
    "text": "'The Period.SegmentTemplate element SHALL NOT be present'",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PERIOD"
+   ],
    "note": ""
   },
   {
@@ -2392,17 +2438,21 @@
    "source": "DVB/MPD/PeriodConstraints.php",
    "context": "Section 4.2.2",
    "text": "Each Period element shall conform to either 4.2.4 or 4.2.6",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PERIOD"
+   ],
+   "note": "dashcheck uses the effective @profiles of the Representations"
   },
   {
    "id": "DVB-25",
    "source": "DVB/MPD/PeriodConstraints.php",
    "context": "Section 4.2.2",
    "text": "At least one Adaptation Set SHALL cary a 'main' role",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-MAINROLE"
+   ],
    "note": ""
   },
   {
@@ -2410,8 +2460,10 @@
    "source": "DVB/MPD/PeriodConstraints.php",
    "context": "Section 6.1.2",
    "text": "At least one Adaptation Set SHALL cary a 'main' role",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-MAINROLE"
+   ],
    "note": ""
   },
   {
@@ -2419,8 +2471,10 @@
    "source": "DVB/MPD/Profiles.php",
    "context": "Section 11.1",
    "text": "Each Representation @profile SHALL include at least one of those in section 4.1",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PROFILE"
+   ],
    "note": ""
   },
   {
@@ -2428,8 +2482,10 @@
    "source": "DVB/MPD/Profiles.php",
    "context": "Section 11.1",
    "text": "Each representation @profile SHALL include either section 4.2.5 or section 4.2.8",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PROFILE"
+   ],
    "note": ""
   },
   {
@@ -2437,8 +2493,10 @@
    "source": "DVB/MPD/Profiles.php",
    "context": "Section 11.1",
    "text": "Each representation shall have only one segment",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PROFILE"
+   ],
    "note": ""
   },
   {
@@ -2446,8 +2504,10 @@
    "source": "DVB/MPD/Resolution.php",
    "context": "Codec Information",
    "text": "The resolution of the stream should conform to table 10.3",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-RESOLUTION"
+   ],
    "note": ""
   },
   {
@@ -2455,8 +2515,10 @@
    "source": "DVB/MPD/SCTEChecks.php",
    "context": "Section 9.1.9",
    "text": "The @value attribute SHOULD be absent",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-SCTE-VALUE"
+   ],
    "note": ""
   },
   {
@@ -2464,44 +2526,52 @@
    "source": "DVB/MPD/SCTEChecks.php",
    "context": "Section 9.1.9",
    "text": "The @presentationTimeOffset attribute MAY be present",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "a permissive (MAY) statement; upstream wrongly fails when the attribute is absent"
   },
   {
    "id": "DVB-33",
    "source": "DVB/MPD/SCTEChecks.php",
    "context": "Section 9.1.9",
    "text": "The @timeScale attribute shall be set to an integer multiple of the video framerate",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-SCTE"
+   ],
+   "note": "upstream truncates fractional frame rates"
   },
   {
    "id": "DVB-34",
    "source": "DVB/MPD/SCTEChecks.php",
    "context": "Section 9.1.9",
    "text": "The @presentationTime of an event SHALL be set to the splice time of the enclosed marker",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "partial",
+   "rules": [
+    "MPD-DVB-SCTE"
+   ],
+   "note": "like upstream, dashcheck checks that @presentationTime is present, not that it equals the splice time"
   },
   {
    "id": "DVB-35",
    "source": "DVB/MPD/SCTEChecks.php",
    "context": "Section 9.1.9",
    "text": "The @duration of an event SHALL be defined [..] and SHALL NOT be 0xFFFFFFFF",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-SCTE"
+   ],
+   "note": "upstream compares with the string 0xFFFFFFFF and never detects 4294967295"
   },
   {
    "id": "DVB-36",
    "source": "DVB/MPD/SCTEChecks.php",
    "context": "Section 9.1.9",
    "text": "The @messageData of an event SHALL be absent",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-SCTE"
+   ],
    "note": ""
   },
   {
@@ -2509,8 +2579,10 @@
    "source": "DVB/MPD/SCTEChecks.php",
    "context": "Section 9.1.9",
    "text": "The @contentEncoding of an event is absent",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-SCTE"
+   ],
    "note": ""
   },
   {
@@ -2518,8 +2590,10 @@
    "source": "DVB/MPD/SubtitleChecks.php",
    "context": "Section 7.1.1",
    "text": "The @codecs attribute shall begin with 'stpp' to indicate the use of XML subtitles",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-SUBTITLE"
+   ],
    "note": ""
   },
   {
@@ -2527,38 +2601,44 @@
    "source": "DVB/MPD/TLSBitrate.php",
    "context": "Bitrate information",
    "text": "Terminal which does not support UHD video (max 12 Mbit/s)",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-TLS-BITRATE"
+   ],
+   "note": "reported once per Period for the highest total bandwidth"
   },
   {
    "id": "DVB-40",
    "source": "DVB/MPD/TLSBitrate.php",
    "context": "Bitrate information",
    "text": "Terminal which does not support UHD, but not UHD HFR video (max 39 Mbit/s)",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-TLS-BITRATE"
+   ],
+   "note": "reported once per Period for the highest total bandwidth"
   },
   {
    "id": "DVB-41",
    "source": "DVB/MPD/TLSBitrate.php",
    "context": "Bitrate information",
    "text": "Terminal which does supports UHD HFR video (max 51 Mbit/s)",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-TLS-BITRATE"
+   ],
+   "note": "reported once per Period for the highest total bandwidth"
   },
   {
    "id": "DVB-42",
    "source": "DVB/MPD/UTCTiming.php",
    "context": "Section 4.7.2",
    "text": "The MPD SHOULD contain at least one UTCTiming element with the @schemeIdUri attribute set to [...]",
-   "status": "partial",
+   "status": "done",
    "rules": [
-    "MPD-DYN-UTCTIMING"
+    "MPD-DVB-UTCTIMING"
    ],
-   "note": "dashcheck only checks dynamic MPDs and accepts any 2014 HTTP scheme"
+   "note": ""
   },
   {
    "id": "DVB-43",
@@ -2682,8 +2762,10 @@
    "source": "DVB/MPD/VideoChecks.php",
    "context": "Section 7.2.1.1",
    "text": "A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-FONT"
+   ],
    "note": ""
   },
   {
@@ -2691,8 +2773,10 @@
    "source": "DVB/MPD/VideoChecks.php",
    "context": "Section 4.4",
    "text": "Elements and attributes are expected to be present [..] to enable selection and switching.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-VIDEO"
+   ],
    "note": ""
   },
   {
@@ -2700,8 +2784,10 @@
    "source": "DVB/MPD/VideoChecks.php",
    "context": "Section 4.4",
    "text": "@scanType SHALL be present [..] if interlaced pictures are used in any [..representation]",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-VIDEO"
+   ],
    "note": ""
   },
   {
@@ -2709,8 +2795,10 @@
    "source": "DVB/MPD/VideoChecks.php",
    "context": "Section 11.2.2",
    "text": "The frame rates used should be integer multiples of eachother",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-FRAMERATES"
+   ],
    "note": ""
   },
   {

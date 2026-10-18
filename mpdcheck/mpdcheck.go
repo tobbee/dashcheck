@@ -122,6 +122,9 @@ func Check(data []byte, mpdURL string) (*m.MPD, []report.Finding) {
 	findings = append(findings, descriptorRules(md)...)
 	findings = append(findings, dolbyRules(md)...)
 	findings = append(findings, lowLatencyRules(md)...)
+	raw := parseRaw(data)
+	findings = append(findings, rawStructureRules(raw)...)
+	findings = append(findings, dvbRules(md, raw, len(data), mpdURL)...)
 	return md, findings
 }
 

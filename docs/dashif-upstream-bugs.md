@@ -45,6 +45,11 @@ yet unless stated.
 | 30 | Low Latency booleans | Compares with TRUE/FALSE, always fails | Verified in code |
 | 31 | Low Latency SegmentAdaptation | Duration limits inverted | Verified in code |
 | 32 | Low Latency placeholders | Checks that always pass or always fail | Verified in code |
+| 33 | DVB AudioChecks | Common attribute checks test an empty array, always fail | Verified in code |
+| 34 | DVB AudioChecks | Reversed arguments, AC-4 channel configuration never checked | Verified in code |
+| 35 | DVB SCTEChecks | Optional @presentationTimeOffset required | Verified in code |
+| 36 | DVB SCTEChecks | Indefinite @duration never detected | Verified in code |
+| 37 | DVB SCTEChecks | Fractional frame rates truncated | Verified in code |
 
 ## Manifest handling
 
@@ -450,6 +455,66 @@ the cross-AdaptationSet rule is a stub that returns false.
 **Effect:** The report shows passes that were never checked, and the cross-AdaptationSet rule depends only on its first option.
 
 **Fix:** Implement the checks or report them as skipped.
+
+## DVB module
+
+### 33. The common audio attribute checks always fail
+
+**Where:** [app/Modules/DVB/MPD/AudioChecks.php#L219](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/AudioChecks.php#L219)
+and [#L264](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/AudioChecks.php#L264)
+
+**Problem:** The values are collected into `$values[$attribute]`, but the checks
+read `$attributeValues`, which stays empty, so `count(array_unique(...)) == 1` is
+`0 == 1`.
+
+**Effect:** "@mimeType, @codecs and @audioSamplingRate SHALL/SHOULD be common"
+(DVB 6.1.1) fails for every audio AdaptationSet.
+
+**Fix:** Collect into `$attributeValues`.
+
+### 34. The Dolby channel configuration check never runs for AC-4
+
+**Where:** [app/Modules/DVB/MPD/AudioChecks.php#L145](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/AudioChecks.php#L145)
+
+**Problem:** `str_starts_with('ec-3', $codec)` has its arguments reversed: it
+tests whether `ec-3` starts with the codecs string. A full AC-4 codecs string
+such as `ac-4.02.01.01` never matches, and the function returns.
+
+**Effect:** AudioChannelConfiguration of AC-4 AdaptationSets is never checked (DVB 6.3.1).
+
+**Fix:** Use `str_starts_with($codec, 'ec-3')` and `str_starts_with($codec, 'ac-4')`.
+
+### 35. An optional @presentationTimeOffset is required
+
+**Where:** [SCTEChecks.php#L47](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/SCTEChecks.php#L47) and [#L122](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/SCTEChecks.php#L122)
+
+**Problem:** The check is described as "The @presentationTimeOffset attribute MAY
+be present", but it fails when the attribute is absent.
+
+**Effect:** SCTE-35 EventStreams without @presentationTimeOffset fail (DVB 9.1.9).
+
+**Fix:** Remove the check, or report its absence as information.
+
+### 36. An indefinite SCTE-35 event duration is never detected
+
+**Where:** [SCTEChecks.php#L170](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/SCTEChecks.php#L170)
+
+**Problem:** @duration is compared with the string `0xFFFFFFFF`, but the
+attribute is an unsigned integer, written `4294967295`.
+
+**Effect:** Events with indefinite duration pass (DVB 9.1.9).
+
+**Fix:** Compare the numeric value with 4294967295.
+
+### 37. Fractional frame rates are truncated in the timescale check
+
+**Where:** [SCTEChecks.php#L97](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/SCTEChecks.php#L97)
+
+**Problem:** `intval($adaptationSetFrameRate)` turns `30000/1001` into 30000.
+
+**Effect:** The "@timescale is a multiple of the frame rate" check is wrong for fractional frame rates.
+
+**Fix:** Evaluate the fraction.
 
 ## Other projects
 

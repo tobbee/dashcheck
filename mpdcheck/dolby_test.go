@@ -8,9 +8,9 @@ import (
 
 const dvbAC4MPD = `<?xml version="1.0" encoding="UTF-8"?>
 <MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT8S"
-     profiles="urn:dvb:dash:profile:dvb-dash:2017" minBufferTime="PT2S">
+     profiles="urn:dvb:dash:profile:dvb-dash:2017,urn:dvb:dash:profile:dvb-dash:isoff-ext-live:2014" minBufferTime="PT2S">
   <Period id="p0">
-    <AdaptationSet id="1" contentType="video" mimeType="video/mp4" codecs="avc1.64001e" frameRate="50">
+    <AdaptationSet id="1" contentType="video" mimeType="video/mp4" codecs="avc1.64001e" frameRate="50" par="16:9" maxWidth="1280" maxHeight="720">
       <SegmentTemplate duration="2" media="$RepresentationID$/$Number$.m4s" initialization="$RepresentationID$/init.mp4"/>
       <Representation id="v1" bandwidth="1000000" width="1280" height="720"/>
     </AdaptationSet>

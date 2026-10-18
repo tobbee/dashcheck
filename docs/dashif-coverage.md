@@ -6,19 +6,19 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | Group | Checks | Done | Partial | Todo | n/a |
 |---|---:|---:|---:|---:|---:|
-| Schematron: schematron.sch | 123 | 119 | 3 | 0 | 1 |
+| Schematron: schematron.sch | 123 | 122 | 0 | 0 | 1 |
 | Schematron: dvb-dash.sch | 13 | 13 | 0 | 0 | 0 |
 | Schematron: ac4-generic.sch | 17 | 17 | 0 | 0 | 0 |
 | Module: Common | 5 | 2 | 0 | 2 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
-| Module: DVB | 103 | 2 | 3 | 98 | 0 |
+| Module: DVB | 103 | 46 | 3 | 53 | 1 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **236** | **10** | **153** | **9** |
+| **Total** | **408** | **283** | **7** | **108** | **10** |
 
 ## Schematron: schematron.sch
 
@@ -66,15 +66,15 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | SCH-40 | `dash:SubRepresentation`: If the level attribute is defined for a SubRepresentation also the bandwidth attribute shall be defined. | done | MPD-SUBREP-BANDWIDTH |  |
 | SCH-41 | `dash:SegmentTemplate`: If more than one Media Segment is present the duration attribute or SegmentTimeline element shall be present. | done | ADDR-TEMPLATE | checked on the inherited SegmentTemplate of each Representation, so templates split over levels are not flagged as upstream does |
 | SCH-42 | `dash:SegmentTemplate`: Either the duration attribute or SegmentTimeline element shall be present but not both. | done | ADDR-TEMPLATE |  |
-| SCH-43 | `dash:SegmentTemplate`: If indexRange is not present indexRangeExact shall not be present. | partial | MPD-INDEXRANGEEXACT | dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact="true" is detected |
+| SCH-43 | `dash:SegmentTemplate`: If indexRange is not present indexRangeExact shall not be present. | done | MPD-INDEXRANGEEXACT | checked on the attributes as written |
 | SCH-44 | `dash:SegmentTemplate`: Neither $Number$ nor the $Time$ identifier shall be included in the initialization attribute. | done | MPD-TEMPLATE-INIT |  |
 | SCH-45 | `dash:SegmentTemplate`: Neither $Number$ nor the $Time$ identifier shall be included in the bitstreamSwitching attribute. | done | MPD-TEMPLATE-INIT |  |
 | SCH-46 | `dash:SegmentTemplate`: Only identifiers such as $Bandwidth$, $Time$, $RepresentationID$, or $Number$ shall be used. | done | ADDR-TEMPLATE | checked when @media is expanded |
 | SCH-47 | `dash:SegmentTemplate`: $RepresentationID$ shall not have a format tag. | done | ADDR-TEMPLATE |  |
 | SCH-48 | `dash:SegmentList`: If more than one Media Segment is present the duration attribute or SegmentTimeline element shall be present. | done | ADDR-TEMPLATE |  |
 | SCH-49 | `dash:SegmentList`: Either the duration attribute or SegmentTimeline element shall be present but not both. | done | ADDR-TEMPLATE |  |
-| SCH-50 | `dash:SegmentList`: If indexRange is not present indexRangeExact shall not be present. | partial | MPD-INDEXRANGEEXACT | dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact="true" is detected |
-| SCH-51 | `dash:SegmentBase`: If indexRange is not present indexRangeExact shall not be present. | partial | MPD-INDEXRANGEEXACT | dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact="true" is detected |
+| SCH-50 | `dash:SegmentList`: If indexRange is not present indexRangeExact shall not be present. | done | MPD-INDEXRANGEEXACT | checked on the attributes as written |
+| SCH-51 | `dash:SegmentBase`: If indexRange is not present indexRangeExact shall not be present. | done | MPD-INDEXRANGEEXACT | checked on the attributes as written |
 | SCH-52 | `dash:SegmentBase`: The timeShiftBufferDepth shall not be smaller than timeShiftBufferDepth specified in the MPD element | done | MPD-SEGBASE-TSBD | upstream tests @timeShiftbuffer (a typo), so its rule never fires |
 | SCH-53 | `dash:SegmentTimeline`: The d attribute of a SegmentTimeline shall not exceed the value give by the MPD maxSegmentDuration attribute. | done | MPD-MAXSEGDUR | upstream adds the duration components without unit conversion, so PT1M counts as 1 s |
 | SCH-54 | `dash:ProgramInformation`: If more than one ProgramInformation element is given each ProgramInformation element shall have a lang attribute. | done | MPD-PROGINFO-LANG |  |
@@ -309,48 +309,48 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
-| DVB-1 | `Unknown`: MPD@minimumUpdatePeriod SHOULD have a value of 1 second or higher | todo |  |  |
-| DVB-2 | `Section 7.2.1.1`: A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles | todo |  |  |
-| DVB-3 | `Section 6.3.1`: The AudioChannelConfiguration shall be compliant with the dolby scheme | todo |  |  |
-| DVB-4 | `Section 6.1.2`: Each audio AdaptationSet shall include at least one Role Element | todo |  |  |
-| DVB-5 | `Section 6.1.1`: All audio Representations SHALL have the attributes and elements in Table 4 | todo |  |  |
-| DVB-6 | `Section 6.1.1`: @mimeType SHALL be common for all audio Representations within an AdaptationSet | todo |  |  |
-| DVB-7 | `Section 6.1.1`: @codec SHOULD be common for all audio Representations within an Adapation Set | todo |  |  |
-| DVB-8 | `Section 6.1.1`: @audioSamplingRate SHOULD be common for all audio Representations within an Adapation Set | todo |  |  |
-| DVB-9 | `Section 6.1.1`: AudioChannelConfiguration SHOULD be common for all audio Representations within an Adapation Set | todo |  |  |
-| DVB-10 | `Section 6.6.3`: An audio fallback set shall have @value equal to the @id of the base set | todo |  |  |
-| DVB-11 | `Section 11.3.0`: Audio should be 20% or less of the total stream bandwith | todo |  |  |
-| DVB-12 | `Codec Information`: The codec should be supported by the specification | todo |  |  |
-| DVB-13 | `Section 8.3`: ContentProtection descriptor(s) shall be placed at the AdaptationSet level | todo |  |  |
-| DVB-14 | `Section 4.5`: The MPD size SHALL NOT exceed 256 Kbytes | todo |  |  |
-| DVB-15 | `Section 4.5`: The MPD has a maximum of 64 periods | todo |  |  |
-| DVB-16 | `Section 4.5`: Each Period has a maximum of 16 Adaptation Sets | todo |  |  |
-| DVB-17 | `Section 4.5`: Each Adaptation Set has a maximum of 16 Representations | todo |  |  |
-| DVB-18 | `Section 9.1.2.1`: Events SHALL have @presentationTime set | todo |  |  |
-| DVB-19 | `Section 9.1.2.1`: The event data shall be valid XML, either escaped or place in a CDATA section | todo |  |  |
-| DVB-20 | `Section 10.12.3.3`: Reporting URL is required to be an absolute HTTP(S) url | todo |  |  |
-| DVB-21 | `Section 10.12.3.4`: Probability - if present - is required to be an integer between 1 and 1000 | todo |  |  |
-| DVB-22 | `Section 4.2.2`: 'The Period.SegmentList element SHALL NOT be present' | todo |  |  |
-| DVB-23 | `Section 4.2.2`: 'The Period.SegmentTemplate element SHALL NOT be present' | todo |  |  |
-| DVB-24 | `Section 4.2.2`: Each Period element shall conform to either 4.2.4 or 4.2.6 | todo |  |  |
-| DVB-25 | `Section 4.2.2`: At least one Adaptation Set SHALL cary a 'main' role | todo |  |  |
-| DVB-26 | `Section 6.1.2`: At least one Adaptation Set SHALL cary a 'main' role | todo |  |  |
-| DVB-27 | `Section 11.1`: Each Representation @profile SHALL include at least one of those in section 4.1 | todo |  |  |
-| DVB-28 | `Section 11.1`: Each representation @profile SHALL include either section 4.2.5 or section 4.2.8 | todo |  |  |
-| DVB-29 | `Section 11.1`: Each representation shall have only one segment | todo |  |  |
-| DVB-30 | `Codec Information`: The resolution of the stream should conform to table 10.3 | todo |  |  |
-| DVB-31 | `Section 9.1.9`: The @value attribute SHOULD be absent | todo |  |  |
-| DVB-32 | `Section 9.1.9`: The @presentationTimeOffset attribute MAY be present | todo |  |  |
-| DVB-33 | `Section 9.1.9`: The @timeScale attribute shall be set to an integer multiple of the video framerate | todo |  |  |
-| DVB-34 | `Section 9.1.9`: The @presentationTime of an event SHALL be set to the splice time of the enclosed marker | todo |  |  |
-| DVB-35 | `Section 9.1.9`: The @duration of an event SHALL be defined [..] and SHALL NOT be 0xFFFFFFFF | todo |  |  |
-| DVB-36 | `Section 9.1.9`: The @messageData of an event SHALL be absent | todo |  |  |
-| DVB-37 | `Section 9.1.9`: The @contentEncoding of an event is absent | todo |  |  |
-| DVB-38 | `Section 7.1.1`: The @codecs attribute shall begin with 'stpp' to indicate the use of XML subtitles | todo |  |  |
-| DVB-39 | `Bitrate information`: Terminal which does not support UHD video (max 12 Mbit/s) | todo |  |  |
-| DVB-40 | `Bitrate information`: Terminal which does not support UHD, but not UHD HFR video (max 39 Mbit/s) | todo |  |  |
-| DVB-41 | `Bitrate information`: Terminal which does supports UHD HFR video (max 51 Mbit/s) | todo |  |  |
-| DVB-42 | `Section 4.7.2`: The MPD SHOULD contain at least one UTCTiming element with the @schemeIdUri attribute set to [...] | partial | MPD-DYN-UTCTIMING | dashcheck only checks dynamic MPDs and accepts any 2014 HTTP scheme |
+| DVB-1 | `Unknown`: MPD@minimumUpdatePeriod SHOULD have a value of 1 second or higher | done | MPD-DVB-MUP |  |
+| DVB-2 | `Section 7.2.1.1`: A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles | done | MPD-DVB-FONT |  |
+| DVB-3 | `Section 6.3.1`: The AudioChannelConfiguration shall be compliant with the dolby scheme | done | MPD-DVB-AUDIO | dashcheck requires the Dolby 2014 scheme for E-AC-3 only; AC-4 schemes are checked by the ac4-generic.sch rules; upstream never checks AC-4 because of reversed arguments |
+| DVB-4 | `Section 6.1.2`: Each audio AdaptationSet shall include at least one Role Element | done | MPD-DVB-AUDIO |  |
+| DVB-5 | `Section 6.1.1`: All audio Representations SHALL have the attributes and elements in Table 4 | done | MPD-DVB-AUDIO |  |
+| DVB-6 | `Section 6.1.1`: @mimeType SHALL be common for all audio Representations within an AdaptationSet | done | MPD-DVB-AUDIO-COMMON | upstream tests an empty array and always fails |
+| DVB-7 | `Section 6.1.1`: @codec SHOULD be common for all audio Representations within an Adapation Set | done | MPD-DVB-AUDIO-SIMILAR | upstream tests an empty array and always fails |
+| DVB-8 | `Section 6.1.1`: @audioSamplingRate SHOULD be common for all audio Representations within an Adapation Set | done | MPD-DVB-AUDIO-SIMILAR | upstream tests an empty array and always fails |
+| DVB-9 | `Section 6.1.1`: AudioChannelConfiguration SHOULD be common for all audio Representations within an Adapation Set | done | MPD-DVB-AUDIO-SIMILAR |  |
+| DVB-10 | `Section 6.6.3`: An audio fallback set shall have @value equal to the @id of the base set | done | MPD-DVB-FALLBACK |  |
+| DVB-11 | `Section 11.3.0`: Audio should be 20% or less of the total stream bandwith | done | MPD-DVB-AUDIO-SHARE | dashcheck reports the combination with the largest audio share per Period, upstream every combination |
+| DVB-12 | `Codec Information`: The codec should be supported by the specification | done | MPD-DVB-CODEC |  |
+| DVB-13 | `Section 8.3`: ContentProtection descriptor(s) shall be placed at the AdaptationSet level | done | MPD-DVB-CP |  |
+| DVB-14 | `Section 4.5`: The MPD size SHALL NOT exceed 256 Kbytes | done | MPD-DVB-LIMITS | dashcheck measures the MPD as received; upstream measures the XLink-resolved MPD |
+| DVB-15 | `Section 4.5`: The MPD has a maximum of 64 periods | done | MPD-DVB-LIMITS |  |
+| DVB-16 | `Section 4.5`: Each Period has a maximum of 16 Adaptation Sets | done | MPD-DVB-LIMITS |  |
+| DVB-17 | `Section 4.5`: Each Adaptation Set has a maximum of 16 Representations | done | MPD-DVB-LIMITS |  |
+| DVB-18 | `Section 9.1.2.1`: Events SHALL have @presentationTime set | done | MPD-DVB-EVENT |  |
+| DVB-19 | `Section 9.1.2.1`: The event data shall be valid XML, either escaped or place in a CDATA section | done | MPD-DVB-EVENT |  |
+| DVB-20 | `Section 10.12.3.3`: Reporting URL is required to be an absolute HTTP(S) url | done | MPD-DVB-REPORTING |  |
+| DVB-21 | `Section 10.12.3.4`: Probability - if present - is required to be an integer between 1 and 1000 | done | MPD-DVB-REPORTING |  |
+| DVB-22 | `Section 4.2.2`: 'The Period.SegmentList element SHALL NOT be present' | done | MPD-DVB-PERIOD |  |
+| DVB-23 | `Section 4.2.2`: 'The Period.SegmentTemplate element SHALL NOT be present' | done | MPD-DVB-PERIOD |  |
+| DVB-24 | `Section 4.2.2`: Each Period element shall conform to either 4.2.4 or 4.2.6 | done | MPD-DVB-PERIOD | dashcheck uses the effective @profiles of the Representations |
+| DVB-25 | `Section 4.2.2`: At least one Adaptation Set SHALL cary a 'main' role | done | MPD-DVB-MAINROLE |  |
+| DVB-26 | `Section 6.1.2`: At least one Adaptation Set SHALL cary a 'main' role | done | MPD-DVB-MAINROLE |  |
+| DVB-27 | `Section 11.1`: Each Representation @profile SHALL include at least one of those in section 4.1 | done | MPD-DVB-PROFILE |  |
+| DVB-28 | `Section 11.1`: Each representation @profile SHALL include either section 4.2.5 or section 4.2.8 | done | MPD-DVB-PROFILE |  |
+| DVB-29 | `Section 11.1`: Each representation shall have only one segment | done | MPD-DVB-PROFILE |  |
+| DVB-30 | `Codec Information`: The resolution of the stream should conform to table 10.3 | done | MPD-DVB-RESOLUTION |  |
+| DVB-31 | `Section 9.1.9`: The @value attribute SHOULD be absent | done | MPD-DVB-SCTE-VALUE |  |
+| DVB-32 | `Section 9.1.9`: The @presentationTimeOffset attribute MAY be present | n/a |  | a permissive (MAY) statement; upstream wrongly fails when the attribute is absent |
+| DVB-33 | `Section 9.1.9`: The @timeScale attribute shall be set to an integer multiple of the video framerate | done | MPD-DVB-SCTE | upstream truncates fractional frame rates |
+| DVB-34 | `Section 9.1.9`: The @presentationTime of an event SHALL be set to the splice time of the enclosed marker | partial | MPD-DVB-SCTE | like upstream, dashcheck checks that @presentationTime is present, not that it equals the splice time |
+| DVB-35 | `Section 9.1.9`: The @duration of an event SHALL be defined [..] and SHALL NOT be 0xFFFFFFFF | done | MPD-DVB-SCTE | upstream compares with the string 0xFFFFFFFF and never detects 4294967295 |
+| DVB-36 | `Section 9.1.9`: The @messageData of an event SHALL be absent | done | MPD-DVB-SCTE |  |
+| DVB-37 | `Section 9.1.9`: The @contentEncoding of an event is absent | done | MPD-DVB-SCTE |  |
+| DVB-38 | `Section 7.1.1`: The @codecs attribute shall begin with 'stpp' to indicate the use of XML subtitles | done | MPD-DVB-SUBTITLE |  |
+| DVB-39 | `Bitrate information`: Terminal which does not support UHD video (max 12 Mbit/s) | done | MPD-DVB-TLS-BITRATE | reported once per Period for the highest total bandwidth |
+| DVB-40 | `Bitrate information`: Terminal which does not support UHD, but not UHD HFR video (max 39 Mbit/s) | done | MPD-DVB-TLS-BITRATE | reported once per Period for the highest total bandwidth |
+| DVB-41 | `Bitrate information`: Terminal which does supports UHD HFR video (max 51 Mbit/s) | done | MPD-DVB-TLS-BITRATE | reported once per Period for the highest total bandwidth |
+| DVB-42 | `Section 4.7.2`: The MPD SHOULD contain at least one UTCTiming element with the @schemeIdUri attribute set to [...] | done | MPD-DVB-UTCTIMING |  |
 | DVB-43 | `Section 4.8.3`: MPD@timeShiftBufferDepth shall not change | todo |  |  |
 | DVB-44 | `Section 4.8.3`: MPD@availabilityStartTime shall not change | todo |  |  |
 | DVB-45 | `Section 4.8.3`: MPD@maxSegmentDuration shall not change to a larger duration | todo |  |  |
@@ -364,10 +364,10 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-53 | `Section 4.8.3`: @contentType shall not change for a corresponding AdaptationSet or corresponding Representation | todo |  |  |
 | DVB-54 | `Section 4.8.3`: @codecs shall not change for a corresponding AdaptationSet or corresponding Representation | todo |  |  |
 | DVB-55 | `Section 4.8.3`: @lang shall not change for a corresponding AdaptationSet or corresponding Representation | todo |  |  |
-| DVB-56 | `Section 7.2.1.1`: A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles | todo |  |  |
-| DVB-57 | `Section 4.4`: Elements and attributes are expected to be present [..] to enable selection and switching. | todo |  |  |
-| DVB-58 | `Section 4.4`: @scanType SHALL be present [..] if interlaced pictures are used in any [..representation] | todo |  |  |
-| DVB-59 | `Section 11.2.2`: The frame rates used should be integer multiples of eachother | todo |  |  |
+| DVB-56 | `Section 7.2.1.1`: A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles | done | MPD-DVB-FONT |  |
+| DVB-57 | `Section 4.4`: Elements and attributes are expected to be present [..] to enable selection and switching. | done | MPD-DVB-VIDEO |  |
+| DVB-58 | `Section 4.4`: @scanType SHALL be present [..] if interlaced pictures are used in any [..representation] | done | MPD-DVB-VIDEO |  |
+| DVB-59 | `Section 11.2.2`: The frame rates used should be integer multiples of eachother | done | MPD-DVB-FRAMERATES |  |
 | DVB-60 | `5.4.6`: The value of the signalled ColourPrimaries Property in the MPD SHALL match … | todo |  |  |
 | DVB-61 | `5.4.6`: The value of the signalled MatrixCoefficients Property in the MPD SHALL match … | todo |  |  |
 | DVB-62 | `5.4.6`: The value of the signalled TransferCharacteristics Property in the MPD SHALL match … | todo |  |  |

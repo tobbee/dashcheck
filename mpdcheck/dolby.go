@@ -17,6 +17,7 @@ import (
 
 const (
 	profileDVB2017        = "urn:dvb:dash:profile:dvb-dash:2017"
+	profileDVB2014        = "urn:dvb:dash:profile:dvb-dash:2014"
 	schemePreselection    = "urn:mpeg:dash:preselection:2016"
 	schemeDolbyACC2014    = "tag:dolby.com,2014:dash:audio_channel_configuration:2011"
 	schemeDolbyACC2015    = "tag:dolby.com,2015:dash:audio_channel_configuration:2015"
@@ -132,8 +133,8 @@ func dolbyRules(md *m.MPD) []report.Finding {
 			asPath := fmt.Sprintf("%s/AdaptationSet[%d]", pPath, ai)
 			asP := effective(as.Profiles, mpdP)
 			f = append(f, ac4AdaptationSetRules(as, asPath)...)
-			if asP.has(profileDVB2017) && audioCodecRe.MatchString(as.Codecs+repCodecs(as)) {
-				f = append(f, dvbAudioRules(p, as, asPath)...)
+			if (asP.has(profileDVB2017) || asP.has(profileDVB2014)) && audioCodecRe.MatchString(as.Codecs+repCodecs(as)) {
+				f = append(f, dvbAudioRules(p, as, asPath, asP.has(profileDVB2017))...)
 			}
 			for _, rep := range as.Representations {
 				f = append(f, ac4RepresentationRules(as, rep, fmt.Sprintf("%s/Representation[%s]", asPath, rep.Id))...)
@@ -155,8 +156,9 @@ func repCodecs(as *m.AdaptationSetType) string {
 	return b.String()
 }
 
-// dvbAudioRules ports dvb-dash.sch asserts 1 to 5 and 9 to 13.
-func dvbAudioRules(p *m.Period, as *m.AdaptationSetType, asPath string) []report.Finding {
+// dvbAudioRules ports dvb-dash.sch asserts 1 to 5, which the DVB module also
+// applies to DVB-DASH 2014, and asserts 9 to 13 for DVB-DASH 2017.
+func dvbAudioRules(p *m.Period, as *m.AdaptationSetType, asPath string, dvb2017 bool) []report.Finding {
 	var f []report.Finding
 	loc := report.Location{Path: asPath}
 	if isAuxiliary(as) {
@@ -189,6 +191,9 @@ func dvbAudioRules(p *m.Period, as *m.AdaptationSetType, asPath string) []report
 		}
 	}
 	// SCH-DVB-9 to SCH-DVB-13
+	if !dvb2017 {
+		return f
+	}
 	f = append(f, dvbAC4Check(p, as.Codecs, as.AudioSamplingRate, &as.RepresentationBaseType, loc)...)
 	for _, r := range as.Representations {
 		if r.Codecs != "" {

@@ -301,14 +301,10 @@ func checkTemplateInit(t *m.SegmentTemplateType, loc report.Location) []report.F
 	return f
 }
 
-// SCH-43, SCH-50, SCH-51 (indexRangeExact) and SCH-52 (timeShiftBufferDepth).
-// dash-mpd reads an absent @indexRangeExact as false, so only "true" is detected.
+// SCH-52 (timeShiftBufferDepth). The @indexRangeExact rules are in rawStructureRules.
 func checkSegInfoAttrs(b *m.SegmentBaseType, t *m.SegmentTemplateType, l *m.SegmentListType, mpdTSBD time.Duration, loc report.Location) []report.Finding {
 	var f []report.Finding
 	check := func(name string, sb *m.SegmentBaseType) {
-		if sb.IndexRangeExact && sb.IndexRange == "" {
-			f = append(f, RuleIndexRangeExact.New(loc, "%s@indexRangeExact without @indexRange", name))
-		}
 		if tsbd := time.Duration(sb.TimeShiftBufferDepth); tsbd > 0 && mpdTSBD > 0 && tsbd < mpdTSBD {
 			f = append(f, RuleSegBaseTSBD.New(loc, "%s@timeShiftBufferDepth %v is smaller than MPD@timeShiftBufferDepth %v", name, tsbd, mpdTSBD))
 		}
@@ -524,5 +520,24 @@ func checkChaining(props []*m.DescriptorType, path string, mpdLevel bool) []repo
 			}
 		}
 	}
+	return f
+}
+
+// rawStructureRules runs rules that need the attributes as written.
+func rawStructureRules(raw *rawElem) []report.Finding {
+	if raw == nil {
+		return nil
+	}
+	var f []report.Finding
+	raw.walk(func(e *rawElem, _ []*rawElem) {
+		switch e.Name {
+		case "SegmentBase", "SegmentTemplate", "SegmentList":
+			// SCH-43, SCH-50, SCH-51
+			if e.has("indexRangeExact") && !e.has("indexRange") {
+				f = append(f, RuleIndexRangeExact.New(report.Location{Line: e.Line, Path: e.Name},
+					"%s@indexRangeExact without @indexRange", e.Name))
+			}
+		}
+	})
 	return f
 }
