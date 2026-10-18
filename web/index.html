@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DASH Checker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>DASH Checker</h1>
+    <p class="sub">Checks MPEG-DASH MPDs and segments, including live timing. Runs in your browser; nothing is uploaded.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <form id="form">
+        <label for="url" class="label">MPD URL</label>
+        <div class="row">
+          <input id="url" type="url" required placeholder="Paste an MPD URL, e.g. https://example.com/live/Manifest.mpd" autocomplete="url">
+          <button id="run" type="submit" class="primary">Check</button>
+        </div>
+        <div class="row secondary-row">
+          <label class="file-button">
+            <input id="folder" type="file" webkitdirectory multiple>
+            Check a local folder…
+          </label>
+          <select id="mpdSelect" hidden aria-label="MPD in the folder"></select>
+          <button id="runLocal" type="button" hidden>Check folder</button>
+          <button id="showRules" type="button" class="link">All rules</button>
+        </div>
+        <details class="options">
+          <summary>Options</summary>
+          <div class="grid">
+            <label for="maxSegments">Segments per Representation</label>
+            <input id="maxSegments" type="number" min="1" max="1000" value="4">
+            <label for="reference">Reference clock (http-iso)</label>
+            <input id="reference" type="url" value="https://time.akamai.com/?iso&amp;ms">
+          </div>
+        </details>
+        <p class="examples">Examples:
+          <a href="#" data-url="https://livesim2.dashif.org/livesim2/testpic_2s/Manifest.mpd">live $Number$</a> ·
+          <a href="#" data-url="https://livesim2.dashif.org/livesim2/segtimeline_1/testpic_2s/Manifest.mpd">live SegmentTimeline</a> ·
+          <a href="#" data-url="https://livesim2.dashif.org/livesim2/chunkdur_0.25/ato_7/testpic4_8s/Manifest300.mpd">low latency</a> ·
+          <a href="#" data-url="https://livesim2.dashif.org/livesim2/timeoffset_10/testpic_2s/Manifest.mpd">server clock 10 s ahead</a> ·
+          <a href="#" data-url="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd">on-demand (sidx)</a>
+        </p>
+      </form>
+    </section>
+
+    <section id="status" class="card" hidden>
+      <div class="progress"><div id="bar"></div></div>
+      <p id="statusText" class="muted"></p>
+    </section>
+
+    <section id="results" hidden>
+      <div class="card summary">
+        <dl id="summary"></dl>
+        <div class="chips" role="group" aria-label="Filter by severity">
+          <button class="chip error" data-sev="error" aria-pressed="true"><span id="nError">0</span> errors</button>
+          <button class="chip warning" data-sev="warning" aria-pressed="true"><span id="nWarning">0</span> warnings</button>
+          <button class="chip info" data-sev="info" aria-pressed="true"><span id="nInfo">0</span> info</button>
+        </div>
+      </div>
+      <div id="findings"></div>
+    </section>
+  </main>
+
+  <dialog id="rulesDialog">
+    <div class="dialog-head">
+      <h2>Rules</h2>
+      <button id="closeRules" type="button" aria-label="Close">×</button>
+    </div>
+    <div id="rulesList"></div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
