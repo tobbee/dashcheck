@@ -149,6 +149,10 @@ var (
 		ID: "ADDR-BASEURL", Severity: report.Error,
 		Desc: "BaseURL elements must be valid URLs",
 	})
+	RuleSingleSegment = report.Register(report.Rule{
+		ID: "ADDR-SINGLE", Severity: report.Info,
+		Desc: "Representations that consist of a single segment given only by BaseURL are not checked yet",
+	})
 	RuleNoAddressing = report.Register(report.Rule{
 		ID: "ADDR-NONE", Severity: report.Error,
 		Desc:    "Each Representation needs SegmentTemplate, SegmentList or SegmentBase addressing",
@@ -156,7 +160,7 @@ var (
 	})
 	RuleTemplate = report.Register(report.Rule{
 		ID: "ADDR-TEMPLATE", Severity: report.Error,
-		Desc:    "SegmentTemplate must have a consistent set of identifiers and timing attributes",
+		Desc:    "SegmentTemplate and SegmentList must have a consistent set of identifiers and timing attributes",
 		SpecRef: "ISO/IEC 23009-1 5.3.9.4",
 	})
 	RulePeriodTiming = report.Register(report.Rule{
@@ -306,6 +310,9 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 			r.InitURL = r.resolve(string(l.Initialization.SourceURL))
 			r.InitRange = l.Initialization.Range
 		}
+		if l.Duration != nil && l.SegmentTimeline != nil {
+			return []report.Finding{RuleTemplate.New(loc, "SegmentList has both @duration and SegmentTimeline")}
+		}
 		if l.Duration == nil && l.SegmentTimeline == nil && len(l.SegmentURL) > 1 {
 			return []report.Finding{RuleTemplate.New(loc, "SegmentList with several segments needs @duration or SegmentTimeline")}
 		}
@@ -332,6 +339,8 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 			return []report.Finding{RuleTemplate.New(loc, "SegmentBase without @indexRange is not supported")}
 		}
 		return nil
+	case len(rep.BaseURLs)+len(as.BaseURLs)+len(p.BaseURLs) > 0:
+		return []report.Finding{RuleSingleSegment.New(loc, "single segment at %s", r.BaseURL)}
 	default:
 		return []report.Finding{RuleNoAddressing.New(loc, "no SegmentTemplate, SegmentList or SegmentBase")}
 	}
@@ -570,12 +579,8 @@ func periodTimes(md *m.MPD) (starts, durs []float64, findings []report.Finding) 
 			durs[i] = starts[i+1] - starts[i]
 		case md.MediaPresentationDuration != nil:
 			durs[i] = time.Duration(*md.MediaPresentationDuration).Seconds() - starts[i]
-		case md.GetType() == "dynamic":
-			durs[i] = -1
 		default:
-			findings = append(findings, RulePeriodTiming.New(report.Location{Path: fmt.Sprintf("Period[%d]", i)},
-				"static MPD: last Period has no @duration and MPD has no @mediaPresentationDuration"))
-			durs[i] = -1
+			durs[i] = -1 // open-ended; mpdcheck reports static MPDs without a known end
 		}
 	}
 	return starts, durs, findings

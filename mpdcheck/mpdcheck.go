@@ -33,8 +33,8 @@ var (
 		Desc: "A dynamic MPD must have @availabilityStartTime", SpecRef: refMPD,
 	})
 	RuleDynPublishTime = report.Register(report.Rule{
-		ID: "MPD-DYN-PUBLISHTIME", Severity: report.Warning,
-		Desc: "A dynamic MPD should have @publishTime", SpecRef: refMPD,
+		ID: "MPD-DYN-PUBLISHTIME", Severity: report.Error,
+		Desc: "A dynamic MPD must have @publishTime", SpecRef: refMPD,
 	})
 	RuleDynTSBD = report.Register(report.Rule{
 		ID: "MPD-DYN-TSBD", Severity: report.Info,
@@ -117,6 +117,7 @@ func Check(data []byte, mpdURL string) (*m.MPD, []report.Finding) {
 		return nil, findings
 	}
 	findings = append(findings, Rules(md)...)
+	findings = append(findings, structureRules(md)...)
 	return md, findings
 }
 

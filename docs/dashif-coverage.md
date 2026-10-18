@@ -6,7 +6,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | Group | Checks | Done | Partial | Todo | n/a |
 |---|---:|---:|---:|---:|---:|
-| Schematron: schematron.sch | 123 | 11 | 4 | 108 | 0 |
+| Schematron: schematron.sch | 123 | 47 | 3 | 73 | 0 |
 | Schematron: dvb-dash.sch | 13 | 0 | 0 | 13 | 0 |
 | Schematron: ac4-generic.sch | 17 | 0 | 0 | 17 | 0 |
 | Module: Common | 5 | 2 | 0 | 2 | 1 |
@@ -18,82 +18,82 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **23** | **10** | **369** | **6** |
+| **Total** | **408** | **59** | **9** | **334** | **6** |
 
 ## Schematron: schematron.sch
 
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
 | SCH-1 | `dash:MPD`: If MPD is of type "dynamic" availabilityStartTime shall be defined. | done | MPD-DYN-AST |  |
-| SCH-2 | `dash:MPD`: If MPD is of type "dynamic" publishTime shall be defined. | partial | MPD-DYN-PUBLISHTIME | dashcheck reports a warning, upstream an error |
-| SCH-3 | `dash:MPD`: If mediaPresentationDuration is not defined for the MPD minimumUpdatePeriod shall be defined or vice versa. | todo |  |  |
-| SCH-4 | `dash:MPD`: At least one unknown profile string found. Known list in schematron file. | todo |  |  |
+| SCH-2 | `dash:MPD`: If MPD is of type "dynamic" publishTime shall be defined. | done | MPD-DYN-PUBLISHTIME |  |
+| SCH-3 | `dash:MPD`: If mediaPresentationDuration is not defined for the MPD minimumUpdatePeriod shall be defined or vice versa. | done | MPD-DURATION-MISSING | upstream ignores the last Period@duration; dashcheck uses the condition of SCH-6 |
+| SCH-4 | `dash:MPD`: At least one unknown profile string found. Known list in schematron file. | done | MPD-PROFILE-UNKNOWN | dashcheck reports info, upstream an error; dashcheck also knows DVB interop, CMAF, low-latency and newer MPEG profiles |
 | SCH-5 | `dash:MPD`: For On-Demand profile, the MPD @type shall be "static". | todo |  |  |
-| SCH-6 | `dash:MPD`: If minimumUpdatePeriod is not present and the last period does not include the duration attribute the mediaPresentationDuration must be present. | partial | ADDR-PERIOD | dashcheck reports when the end of the last Period of a static MPD cannot be derived |
+| SCH-6 | `dash:MPD`: If minimumUpdatePeriod is not present and the last period does not include the duration attribute the mediaPresentationDuration must be present. | done | MPD-DURATION-MISSING |  |
 | SCH-7 | `dash:MPD`: For ISO BMFF extended live profile, MPD@type shall be static. | todo |  |  |
 | SCH-8 | `dash:MPD`: For ISO BMFF extended on-demand profile, MPD@type shall be static. | todo |  |  |
-| SCH-9 | `dash:Period`: If bitstreamSwitching is set to true all bitstreamSwitching declarations for AdaptationSet within this Period shall not be set to false. | todo |  |  |
+| SCH-9 | `dash:Period`: If bitstreamSwitching is set to true all bitstreamSwitching declarations for AdaptationSet within this Period shall not be set to false. | done | MPD-BITSTREAMSWITCHING |  |
 | SCH-10 | `dash:Period`: The id of each Period shall be unique. | done | MPD-PERIOD-ID |  |
-| SCH-11 | `dash:Period`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Period. | todo |  |  |
+| SCH-11 | `dash:Period`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Period. | done | MPD-SEGINFO-MULTIPLE |  |
 | SCH-12 | `dash:Period`: If the MPD is dynamic the Period element shall have an id. | done | MPD-PERIOD-ID |  |
-| SCH-13 | `dash:Period`: At least one BaseURL, SegmentTemplate or SegmentList shall be defined in Period, AdaptationSet or Representation. | partial | ADDR-NONE | Representations with only a BaseURL (one segment) are not supported yet |
-| SCH-14 | `dash:Period`: If the duration attribute is set to zero, there should only be a single AdaptationSet present. | todo |  |  |
+| SCH-13 | `dash:Period`: At least one BaseURL, SegmentTemplate or SegmentList shall be defined in Period, AdaptationSet or Representation. | done | MPD-SEGINFO-NONE |  |
+| SCH-14 | `dash:Period`: If the duration attribute is set to zero, there should only be a single AdaptationSet present. | done | MPD-PERIOD-ZERO | upstream fails for any Period with @duration 0 and an AdaptationSet; dashcheck follows the message and warns when there is more than one |
 | SCH-15 | `dash:Period`: Neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here. | todo |  |  |
 | SCH-16 | `dash:Period`: For ISO BMFF extended live profile, Period.SegmentList shall not be present. | todo |  |  |
 | SCH-17 | `dash:Period`: For ISO BMFF extended live profile: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" | todo |  |  |
 | SCH-18 | `dash:Period`: For ISO BMFF extended on-demand profile, neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here. | todo |  |  |
 | SCH-19 | `dash:Period`: For ISO BMFF extended on-demand profile: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" | todo |  |  |
 | SCH-20 | `dash:AdaptationSet`: The id of each AdaptationSet within a Period shall be unique. | done | MPD-AS-ID |  |
-| SCH-21 | `dash:AdaptationSet`: Attributes from the AdaptationSet shall not be repeated in the descendanding ContentComponent elements. | todo |  |  |
-| SCH-22 | `dash:AdaptationSet`: Common attributes for AdaptationSet and Representation shall either be in one of the elements but not in both. | todo |  |  |
-| SCH-23 | `dash:AdaptationSet`: Each minimum value (minWidth, minHeight, minBandwidth) shall be larger than the maximum value. | todo |  |  |
-| SCH-24 | `dash:AdaptationSet`: The value of the bandwidth attribute shall be in the range defined by the AdaptationSet. | todo |  |  |
-| SCH-25 | `dash:AdaptationSet`: The value of the width attribute shall be in the range defined by the AdaptationSet. | todo |  |  |
-| SCH-26 | `dash:AdaptationSet`: The value of the height attribute shall be in the range defined by the AdaptationSet. | todo |  |  |
-| SCH-27 | `dash:AdaptationSet`: An AdaptationSet shall have at least one Representation element. | todo |  |  |
-| SCH-28 | `dash:AdaptationSet`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in AdaptationSet. | todo |  |  |
-| SCH-29 | `dash:AdaptationSet`: ISO/IEC 23009-1:2019, 5.3.3.1: The value of the frameRate attribute shall be in the range defined by the AdaptationSet. | todo |  |  |
+| SCH-21 | `dash:AdaptationSet`: Attributes from the AdaptationSet shall not be repeated in the descendanding ContentComponent elements. | done | MPD-CONTENTCOMPONENT |  |
+| SCH-22 | `dash:AdaptationSet`: Common attributes for AdaptationSet and Representation shall either be in one of the elements but not in both. | done | MPD-COMMON-BOTH | dashcheck reports a warning, upstream an error |
+| SCH-23 | `dash:AdaptationSet`: Each minimum value (minWidth, minHeight, minBandwidth) shall be larger than the maximum value. | done | MPD-AS-MINMAX |  |
+| SCH-24 | `dash:AdaptationSet`: The value of the bandwidth attribute shall be in the range defined by the AdaptationSet. | done | MPD-AS-RANGE |  |
+| SCH-25 | `dash:AdaptationSet`: The value of the width attribute shall be in the range defined by the AdaptationSet. | done | MPD-AS-RANGE | dashcheck also checks @minWidth |
+| SCH-26 | `dash:AdaptationSet`: The value of the height attribute shall be in the range defined by the AdaptationSet. | done | MPD-AS-RANGE | dashcheck also checks @minHeight |
+| SCH-27 | `dash:AdaptationSet`: An AdaptationSet shall have at least one Representation element. | done | MPD-AS-NOREP |  |
+| SCH-28 | `dash:AdaptationSet`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in AdaptationSet. | done | MPD-SEGINFO-MULTIPLE |  |
+| SCH-29 | `dash:AdaptationSet`: ISO/IEC 23009-1:2019, 5.3.3.1: The value of the frameRate attribute shall be in the range defined by the AdaptationSet. | done | MPD-AS-RANGE |  |
 | SCH-30 | `dash:AdaptationSet`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentAlignment' as true | todo |  |  |
 | SCH-31 | `dash:AdaptationSet`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 1 or 2 | todo |  |  |
 | SCH-32 | `dash:AdaptationSet`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 while not containing more than one Representation | todo |  |  |
-| SCH-33 | `dash:ContentComponent`: The id of each ContentComponent within an AdaptationSet shall be unique. | todo |  |  |
+| SCH-33 | `dash:ContentComponent`: The id of each ContentComponent within an AdaptationSet shall be unique. | done | MPD-CONTENTCOMPONENT |  |
 | SCH-34 | `dash:Representation`: Either the Representation or the containing AdaptationSet shall have the mimeType attribute. | done | MPD-MIMETYPE |  |
 | SCH-35 | `dash:Representation`: For live profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself. | todo |  |  |
-| SCH-36 | `dash:Representation`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Representation. | todo |  |  |
+| SCH-36 | `dash:Representation`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Representation. | done | MPD-SEGINFO-MULTIPLE |  |
 | SCH-37 | `dash:Representation`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an element that is not part of the HbbTV profile', i.e., found 'BaseURL' element | todo |  |  |
 | SCH-38 | `dash:Representation`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 with same value of mediaStreamStructureId in more than one Representation | todo |  |  |
 | SCH-39 | `dash:Representation`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - For HbbTV profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself as it is based on live profile | todo |  |  |
-| SCH-40 | `dash:SubRepresentation`: If the level attribute is defined for a SubRepresentation also the bandwidth attribute shall be defined. | todo |  |  |
-| SCH-41 | `dash:SegmentTemplate`: If more than one Media Segment is present the duration attribute or SegmentTimeline element shall be present. | partial | ADDR-TEMPLATE | checked on the effective SegmentTemplate of each Representation |
+| SCH-40 | `dash:SubRepresentation`: If the level attribute is defined for a SubRepresentation also the bandwidth attribute shall be defined. | done | MPD-SUBREP-BANDWIDTH |  |
+| SCH-41 | `dash:SegmentTemplate`: If more than one Media Segment is present the duration attribute or SegmentTimeline element shall be present. | done | ADDR-TEMPLATE | checked on the inherited SegmentTemplate of each Representation, so templates split over levels are not flagged as upstream does |
 | SCH-42 | `dash:SegmentTemplate`: Either the duration attribute or SegmentTimeline element shall be present but not both. | done | ADDR-TEMPLATE |  |
-| SCH-43 | `dash:SegmentTemplate`: If indexRange is not present indexRangeExact shall not be present. | todo |  |  |
-| SCH-44 | `dash:SegmentTemplate`: Neither $Number$ nor the $Time$ identifier shall be included in the initialization attribute. | todo |  |  |
-| SCH-45 | `dash:SegmentTemplate`: Neither $Number$ nor the $Time$ identifier shall be included in the bitstreamSwitching attribute. | todo |  |  |
+| SCH-43 | `dash:SegmentTemplate`: If indexRange is not present indexRangeExact shall not be present. | partial | MPD-INDEXRANGEEXACT | dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact="true" is detected |
+| SCH-44 | `dash:SegmentTemplate`: Neither $Number$ nor the $Time$ identifier shall be included in the initialization attribute. | done | MPD-TEMPLATE-INIT |  |
+| SCH-45 | `dash:SegmentTemplate`: Neither $Number$ nor the $Time$ identifier shall be included in the bitstreamSwitching attribute. | done | MPD-TEMPLATE-INIT |  |
 | SCH-46 | `dash:SegmentTemplate`: Only identifiers such as $Bandwidth$, $Time$, $RepresentationID$, or $Number$ shall be used. | done | ADDR-TEMPLATE | checked when @media is expanded |
 | SCH-47 | `dash:SegmentTemplate`: $RepresentationID$ shall not have a format tag. | done | ADDR-TEMPLATE |  |
 | SCH-48 | `dash:SegmentList`: If more than one Media Segment is present the duration attribute or SegmentTimeline element shall be present. | done | ADDR-TEMPLATE |  |
-| SCH-49 | `dash:SegmentList`: Either the duration attribute or SegmentTimeline element shall be present but not both. | todo |  |  |
-| SCH-50 | `dash:SegmentList`: If indexRange is not present indexRangeExact shall not be present. | todo |  |  |
-| SCH-51 | `dash:SegmentBase`: If indexRange is not present indexRangeExact shall not be present. | todo |  |  |
-| SCH-52 | `dash:SegmentBase`: The timeShiftBufferDepth shall not be smaller than timeShiftBufferDepth specified in the MPD element | todo |  |  |
+| SCH-49 | `dash:SegmentList`: Either the duration attribute or SegmentTimeline element shall be present but not both. | done | ADDR-TEMPLATE |  |
+| SCH-50 | `dash:SegmentList`: If indexRange is not present indexRangeExact shall not be present. | partial | MPD-INDEXRANGEEXACT | dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact="true" is detected |
+| SCH-51 | `dash:SegmentBase`: If indexRange is not present indexRangeExact shall not be present. | partial | MPD-INDEXRANGEEXACT | dash-mpd reads an absent @indexRangeExact as false, so only indexRangeExact="true" is detected |
+| SCH-52 | `dash:SegmentBase`: The timeShiftBufferDepth shall not be smaller than timeShiftBufferDepth specified in the MPD element | done | MPD-SEGBASE-TSBD | upstream tests @timeShiftbuffer (a typo), so its rule never fires |
 | SCH-53 | `dash:SegmentTimeline`: The d attribute of a SegmentTimeline shall not exceed the value give by the MPD maxSegmentDuration attribute. | done | MPD-MAXSEGDUR | upstream adds the duration components without unit conversion, so PT1M counts as 1 s |
-| SCH-54 | `dash:ProgramInformation`: If more than one ProgramInformation element is given each ProgramInformation element shall have a lang attribute. | todo |  |  |
-| SCH-55 | `dash:ContentProtection`: The value of ContentProtection shall be the 4CC contained in the Scheme Type Box | todo |  |  |
-| SCH-56 | `dash:ContentProtection`: The value of ContentProtection shall be the 4-digit lower-case hexadecimal Representation. | todo |  |  |
-| SCH-57 | `dash:Role`: The value of Role (role) shall be caption, subtitle, main, alternate, supplementary, commentary or dub. | todo |  |  |
-| SCH-58 | `dash:Role`: The value of Role (stereoid) shall start with 'l' or 'r'. | todo |  |  |
+| SCH-54 | `dash:ProgramInformation`: If more than one ProgramInformation element is given each ProgramInformation element shall have a lang attribute. | done | MPD-PROGINFO-LANG |  |
+| SCH-55 | `dash:ContentProtection`: The value of ContentProtection shall be the 4CC contained in the Scheme Type Box | done | MPD-CP-VALUE |  |
+| SCH-56 | `dash:ContentProtection`: The value of ContentProtection shall be the 4-digit lower-case hexadecimal Representation. | done | MPD-CP-VALUE |  |
+| SCH-57 | `dash:Role`: The value of Role (role) shall be caption, subtitle, main, alternate, supplementary, commentary or dub. | done | MPD-ROLE-VALUE | dashcheck accepts all role values of the 6th edition, upstream only the first seven |
+| SCH-58 | `dash:Role`: The value of Role (stereoid) shall start with 'l' or 'r'. | done | MPD-ROLE-VALUE |  |
 | SCH-59 | `dash:FramePacking`: The URI urn:mpeg:dash:14496:10:frame_packing_arrangement_type:2011 is used for Adaptation Sets or Representations that contain a video component that conforms to ISO/IEC 14496-10. | todo |  |  |
 | SCH-60 | `dash:FramePacking`: The URI urn:mpeg:dash:13818:1:stereo_video_format_type:2011 is used for Adaptation Sets or Representations that contain a video component that conforms to ISO/IEC 13818-1. | todo |  |  |
 | SCH-61 | `dash:FramePacking`: schemeIdUri for FramePacking descriptor shall be urn:mpeg:dash:14496:10:frame_packing_arrangement_type:2011 or urn:mpeg:dash:13818:1:stereo_video_format_type:2011. | todo |  |  |
 | SCH-62 | `dash:FramePacking`: The value of FramePacking shall be 0 to 6 as defined in ISO/IEC 23091(all parts). | todo |  |  |
 | SCH-63 | `dash:AudioChannelConfiguration`: If URI urn:mpeg:dash:outputChannelPositionList:2012 is used the value attribute shall be a space-delimited list as defined in ISO/IEC 23091(all parts). | todo |  |  |
-| SCH-64 | `dash:EventStream`: If href is not present actuate shall not be present. | todo |  |  |
-| SCH-65 | `dash:EventStream`: schemeIdUri shall be present. | todo |  |  |
-| SCH-66 | `dash:Subset`: The id of each Subset shall be unique. | todo |  |  |
+| SCH-64 | `dash:EventStream`: If href is not present actuate shall not be present. | done | MPD-EVENTSTREAM |  |
+| SCH-65 | `dash:EventStream`: schemeIdUri shall be present. | done | MPD-EVENTSTREAM |  |
+| SCH-66 | `dash:Subset`: The id of each Subset shall be unique. | done | MPD-SUBSET-ID |  |
 | SCH-67 | `dash:UTCTiming`: @schemeIdUri for UTCTiming is not one of the 7 different types specified. | done | MPD-UTCTIMING-SCHEME | dashcheck also warns for schemes that browsers cannot use |
-| SCH-68 | `dash:SupplementalProperty`: If schemeIdUri urn:mpeg:dash:chaining:2016 is used, then value attribute shall be composed of the comma separated parameters (no comma needed if only first parameter is present). | todo |  |  |
-| SCH-69 | `dash:SupplementalProperty`: MPD fallback chaining shall be signaled by Supplemental Descriptor on MPD level with schemeIdUri urn:mpeg:dash:fallback:2016. | todo |  |  |
-| SCH-70 | `dash:SupplementalProperty`: If schemeIdUri urn:mpeg:dash:fallback:2016 is used, then value attribute shall be composed of one URL or whitespace separated URLs. | todo |  |  |
+| SCH-68 | `dash:SupplementalProperty`: If schemeIdUri urn:mpeg:dash:chaining:2016 is used, then value attribute shall be composed of the comma separated parameters (no comma needed if only first parameter is present). | done | MPD-CHAINING |  |
+| SCH-69 | `dash:SupplementalProperty`: MPD fallback chaining shall be signaled by Supplemental Descriptor on MPD level with schemeIdUri urn:mpeg:dash:fallback:2016. | done | MPD-CHAINING |  |
+| SCH-70 | `dash:SupplementalProperty`: If schemeIdUri urn:mpeg:dash:fallback:2016 is used, then value attribute shall be composed of one URL or whitespace separated URLs. | done | MPD-CHAINING |  |
 | SCH-71 | `dash:Period`: When every Adaptation Set in a MPD has a SRD descriptor, at least one of this descriptor shall be a SupplementalProperty. | todo |  |  |
 | SCH-72 | `dash:Period`: For a given source_id of the @value attribute, at least one of the EssentialProperty or SupplementalProperty in the containing Period shall specify the optional parameters W and H. | todo |  |  |
 | SCH-73 | `dash:Period`: For a given source_id of the @value attribute, if two SRD elements (indistinctively EssentialProperty or SupplementalProperty) explicitly specify a different pair of values for the optional parameters (W,H) then all the remaining SRD element shall explicitly specify a pair of values for (W,H) too. | todo |  |  |
