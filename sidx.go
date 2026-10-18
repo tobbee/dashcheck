@@ -37,10 +37,9 @@ func (rc *repChecker) sidxSegments(ctx context.Context) ([]addressing.Segment, e
 	if !ok {
 		return nil, fmt.Errorf("index range %s holds %s, not sidx", rep.IndexRange, box.Type())
 	}
-	if segcheck.IsIOPOnDemand(rep) {
-		if n := countSidx(first, resp.Body); n != 1 {
-			rc.add(segcheck.RuleIOPSidx.New(rep.Loc(), "%d sidx boxes in @indexRange %s", n, rep.IndexRange))
-		}
+	rc.sidx, rc.nSidx = sidx, countSidx(first, resp.Body)
+	if segcheck.IsIOPOnDemand(rep) && rc.nSidx != 1 {
+		rc.add(segcheck.RuleIOPSidx.New(rep.Loc(), "%d sidx boxes in @indexRange %s", rc.nSidx, rep.IndexRange))
 	}
 	if sidx.Timescale == 0 {
 		return nil, fmt.Errorf("sidx timescale is 0")

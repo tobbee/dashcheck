@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/clock"
 	"github.com/tobbee/dashcheck/fetch"
@@ -218,6 +219,8 @@ type repChecker struct {
 	findings []report.Finding
 	checked  int
 	init     *segcheck.Init
+	sidx     *mp4.SidxBox // index of a SegmentBase Representation
+	nSidx    int          // number of sidx boxes in its index range
 }
 
 func (rc *repChecker) add(f ...report.Finding) { rc.findings = append(rc.findings, f...) }
@@ -261,13 +264,20 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		segs = rc.selectStatic(segs)
 	}
 	var prevSeg addressing.Segment
-	var prev *segcheck.Media
-	for _, seg := range segs {
+	var prev, first *segcheck.Media
+	for i, seg := range segs {
 		media := rc.checkSegment(ctx, init, seg, seg == last)
+		if i == 0 {
+			first = media
+		}
 		if prev != nil && media != nil && consecutive(prevSeg, seg) {
 			rc.add(segcheck.CheckContinuity(prev, media, init, rep, seg)...)
 		}
 		prev, prevSeg = media, seg
+	}
+	if rc.sidx != nil {
+		// The index range precedes the media by construction of the sidx offsets.
+		rc.add(segcheck.CheckSelfInitSidx(rep, init, rc.sidx, rc.nSidx, true, first)...)
 	}
 	if rc.dynamic && len(segs) > 0 {
 		rc.probeEarly(ctx, segs[len(segs)-1])

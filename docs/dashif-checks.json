@@ -3543,9 +3543,12 @@
    "source": "LowLatency/Segments/ChunkedAdaptation.php",
    "context": "9.X.4.5",
    "text": "Each Segment SHALL Conform to a CMAF Fragment",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "partial",
+   "rules": [
+    "SEG-STRUCTURE",
+    "SEG-CMAF-DATAOFFSET"
+   ],
+   "note": "upstream always passes; dashcheck applies the CMAF fragment rules to tracks declared as CMAF"
   },
   {
    "id": "LL-13",
@@ -3554,15 +3557,17 @@
    "text": "EMSG box constraints",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "upstream always passes (not implemented)"
   },
   {
    "id": "LL-14",
    "source": "LowLatency/Segments/ChunkedAdaptation.php",
    "context": "9.X.4.5",
    "text": "Each Segment MAY (and typically SHOULD) contain more than one CMAF chunk",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-CHUNKS"
+   ],
    "note": ""
   },
   {
@@ -3603,9 +3608,11 @@
    "source": "LowLatency/Segments/ChunkedCrossAdaptation.php",
    "context": "9.X.4.5",
    "text": "One of the following should hold",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-LL-DURATION-RECOMMENDED"
+   ],
+   "note": "upstream's second option is a stub that returns false; dashcheck warns when a chunked segment exceeds the target latency"
   },
   {
    "id": "LL-19",
@@ -3668,8 +3675,10 @@
    "source": "LowLatency/Segments/DASHProfile.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.4",
    "text": "If the content is protected, a ContentProtection element SHALL be present and set appropriately",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-PROTECTION"
+   ],
    "note": ""
   },
   {
@@ -3677,8 +3686,10 @@
    "source": "LowLatency/Segments/DASHProfile.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.4",
    "text": "@timescale SHALL correspond to the timescale in the 'mdhd' box",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-TIMESCALE"
+   ],
    "note": ""
   },
   {
@@ -3697,9 +3708,9 @@
    "source": "LowLatency/Segments/DASHProfile.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "Event message streams MAY be signalled with InbandEventStream elements",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "a permissive (MAY) statement"
   },
   {
    "id": "LL-28",
@@ -3708,7 +3719,7 @@
    "text": "All 'emsg' boxes inserted [..] after the start of the first CMAF chunk …",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "upstream always passes (not implemented)"
   },
   {
    "id": "LL-29",
@@ -3771,8 +3782,10 @@
    "source": "LowLatency/Segments/SegmentAdaptation.php",
    "context": "9.X.4.4",
    "text": "Each Segment SHOULD include only a single 'moof' box",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SINGLEMOOF"
+   ],
    "note": ""
   },
   {
@@ -3780,8 +3793,10 @@
    "source": "LowLatency/Segments/SegmentAdaptation.php",
    "context": "9.X.4.4",
    "text": "A segment with a single 'moof' box may carry an 'smds' brand",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SMDS"
+   ],
    "note": ""
   },
   {
@@ -3789,9 +3804,12 @@
    "source": "LowLatency/Segments/SegmentAdaptation.php",
    "context": "9.X.4.4",
    "text": "A segment SHALL NOT exceed 50% and SHOULD not exceed 30% of the tareget latency",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-LL-DURATION",
+    "SEG-LL-DURATION-RECOMMENDED"
+   ],
+   "note": "upstream inverts both limits"
   },
   {
    "id": "LL-37",
@@ -3863,8 +3881,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "Exactly one 'sidx' box shall be used",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3872,17 +3892,21 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box shall be placed before any 'moof' boxes",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
+   "note": "with SegmentBase the index range precedes the media by construction"
   },
   {
    "id": "LL-45",
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box reference_ID SHALL be equal to the track id",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3890,8 +3914,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box timescale SHALL be identical to the one in the 'mdhd' box",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3899,8 +3925,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box earliest presentation time SHALL match the segment EPT",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3908,17 +3936,21 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box reference count SHALL match the number of 'mmof' boxes",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "partial",
+   "rules": [
+    "SEG-CMAF-SIDX"
+   ],
+   "note": "dashcheck checks that each fetched subsegment of a CMAF track is one fragment, not the total count"
   },
   {
    "id": "LL-49",
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box reference_type shall be set to 0",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3926,8 +3958,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box startwithsap shall be set to 1",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3935,8 +3969,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box sapType shall be set to 1 or 2",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3944,8 +3980,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box sapDeltaTime shall be set to 0",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3953,8 +3991,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The baseMediaDecodeTime shall be 0",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {
@@ -3962,8 +4002,10 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The list of compatible brands SHALL contain 'dash'",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-LL-SIDX"
+   ],
    "note": ""
   },
   {

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -102,6 +103,11 @@ type Rep struct {
 	ATO         float64   // availabilityTimeOffset in seconds
 	ATC         *bool     // effective availabilityTimeComplete, nil if absent
 	Media       string    // effective SegmentTemplate@media
+
+	LowLatency           bool    // the MPD uses low-latency profile or chunked delivery
+	TargetLatency        float64 // ServiceDescription target latency in seconds, 0 if absent
+	HasContentProtection bool    // ContentProtection on the Representation or AdaptationSet
+	SegmentProfiles      string  // effective @segmentProfiles
 
 	tmpl  *m.SegmentTemplateType
 	list  *m.SegmentListType
@@ -222,39 +228,70 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 				rBase, f := resolveBase(asBase, rep.BaseURLs, rPath)
 				findings = append(findings, f...)
 				r := &Rep{
-					ID:                 rep.Id,
-					Path:               rPath,
-					PeriodID:           p.Id,
-					PeriodIndex:        pi,
-					ASPath:             asPath,
-					ASCodecs:           as.Codecs,
-					Profiles:           splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
-					BitstreamSwitching: boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),
-					ContentType:        string(as.ContentType),
-					MimeType:           first(rep.MimeType, as.MimeType),
-					Codecs:             first(rep.Codecs, as.Codecs),
-					Bandwidth:          rep.Bandwidth,
-					Width:              firstU(rep.Width, as.Width),
-					Height:             firstU(rep.Height, as.Height),
-					FrameRate:          first(string(rep.FrameRate), string(as.FrameRate)),
-					Sar:                first(string(rep.Sar), string(as.Sar)),
-					AudioSamplingRate:  firstVec(rep.AudioSamplingRate, as.AudioSamplingRate),
-					StartWithSAP:       firstU(rep.StartWithSAP, as.StartWithSAP),
-					BaseURL:            rBase.String(),
-					Dynamic:            dynamic,
-					AST:                ast,
-					PeriodStart:        starts[pi],
-					PeriodDur:          durs[pi],
-					TSBD:               tsbd,
-					ATO:                baseURLATO(md.BaseURL, p.BaseURLs, as.BaseURLs, rep.BaseURLs),
-					repID:              rep.Id,
+					ID:                   rep.Id,
+					Path:                 rPath,
+					PeriodID:             p.Id,
+					PeriodIndex:          pi,
+					ASPath:               asPath,
+					ASCodecs:             as.Codecs,
+					TargetLatency:        targetLatency(md),
+					HasContentProtection: len(rep.ContentProtections)+len(as.ContentProtections) > 0,
+					SegmentProfiles:      first(listOf4CC(rep.SegmentProfiles), listOf4CC(as.SegmentProfiles)),
+					Profiles:             splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
+					BitstreamSwitching:   boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),
+					ContentType:          string(as.ContentType),
+					MimeType:             first(rep.MimeType, as.MimeType),
+					Codecs:               first(rep.Codecs, as.Codecs),
+					Bandwidth:            rep.Bandwidth,
+					Width:                firstU(rep.Width, as.Width),
+					Height:               firstU(rep.Height, as.Height),
+					FrameRate:            first(string(rep.FrameRate), string(as.FrameRate)),
+					Sar:                  first(string(rep.Sar), string(as.Sar)),
+					AudioSamplingRate:    firstVec(rep.AudioSamplingRate, as.AudioSamplingRate),
+					StartWithSAP:         firstU(rep.StartWithSAP, as.StartWithSAP),
+					BaseURL:              rBase.String(),
+					Dynamic:              dynamic,
+					AST:                  ast,
+					PeriodStart:          starts[pi],
+					PeriodDur:            durs[pi],
+					TSBD:                 tsbd,
+					ATO:                  baseURLATO(md.BaseURL, p.BaseURLs, as.BaseURLs, rep.BaseURLs),
+					repID:                rep.Id,
 				}
 				findings = append(findings, r.setAddressing(p, as, rep)...)
 				reps = append(reps, r)
 			}
 		}
 	}
+	lowLatency := dynamic && slices.Contains(splitProfiles(string(md.Profiles)), ProfileLowLatency)
+	for _, r := range reps {
+		lowLatency = lowLatency || (dynamic && (r.ATO > 0 || (r.ATC != nil && !*r.ATC)))
+	}
+	for _, r := range reps {
+		r.LowLatency = lowLatency
+	}
 	return reps, findings
+}
+
+// ProfileLowLatency is the DASH-IF low-latency profile.
+const ProfileLowLatency = "http://www.dashif.org/guidelines/low-latency-live-v5"
+
+func targetLatency(md *m.MPD) float64 {
+	for _, sd := range md.ServiceDescription {
+		for _, l := range sd.Latencies {
+			if l.Target != nil {
+				return float64(*l.Target) / 1000
+			}
+		}
+	}
+	return 0
+}
+
+func listOf4CC(v *m.ListOf4CCType) string {
+	if v == nil {
+		return ""
+	}
+	return string(*v)
 }
 
 func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.RepresentationType) []report.Finding {

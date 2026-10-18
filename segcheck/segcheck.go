@@ -181,6 +181,7 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	init.CMAF = isCMAF(rep, init.Brands)
 	f = append(f, crossCheckInit(rep, init, info, loc)...)
 	f = append(f, iopInitRules(rep, init, loc)...)
+	f = append(f, llInitRules(rep, init, loc)...)
 	f = append(f, cmafInitRules(rep, init, info, mf.Init.Children, loc)...)
 	init.cmafBrand = mediaProfileBrand(init.Brands, init.Handler, info.fourCC)
 	if init.CMAF {
@@ -317,6 +318,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	f = append(f, checkTiming(rep, seg, media, mediaTS, last, loc)...)
 	f = append(f, iopMediaRules(rep, init, media, loc)...)
 	f = append(f, cmafMediaRules(rep, init, mf, loc)...)
+	f = append(f, llMediaRules(rep, media, mf, mediaTS, last, loc)...)
 	return media, f
 }
 
