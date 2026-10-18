@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
+	"github.com/Eyevinn/mp4ff/hevc"
 	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/addressing"
 )
@@ -71,6 +72,105 @@ func TestDVBInit(t *testing.T) {
 		info := sampleEntryInfo{fourCC: "hvc1", width: uint16(v.width), height: uint16(v.height), video: v}
 		if f := dvbInitRules(&video, &Init{}, info, video.Loc()); len(f) != c.want {
 			t.Errorf("hevc %s: got %v", c.desc, f)
+		}
+	}
+}
+
+func TestDVBHEVCSignalling(t *testing.T) {
+	_, video := dvbReps(t)
+	video.Profiles = []string{profileDVB2017}
+	video.Codecs = "hvc1.2.4.L153.90"
+	// Main 10, level 5.1, progressive frames, BT.709 in the VUI.
+	good := videoConfig{codec: "hevc", hasConfig: true, hasSPS: true, profile: 2, compatibility: 1 << 29, level: 153,
+		bitDepth: 10, chromaBitDepth: 10, constraints: 0x900000000000, width: 3840, height: 2160,
+		colourDescribed: true, primaries: 1, transfer: 1, matrix: 1}
+	essential := func(scheme, value string) *m.DescriptorType {
+		return &m.DescriptorType{SchemeIdUri: m.AnyURI(scheme), Value: value}
+	}
+	hdr := func(transfer string) []*m.DescriptorType {
+		return []*m.DescriptorType{essential(schemeColourPrimaries, "9"), essential(schemeMatrixCoeffs, "9"), essential(schemeTransferCharacter, transfer)}
+	}
+	cases := []struct {
+		desc   string
+		codecs string
+		mutate func(v *videoConfig, r *addressing.Rep)
+		want   []string
+	}{
+		{"valid", "", nil, nil},
+		{"higher level signalled", "hvc1.2.4.L156.90", nil, nil},
+		{"constraints left out", "hvc1.2.4.L153", nil, nil},
+		{"lower level signalled", "hvc1.2.4.L123.90", nil, []string{"SEG-DVB-HEVC-CODECS"}},
+		{"main tier signalled for high tier", "", func(v *videoConfig, r *addressing.Rep) { v.highTier = true }, []string{"SEG-DVB-HEVC-CODECS"}},
+		{"wrong profile", "hvc1.1.6.L153.90", nil, []string{"SEG-DVB-HEVC-CODECS"}},
+		{"constraint not met", "hvc1.2.4.L153.B0", nil, []string{"SEG-DVB-HEVC-CODECS"}},
+		{"bad form", "hvc1.2.4", nil, []string{"SEG-DVB-HEVC-CODECS"}},
+		{"colour matches", "", func(v *videoConfig, r *addressing.Rep) {
+			r.Essentials = []*m.DescriptorType{essential(schemeColourPrimaries, "1")}
+		}, nil},
+		{"colour mismatch", "", func(v *videoConfig, r *addressing.Rep) {
+			r.Essentials = []*m.DescriptorType{essential(schemeColourPrimaries, "9")}
+		}, []string{"SEG-DVB-COLOUR"}},
+		{"no colour in VUI", "", func(v *videoConfig, r *addressing.Rep) {
+			v.colourDescribed = false
+			r.Essentials = []*m.DescriptorType{essential(schemeMatrixCoeffs, "1")}
+		}, []string{"SEG-DVB-COLOUR"}},
+		{"PQ10 signalled", "", func(v *videoConfig, r *addressing.Rep) {
+			v.primaries, v.matrix, v.transfer = 9, 9, 16
+			r.Essentials = hdr("16")
+		}, nil},
+		{"PQ10 without descriptors", "", func(v *videoConfig, r *addressing.Rep) { v.primaries, v.matrix, v.transfer = 9, 9, 16 }, []string{"SEG-DVB-PQ10"}},
+		{"PQ10 with 2014 profile", "", func(v *videoConfig, r *addressing.Rep) {
+			v.primaries, v.matrix, v.transfer = 9, 9, 16
+			r.Essentials, r.Profiles = hdr("16"), []string{profileDVB2014}
+		}, []string{"SEG-DVB-PQ10"}},
+		{"HLG10 signalled", "", func(v *videoConfig, r *addressing.Rep) {
+			v.primaries, v.matrix, v.transfer, v.hlgSEI = 9, 9, 14, true
+			r.Essentials, r.Supplementals = hdr("14"), []*m.DescriptorType{essential(schemeTransferCharacter, "18")}
+		}, nil},
+		{"HLG10 without supplemental", "", func(v *videoConfig, r *addressing.Rep) {
+			v.primaries, v.matrix, v.transfer, v.hlgSEI = 9, 9, 14, true
+			r.Essentials = hdr("14")
+		}, []string{"SEG-DVB-HLG10"}},
+		{"BT.2020 SDR", "", func(v *videoConfig, r *addressing.Rep) { v.primaries, v.matrix, v.transfer = 9, 9, 14 }, nil},
+		{"SEI array first", "", func(v *videoConfig, r *addressing.Rep) { v.seiArrayEarly = true }, []string{"SEG-DVB-SEI"}},
+	}
+	for _, c := range cases {
+		v, r := good, video
+		if c.codecs != "" {
+			r.Codecs = c.codecs
+		}
+		if c.mutate != nil {
+			c.mutate(&v, &r)
+		}
+		info := sampleEntryInfo{fourCC: "hvc1", width: uint16(v.width), height: uint16(v.height), video: v}
+		if got := ruleIDs(dvbHEVCInitRules(&r, info, r.Loc())); !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.desc, got, c.want)
+		}
+	}
+}
+
+func TestSEIOrder(t *testing.T) {
+	nalu := func(typ hevc.NaluType) []byte { return []byte{0, 0, 0, 2, byte(typ) << 1, 1} }
+	sample := func(types ...hevc.NaluType) []byte {
+		var b []byte
+		for _, typ := range types {
+			b = append(b, nalu(typ)...)
+		}
+		return b
+	}
+	const vcl, aud = hevc.NaluType(1), hevc.NALU_AUD
+	cases := []struct {
+		types []hevc.NaluType
+		bad   bool
+	}{
+		{[]hevc.NaluType{aud, hevc.NALU_VPS, hevc.NALU_SPS, hevc.NALU_PPS, hevc.NALU_SEI_PREFIX, vcl, vcl, hevc.NALU_SEI_SUFFIX}, false},
+		{[]hevc.NaluType{hevc.NALU_SEI_PREFIX, hevc.NALU_SPS, vcl}, true},
+		{[]hevc.NaluType{vcl, hevc.NALU_SEI_PREFIX, vcl}, true},
+		{[]hevc.NaluType{vcl, hevc.NALU_SEI_SUFFIX, vcl}, true},
+	}
+	for i, c := range cases {
+		if got := seiOrder(sample(c.types...)); (got != "") != c.bad {
+			t.Errorf("case %d: got %q", i, got)
 		}
 	}
 }

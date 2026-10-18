@@ -13,12 +13,12 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
-| Module: DVB | 103 | 84 | 1 | 16 | 2 |
+| Module: DVB | 103 | 91 | 1 | 9 | 2 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **320** | **5** | **71** | **12** |
+| **Total** | **408** | **327** | **5** | **64** | **12** |
 
 ## Schematron: schematron.sch
 
@@ -368,17 +368,17 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-57 | `Section 4.4`: Elements and attributes are expected to be present [..] to enable selection and switching. | done | MPD-DVB-VIDEO |  |
 | DVB-58 | `Section 4.4`: @scanType SHALL be present [..] if interlaced pictures are used in any [..representation] | done | MPD-DVB-VIDEO |  |
 | DVB-59 | `Section 11.2.2`: The frame rates used should be integer multiples of eachother | done | MPD-DVB-FRAMERATES |  |
-| DVB-60 | `5.4.6`: The value of the signalled ColourPrimaries Property in the MPD SHALL match … | todo |  |  |
-| DVB-61 | `5.4.6`: The value of the signalled MatrixCoefficients Property in the MPD SHALL match … | todo |  |  |
-| DVB-62 | `5.4.6`: The value of the signalled TransferCharacteristics Property in the MPD SHALL match … | todo |  |  |
-| DVB-63 | `5.4.7`: Use of HLG10 within in an AdapationSet shall be signalled according to this section | todo |  |  |
-| DVB-64 | `5.4.8`: Use of PQ10 within in an AdapationSet shall be signalled according to this section | todo |  |  |
-| DVB-65 | `5.2.2`: The value of the @codecs attribute shall be set in accordance with ISO/IEC 14496-15 | todo |  |  |
-| DVB-66 | `5.2.2`: The value of the signalled ColourPrimaries Property in the MPD SHALL match … | todo |  |  |
-| DVB-67 | `5.2.2`: The value of the signalled MatrixCoefficients Property in the MPD SHALL match … | todo |  |  |
-| DVB-68 | `5.2.2`: The value of the signalled TransferCharacteristics Property in the MPD SHALL match … | todo |  |  |
-| DVB-69 | `5.2.6`: Use of HLG10 within in an AdapationSet shall be signalled according to this section | todo |  |  |
-| DVB-70 | `5.2.7`: Use of PQ10 within in an AdapationSet shall be signalled according to this section | todo |  |  |
+| DVB-60 | `5.4.6`: The value of the signalled ColourPrimaries Property in the MPD SHALL match … | todo |  | AVS3: mp4ff does not parse AVS3 configuration records |
+| DVB-61 | `5.4.6`: The value of the signalled MatrixCoefficients Property in the MPD SHALL match … | todo |  | AVS3: mp4ff does not parse AVS3 configuration records |
+| DVB-62 | `5.4.6`: The value of the signalled TransferCharacteristics Property in the MPD SHALL match … | todo |  | AVS3: mp4ff does not parse AVS3 configuration records |
+| DVB-63 | `5.4.7`: Use of HLG10 within in an AdapationSet shall be signalled according to this section | todo |  | AVS3: mp4ff does not parse AVS3 configuration records |
+| DVB-64 | `5.4.8`: Use of PQ10 within in an AdapationSet shall be signalled according to this section | todo |  | AVS3: mp4ff does not parse AVS3 configuration records |
+| DVB-65 | `5.2.2`: The value of the @codecs attribute shall be set in accordance with ISO/IEC 14496-15 | done | SEG-DVB-HEVC-CODECS | @codecs may signal more capability than needed (5.2.2), so dashcheck checks that the media meets the signalled profile, tier, level and constraints; upstream requires an exact prefix (bug 45) |
+| DVB-66 | `5.2.2`: The value of the signalled ColourPrimaries Property in the MPD SHALL match … | done | SEG-DVB-COLOUR | compared with the VUI, as 5.2.5 says; upstream uses the 'colr' box (bug 45) |
+| DVB-67 | `5.2.2`: The value of the signalled MatrixCoefficients Property in the MPD SHALL match … | done | SEG-DVB-COLOUR | compared with the VUI (bug 45) |
+| DVB-68 | `5.2.2`: The value of the signalled TransferCharacteristics Property in the MPD SHALL match … | done | SEG-DVB-COLOUR | compared with the VUI; the SupplementalProperty may differ (bug 45) |
+| DVB-69 | `5.2.6`: Use of HLG10 within in an AdapationSet shall be signalled according to this section | done | SEG-DVB-HLG10 | HLG10 found from VUI 9/14/9 and the alternative_transfer_characteristics SEI (hvcC or first sample) or the SupplementalProperty; a warning because MPDs for BT.2020 players may omit signalling; upstream never fails (bug 45) |
+| DVB-70 | `5.2.7`: Use of PQ10 within in an AdapationSet shall be signalled according to this section | done | SEG-DVB-PQ10 | PQ10 found from VUI transfer_characteristics 16; upstream never fails (bug 45) |
 | DVB-71 | `Section 4.3`: The 'moof' box shall contain only one 'traf' box | done | SEG-DVB-TRAF |  |
 | DVB-72 | `Section 4.3`: The segment shall contain only one 'sidx' box | done | SEG-DVB-SIDX | checked on the sidx boxes in @indexRange |
 | DVB-73 | `5.1.2`: Content SHOULD be offered using 'avc3' or 'avc4' | done | SEG-DVB-AVC3 |  |
@@ -404,8 +404,8 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-93 | Profile used for HEVC must be suported by the specification | done | SEG-DVB-HEVC | checked per Period with DVB-91; upstream rejects Main profile above 1080p although hevc_uhd allows it (bug 41) |
 | DVB-94 | Level used for HEVC must be suported by the specification | done | SEG-DVB-HEVC | checked per Period with DVB-91; levels 4.1 up to 1080p, 5.2 up to 2160p and 6.1 up to 4320p; upstream rejects 5.2 and 6.1 (bug 41) |
 | DVB-95 | `5.1.2`: Segments shall start with SAP types 1 or 2 | done | SEG-DVB-SAP, SEG-SAP |  |
-| DVB-96 | `5.2.4`: For HEVC streams, SEI messages are placed according to ETSI TS 101 154 - L.3.3.8 | todo |  |  |
-| DVB-97 | `5.2.4`: For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1 | todo |  |  |
+| DVB-96 | `5.2.4`: For HEVC streams, SEI messages are placed according to ETSI TS 101 154 - L.3.3.8 | done | SEG-DVB-SEI | all samples of the checked segments, and the hvcC array order of 5.2.4; upstream skips hvc1 (bug 46) |
+| DVB-97 | `5.2.4`: For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1 | todo |  | VVC: mp4ff does not parse VVC NAL units yet |
 | DVB-98 | `Subtitles`: For subtitle media, handler SHALL be 'subt' | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |
 | DVB-99 | `Subtitles`: Sample entry shall be 'stpp' | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |
 | DVB-100 | `Subtitles`: Sample entry shall countain a namespace | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |

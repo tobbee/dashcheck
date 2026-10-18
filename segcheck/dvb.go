@@ -128,6 +128,7 @@ func dvbInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, loc rep
 			}
 		}
 	case fourCC == "hvc1" || fourCC == "hev1":
+		f = append(f, dvbHEVCInitRules(rep, info, loc)...)
 		// DVB-92 (upstream only checks for 8 or 10 bits)
 		if v.hasConfig {
 			const progressive, interlaced, frameOnly = 1 << 47, 1 << 46, 1 << 44
@@ -190,6 +191,9 @@ func dvbMediaRules(rep *addressing.Rep, init *Init, media *Media, mf *mp4.File, 
 		return nil
 	}
 	var f []report.Finding
+	if init.Video.codec == "hevc" {
+		f = append(f, dvbHEVCMediaRules(rep, init, mf, loc)...)
+	}
 	// DVB-71
 	for _, ms := range mf.Segments {
 		for fi, frag := range ms.Fragments {

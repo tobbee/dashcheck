@@ -109,6 +109,8 @@ type Rep struct {
 	HasContentProtection bool                       // ContentProtection on the Representation or AdaptationSet
 	ContentProtections   []*m.ContentProtectionType // effective ContentProtection elements
 	AudioChannelConfigs  []*m.DescriptorType        // effective AudioChannelConfiguration elements
+	Essentials           []*m.DescriptorType        // EssentialProperty elements of the AdaptationSet and Representation
+	Supplementals        []*m.DescriptorType        // SupplementalProperty elements of the AdaptationSet and Representation
 	SegmentProfiles      string                     // effective @segmentProfiles
 
 	tmpl  *m.SegmentTemplateType
@@ -240,6 +242,8 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 					HasContentProtection: len(rep.ContentProtections)+len(as.ContentProtections) > 0,
 					ContentProtections:   firstCPs(rep.ContentProtections, as.ContentProtections),
 					AudioChannelConfigs:  firstDescs(rep.AudioChannelConfigurations, as.AudioChannelConfigurations),
+					Essentials:           slices.Concat(as.EssentialProperties, rep.EssentialProperties),
+					Supplementals:        slices.Concat(as.SupplementalProperties, rep.SupplementalProperties),
 					SegmentProfiles:      first(listOf4CC(rep.SegmentProfiles), listOf4CC(as.SegmentProfiles)),
 					Profiles:             splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
 					BitstreamSwitching:   boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),

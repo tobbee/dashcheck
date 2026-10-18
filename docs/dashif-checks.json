@@ -2832,7 +2832,7 @@
    "text": "The value of the signalled ColourPrimaries Property in the MPD SHALL match …",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "AVS3: mp4ff does not parse AVS3 configuration records"
   },
   {
    "id": "DVB-61",
@@ -2841,7 +2841,7 @@
    "text": "The value of the signalled MatrixCoefficients Property in the MPD SHALL match …",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "AVS3: mp4ff does not parse AVS3 configuration records"
   },
   {
    "id": "DVB-62",
@@ -2850,7 +2850,7 @@
    "text": "The value of the signalled TransferCharacteristics Property in the MPD SHALL match …",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "AVS3: mp4ff does not parse AVS3 configuration records"
   },
   {
    "id": "DVB-63",
@@ -2859,7 +2859,7 @@
    "text": "Use of HLG10 within in an AdapationSet shall be signalled according to this section",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "AVS3: mp4ff does not parse AVS3 configuration records"
   },
   {
    "id": "DVB-64",
@@ -2868,61 +2868,73 @@
    "text": "Use of PQ10 within in an AdapationSet shall be signalled according to this section",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "AVS3: mp4ff does not parse AVS3 configuration records"
   },
   {
    "id": "DVB-65",
    "source": "DVB/Segments/BitStream.php",
    "context": "5.2.2",
    "text": "The value of the @codecs attribute shall be set in accordance with ISO/IEC 14496-15",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-HEVC-CODECS"
+   ],
+   "note": "@codecs may signal more capability than needed (5.2.2), so dashcheck checks that the media meets the signalled profile, tier, level and constraints; upstream requires an exact prefix (bug 45)"
   },
   {
    "id": "DVB-66",
    "source": "DVB/Segments/BitStream.php",
    "context": "5.2.2",
    "text": "The value of the signalled ColourPrimaries Property in the MPD SHALL match …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-COLOUR"
+   ],
+   "note": "compared with the VUI, as 5.2.5 says; upstream uses the 'colr' box (bug 45)"
   },
   {
    "id": "DVB-67",
    "source": "DVB/Segments/BitStream.php",
    "context": "5.2.2",
    "text": "The value of the signalled MatrixCoefficients Property in the MPD SHALL match …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-COLOUR"
+   ],
+   "note": "compared with the VUI (bug 45)"
   },
   {
    "id": "DVB-68",
    "source": "DVB/Segments/BitStream.php",
    "context": "5.2.2",
    "text": "The value of the signalled TransferCharacteristics Property in the MPD SHALL match …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-COLOUR"
+   ],
+   "note": "compared with the VUI; the SupplementalProperty may differ (bug 45)"
   },
   {
    "id": "DVB-69",
    "source": "DVB/Segments/BitStream.php",
    "context": "5.2.6",
    "text": "Use of HLG10 within in an AdapationSet shall be signalled according to this section",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-HLG10"
+   ],
+   "note": "HLG10 found from VUI 9/14/9 and the alternative_transfer_characteristics SEI (hvcC or first sample) or the SupplementalProperty; a warning because MPDs for BT.2020 players may omit signalling; upstream never fails (bug 45)"
   },
   {
    "id": "DVB-70",
    "source": "DVB/Segments/BitStream.php",
    "context": "5.2.7",
    "text": "Use of PQ10 within in an AdapationSet shall be signalled according to this section",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-PQ10"
+   ],
+   "note": "PQ10 found from VUI transfer_characteristics 16; upstream never fails (bug 45)"
   },
   {
    "id": "DVB-71",
@@ -3199,9 +3211,11 @@
    "source": "DVB/Segments/SEILocations.php",
    "context": "5.2.4",
    "text": "For HEVC streams, SEI messages are placed according to ETSI TS 101 154 - L.3.3.8",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SEI"
+   ],
+   "note": "all samples of the checked segments, and the hvcC array order of 5.2.4; upstream skips hvc1 (bug 46)"
   },
   {
    "id": "DVB-97",
@@ -3210,7 +3224,7 @@
    "text": "For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1",
    "status": "todo",
    "rules": [],
-   "note": ""
+   "note": "VVC: mp4ff does not parse VVC NAL units yet"
   },
   {
    "id": "DVB-98",

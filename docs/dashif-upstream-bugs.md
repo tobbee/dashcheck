@@ -57,6 +57,8 @@ yet unless stated.
 | 42 | SCH-7 | Requires a static MPD for the extended live profile | Verified in spec |
 | 43 | DVB ContentProtection | Outdated cenc-only scheme rule and a pssh SHOULD not in the spec | Verified in spec |
 | 44 | DVB UpdateConstraints | Several MPD update checks can never fail, others fail wrongly | Verified in code |
+| 45 | DVB BitStream | Colour checked against 'colr' instead of the VUI; HDR checks never fail; @codecs too strict | Verified in code and spec |
+| 46 | DVB SEILocations | hvc1 never checked; prefix SEI after VCL not found | Verified in code |
 
 ## Manifest handling
 
@@ -652,6 +654,55 @@ fail.
 **Fix:** Compare the AssetIdentifier and AudioChannelConfiguration elements,
 parse durations, pair Representations by @id within a Period and
 AdaptationSets through their Representations, and add the missing checks.
+
+### 45. The DVB HEVC signalling checks do not follow TS 103 285 5.2
+
+**Where:** [BitStream.php](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/BitStream.php)
+
+**Problem:**
+
+- The ColourPrimaries, MatrixCoefficients and TransferCharacteristics
+  descriptors are compared with the 'colr' box
+  ([L238](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/BitStream.php#L238)); TS 103 285 V1.4.1 clause 5.2.5 says they
+  shall match the VUI. Without a 'colr' box the check fails even when the VUI
+  matches.
+- The HLG10 and PQ10 checks (5.2.6, 5.2.7) report information when the
+  signalling is missing and pass when it is present
+  ([L165](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/BitStream.php#L165), [L227](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/BitStream.php#L227)), so they
+  never fail. They also do not look at the bitstream to see whether HLG10 or
+  PQ10 is used.
+- The @codecs check requires the string derived from the decoder
+  configuration to be a prefix of @codecs ([L333](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/BitStream.php#L333)),
+  but clause 5.2.2 says the values
+  "are not required to indicate the minimum capabilities", so a higher level
+  is allowed.
+- Only `hev1` and `hvc1` sample entries are checked
+  ([L86](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/BitStream.php#L86)), so encrypted HEVC (`encv`) is skipped.
+
+**Effect:** False failures for streams without 'colr' and for @codecs with a
+higher level; missing HDR signalling is never reported.
+
+**Fix:** Compare with the VUI colour description, detect PQ10 from
+transfer_characteristics 16 and HLG10 from 14 plus the
+alternative_transfer_characteristics SEI, fail missing signalling, and accept
+@codecs values that signal at least the media's profile, tier and level.
+
+### 46. The DVB SEI location check skips hvc1 and misses prefix SEI after VCL
+
+**Where:** [SEILocations.php#L52](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/SEILocations.php#L52) and
+[#L91](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/SEILocations.php#L91)
+
+**Problem:** The HEVC check runs for the sample entries `hev1` and `hevc`;
+`hevc` does not exist and `hvc1` is missing. ETSI TS 101 154 L.3.3.8 requires
+prefix SEI before the first VCL NAL unit, which is not checked. A suffix SEI
+fails if any NAL unit except SEI follows it, also non-VCL units such as end of
+sequence or filler data, while the rule is only about VCL NAL units.
+
+**Effect:** hvc1 streams are not checked, prefix SEI between VCL NAL units
+pass, and valid suffix SEI before end of sequence fail.
+
+**Fix:** Check `hvc1`, fail a prefix SEI after a VCL NAL unit, and compare
+suffix SEI positions only with VCL NAL units.
 
 ## Other projects
 

@@ -9,6 +9,7 @@ import (
 	"github.com/Eyevinn/mp4ff/avc"
 	"github.com/Eyevinn/mp4ff/hevc"
 	"github.com/Eyevinn/mp4ff/mp4"
+	"github.com/Eyevinn/mp4ff/sei"
 )
 
 // sampleEntryInfo is what the checks need from the first sample entry.
@@ -42,6 +43,9 @@ type videoConfig struct {
 	bitDepth       int    // HEVC luma bit depth
 	chromaBitDepth int    // HEVC chroma bit depth
 	width, height  int    // from the sample entry
+	profileSpace   int    // HEVC general_profile_space
+	seiArrayEarly  bool   // HEVC: an SEI array comes before a parameter set array in hvcC
+	hlgSEI         bool   // HEVC: hvcC has an alternative_transfer_characteristics SEI preferring HLG
 
 	// From the SPS video usability information.
 	colourDescribed             bool
@@ -162,11 +166,22 @@ func describeVideoConfig(se *mp4.VisualSampleEntryBox) videoConfig {
 			constraints:    se.HvcC.GeneralConstraintIndicatorFlags,
 			compatibility:  se.HvcC.GeneralProfileCompatibilityFlags,
 		}
-		var sei []string
+		vc.profileSpace = int(se.HvcC.GeneralProfileSpace)
+		var seiHex []string
 		for _, n := range append(se.HvcC.GetNalusForType(hevc.NALU_SEI_PREFIX), se.HvcC.GetNalusForType(hevc.NALU_SEI_SUFFIX)...) {
-			sei = append(sei, fmt.Sprintf("%x", n))
+			seiHex = append(seiHex, fmt.Sprintf("%x", n))
+			vc.hlgSEI = vc.hlgSEI || hasHLGPreference(n)
 		}
-		vc.seiNalus = strings.Join(sei, ",")
+		vc.seiNalus = strings.Join(seiHex, ",")
+		seenSEI := false
+		for i := range se.HvcC.NaluArrays {
+			switch se.HvcC.NaluArrays[i].NaluType() {
+			case hevc.NALU_SEI_PREFIX, hevc.NALU_SEI_SUFFIX:
+				seenSEI = true
+			case hevc.NALU_VPS, hevc.NALU_SPS, hevc.NALU_PPS:
+				vc.seiArrayEarly = vc.seiArrayEarly || seenSEI
+			}
+		}
 		if spss := se.HvcC.GetNalusForType(hevc.NALU_SPS); len(spss) > 0 {
 			if sps, err := hevc.ParseSPSNALUnit(spss[0]); err == nil {
 				vc.spsSummary = hevcSPSSummary(sps)
@@ -273,6 +288,22 @@ func implicitAAC(mpdCodecs, derived string) bool {
 		return derived == "mp4a.40.2"
 	case "mp4a.40.29":
 		return derived == "mp4a.40.2" || derived == "mp4a.40.5"
+	}
+	return false
+}
+
+// hasHLGPreference reports whether an HEVC SEI NAL unit has an
+// alternative_transfer_characteristics message with
+// preferred_transfer_characteristics 18 (BT.2100 HLG).
+func hasHLGPreference(nalu []byte) bool {
+	if len(nalu) < 3 {
+		return false
+	}
+	msgs, _ := sei.ExtractSEIData(bytes.NewReader(nalu[2:]))
+	for _, m := range msgs {
+		if m.Type() == sei.SEIAlternativeTransferCharacteristicsType && len(m.Payload()) > 0 && m.Payload()[0] == 18 {
+			return true
+		}
 	}
 	return false
 }
