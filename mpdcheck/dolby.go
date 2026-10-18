@@ -149,7 +149,8 @@ func dolbyRules(md *m.MPD) []report.Finding {
 func repCodecs(as *m.AdaptationSetType) string {
 	var b strings.Builder
 	for _, r := range as.Representations {
-		b.WriteString(r.Codecs + " ")
+		b.WriteString(r.Codecs)
+		b.WriteByte(' ')
 	}
 	return b.String()
 }

@@ -12,13 +12,13 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: Common | 5 | 2 | 0 | 2 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
-| Module: Low Latency | 54 | 5 | 3 | 46 | 0 |
+| Module: Low Latency | 54 | 28 | 2 | 24 | 0 |
 | Module: DVB | 103 | 2 | 3 | 98 | 0 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **195** | **9** | **196** | **8** |
+| **Total** | **408** | **218** | **8** | **174** | **8** |
 
 ## Schematron: schematron.sch
 
@@ -250,45 +250,45 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
-| LL-1 | `9.X.4.1`: Media presentation offering Low Latency SHOULD be signalled with … | todo |  |  |
-| LL-2 | `9.X.4.2`: Inband Event streams carrying MPD validity expiration events SHOULD be present | todo |  |  |
-| LL-3 | `9.X.4.2`: If Inband Event streams carrying MPD validity expiration events are used, @value SHALL be set to 1 | todo |  |  |
-| LL-4 | `9.X.4.2`: LeapSecondInformation SHOULD be provided | todo |  |  |
-| LL-5 | `9.X.4.3`: At least one ProducerTimeReference SHALL be present | todo |  |  |
-| LL-6 | `9.X.4.3`: Each ProducerTimeReference SHALL have a unique @id | todo |  |  |
-| LL-7 | `9.X.4.3`: Either (constrained) SegmentTemplate or SegmentTimeline shall be present | todo |  |  |
-| LL-8 | `9.X.4.3`: SegmentTemplate will have @duration set and have @media containing $Number$ | todo |  |  |
-| LL-9 | `9.X.4.3`: SegmentTimeline will have @media containing $Number$ and $Time$ | todo |  |  |
-| LL-10 | `9.X.4.2`: At least one valid ServiceDescription element SHALL be present | todo |  |  |
-| LL-11 | `9.X.4.2`: At least one UTC timing description element SHALL be present with a correct @schemIdUri | partial | MPD-DYN-UTCTIMING, MPD-UTCTIMING-SCHEME | not tied to low-latency signalling |
+| LL-1 | `9.X.4.1`: Media presentation offering Low Latency SHOULD be signalled with … | done | MPD-LL-PROFILE | dashcheck detects low latency from @availabilityTimeOffset and @availabilityTimeComplete |
+| LL-2 | `9.X.4.2`: Inband Event streams carrying MPD validity expiration events SHOULD be present | done | MPD-LL-INBAND |  |
+| LL-3 | `9.X.4.2`: If Inband Event streams carrying MPD validity expiration events are used, @value SHALL be set to 1 | done | MPD-LL-INBAND-VALUE |  |
+| LL-4 | `9.X.4.2`: LeapSecondInformation SHOULD be provided | done | MPD-LL-LEAPSECOND | upstream looks up a misspelled element name and always fails |
+| LL-5 | `9.X.4.3`: At least one ProducerTimeReference SHALL be present | done | MPD-LL-PRT | an absent @type means encoder; dash-mpd cannot tell an absent @presentationTime from 0 |
+| LL-6 | `9.X.4.3`: Each ProducerTimeReference SHALL have a unique @id | done | MPD-LL-PRT | dashcheck requires unique ids within an AdaptationSet, upstream across the MPD |
+| LL-7 | `9.X.4.3`: Either (constrained) SegmentTemplate or SegmentTimeline shall be present | done | MPD-LL-ADDRESSING |  |
+| LL-8 | `9.X.4.3`: SegmentTemplate will have @duration set and have @media containing $Number$ | done | MPD-LL-ADDRESSING |  |
+| LL-9 | `9.X.4.3`: SegmentTimeline will have @media containing $Number$ and $Time$ | done | MPD-LL-ADDRESSING | upstream reads @media from SegmentTimeline and requires both $Number$ and $Time$, so it never passes |
+| LL-10 | `9.X.4.2`: At least one valid ServiceDescription element SHALL be present | done | MPD-LL-SERVICEDESC, MPD-LL-SERVICEDESC-OPTIONAL |  |
+| LL-11 | `9.X.4.2`: At least one UTC timing description element SHALL be present with a correct @schemIdUri | done | MPD-LL-UTCTIMING |  |
 | LL-12 | `9.X.4.5`: Each Segment SHALL Conform to a CMAF Fragment | todo |  |  |
 | LL-13 | `9.X.4.5`: EMSG box constraints | todo |  |  |
 | LL-14 | `9.X.4.5`: Each Segment MAY (and typically SHOULD) contain more than one CMAF chunk | todo |  |  |
-| LL-15 | `9.X.4.5`: A Resync element SHOULD be assigned to each Representation | todo |  |  |
-| LL-16 | `9.X.4.5`: @availabilityTimeOffset SHALL be present for each represention | todo |  |  |
-| LL-17 | `9.X.4.5`: @availabilityTimeComple SHALL be present and set to 'FALSE' for each representation | todo |  |  |
+| LL-15 | `9.X.4.5`: A Resync element SHOULD be assigned to each Representation | done | MPD-LL-RESYNC |  |
+| LL-16 | `9.X.4.5`: @availabilityTimeOffset SHALL be present for each represention | done | MPD-LL-CHUNKED |  |
+| LL-17 | `9.X.4.5`: @availabilityTimeComple SHALL be present and set to 'FALSE' for each representation | done | MPD-LL-CHUNKED | upstream compares with FALSE and always fails |
 | LL-18 | `9.X.4.5`: One of the following should hold | todo |  |  |
 | LL-19 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @contentType shall correspond with the hdlr type | done | XCHK-HANDLER |  |
-| LL-20 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @mimeType SHALL be either '&lt;@contentType&gt;/mp4' or &lt;#contentType&gt;/mp4, profiles='cmfc' | todo |  |  |
+| LL-20 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @mimeType SHALL be either '&lt;@contentType&gt;/mp4' or &lt;#contentType&gt;/mp4, profiles='cmfc' | done | MPD-LL-MIMETYPE |  |
 | LL-21 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @maxWidth SHOULD correspond to the width in the 'tkhd' box | partial | XCHK-SIZE | dashcheck compares @width with the sample entry |
 | LL-22 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @maxHeight SHOULD correspond to the height in the 'tkhd' box | partial | XCHK-SIZE | dashcheck compares @height with the sample entry |
 | LL-23 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @codecs shall correspond with the sample descriptor type | done | XCHK-CODECS, XCHK-CODECS-DETAIL |  |
 | LL-24 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: If the content is protected, a ContentProtection element SHALL be present and set appropriately | todo |  |  |
 | LL-25 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @timescale SHALL correspond to the timescale in the 'mdhd' box | todo |  |  |
-| LL-26 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: Either segmentAlignment or subsegmentAlignment SHALL be set | todo |  |  |
+| LL-26 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: Either segmentAlignment or subsegmentAlignment SHALL be set | done | MPD-LL-ALIGNMENT |  |
 | LL-27 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: Event message streams MAY be signalled with InbandEventStream elements | todo |  |  |
 | LL-28 | `9.X.4.5`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | todo |  |  |
-| LL-29 | `9.X.4.5`: Resync element SHALL/SHOULD be present (conditional) | todo |  |  |
-| LL-30 | `9.X.4.5`: Resync element type SHALL be valid | todo |  |  |
-| LL-31 | `9.X.4.5`: Resync element @marker SHALL be 'true' | todo |  |  |
-| LL-32 | `9.X.4.5`: Resync element @dT SHOULD be lower than half the latency, and SHALL not exceed the target latency | todo |  |  |
-| LL-33 | `9.X.4.5`: @qualityRanking should be used | todo |  |  |
+| LL-29 | `9.X.4.5`: Resync element SHALL/SHOULD be present (conditional) | done | MPD-LL-RESYNC |  |
+| LL-30 | `9.X.4.5`: Resync element type SHALL be valid | done | MPD-LL-RESYNC-VALUE |  |
+| LL-31 | `9.X.4.5`: Resync element @marker SHALL be 'true' | done | MPD-LL-RESYNC-VALUE | upstream compares with TRUE and always fails |
+| LL-32 | `9.X.4.5`: Resync element @dT SHOULD be lower than half the latency, and SHALL not exceed the target latency | done | MPD-LL-RESYNC, MPD-LL-RESYNC-VALUE | dashcheck converts @dT from the Representation timescale to milliseconds; upstream compares the raw value |
+| LL-33 | `9.X.4.5`: @qualityRanking should be used | done | MPD-LL-RESYNC |  |
 | LL-34 | `9.X.4.4`: Each Segment SHOULD include only a single 'moof' box | todo |  |  |
 | LL-35 | `9.X.4.4`: A segment with a single 'moof' box may carry an 'smds' brand | todo |  |  |
 | LL-36 | `9.X.4.4`: A segment SHALL NOT exceed 50% and SHOULD not exceed 30% of the tareget latency | todo |  |  |
-| LL-37 | `9.X.4.3`: A Low Latency Adaptation Set SHALL either be a Segment or a Chunked Set | todo |  |  |
+| LL-37 | `9.X.4.3`: A Low Latency Adaptation Set SHALL either be a Segment or a Chunked Set | done | MPD-LL-MODE |  |
 | LL-38 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The tolerance for the EPT relative to the first stegment SHALL NOT exceed 50% | done | SEG-EPT | for all number-based streams, not only low latency |
-| LL-39 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: If an 'S' elements and it predecessor share the same duration, they SHOULD be combined | todo |  |  |
+| LL-39 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: If an 'S' elements and it predecessor share the same duration, they SHOULD be combined | done | MPD-LL-TIMELINE-REPEAT | S elements with @t start a new run and are not flagged |
 | LL-40 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: If each chunk is an addressable object, '@k SHALL be present in the SegmentTimeline | todo |  |  |
 | LL-41 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 't' attribute SHALL correspond to the EPT of the corresponding segment | done | SEG-EPT, SEG-EPT-CTO | for all SegmentTimeline streams, not only low latency |
 | LL-42 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'd' attribute SHALL correspond to the duration of the corresponding segment | done | SEG-DURATION | for all SegmentTimeline streams, not only low latency |

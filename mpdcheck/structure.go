@@ -15,8 +15,6 @@ import (
 // Schematron rules (schematron.sch). The SCH numbers in the comments refer to
 // docs/dashif-checks.json.
 
-const refDescriptors = "ISO/IEC 23009-1 5.8"
-
 var (
 	RuleDurationMissing = report.Register(report.Rule{
 		ID: "MPD-DURATION-MISSING", Severity: report.Error,

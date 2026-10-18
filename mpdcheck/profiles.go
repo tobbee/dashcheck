@@ -211,7 +211,7 @@ func profileRules(md *m.MPD) []report.Finding {
 		for ai, as := range p.AdaptationSets {
 			asPath := fmt.Sprintf("%s/AdaptationSet[%d]", pPath, ai)
 			asP := effective(as.Profiles, mpdP)
-			f = append(f, adaptationSetProfileRules(md, p, ai, as, asP, mpdP, iop, asPath)...)
+			f = append(f, adaptationSetProfileRules(p, ai, as, asP, mpdP, iop, asPath)...)
 			for ri, rep := range as.Representations {
 				repP := effective(rep.Profiles, asP)
 				f = append(f, representationProfileRules(p, as, ri, rep, repP, asP, mpdP, iop, asPath)...)
@@ -221,7 +221,7 @@ func profileRules(md *m.MPD) []report.Finding {
 	return f
 }
 
-func adaptationSetProfileRules(md *m.MPD, p *m.Period, ai int, as *m.AdaptationSetType, asP, mpdP profiles, iop bool, asPath string) []report.Finding {
+func adaptationSetProfileRules(p *m.Period, ai int, as *m.AdaptationSetType, asP, mpdP profiles, iop bool, asPath string) []report.Finding {
 	var f []report.Finding
 	loc := report.Location{Path: asPath}
 	// SCH-100

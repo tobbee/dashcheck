@@ -121,6 +121,7 @@ func Check(data []byte, mpdURL string) (*m.MPD, []report.Finding) {
 	findings = append(findings, profileRules(md)...)
 	findings = append(findings, descriptorRules(md)...)
 	findings = append(findings, dolbyRules(md)...)
+	findings = append(findings, lowLatencyRules(md)...)
 	return md, findings
 }
 

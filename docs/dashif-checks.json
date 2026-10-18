@@ -3421,17 +3421,21 @@
    "source": "LowLatency/MPD.php",
    "context": "9.X.4.1",
    "text": "Media presentation offering Low Latency SHOULD be signalled with …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-PROFILE"
+   ],
+   "note": "dashcheck detects low latency from @availabilityTimeOffset and @availabilityTimeComplete"
   },
   {
    "id": "LL-2",
    "source": "LowLatency/MPD/InbandEventStream.php",
    "context": "9.X.4.2",
    "text": "Inband Event streams carrying MPD validity expiration events SHOULD be present",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-INBAND"
+   ],
    "note": ""
   },
   {
@@ -3439,8 +3443,10 @@
    "source": "LowLatency/MPD/InbandEventStream.php",
    "context": "9.X.4.2",
    "text": "If Inband Event streams carrying MPD validity expiration events are used, @value SHALL be set to 1",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-INBAND-VALUE"
+   ],
    "note": ""
   },
   {
@@ -3448,35 +3454,43 @@
    "source": "LowLatency/MPD/LeapSecond.php",
    "context": "9.X.4.2",
    "text": "LeapSecondInformation SHOULD be provided",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-LEAPSECOND"
+   ],
+   "note": "upstream looks up a misspelled element name and always fails"
   },
   {
    "id": "LL-5",
    "source": "LowLatency/MPD/ProducerReferenceTime.php",
    "context": "9.X.4.3",
    "text": "At least one ProducerTimeReference SHALL be present",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-PRT"
+   ],
+   "note": "an absent @type means encoder; dash-mpd cannot tell an absent @presentationTime from 0"
   },
   {
    "id": "LL-6",
    "source": "LowLatency/MPD/ProducerReferenceTime.php",
    "context": "9.X.4.3",
    "text": "Each ProducerTimeReference SHALL have a unique @id",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-PRT"
+   ],
+   "note": "dashcheck requires unique ids within an AdaptationSet, upstream across the MPD"
   },
   {
    "id": "LL-7",
    "source": "LowLatency/MPD/SegmentURL.php",
    "context": "9.X.4.3",
    "text": "Either (constrained) SegmentTemplate or SegmentTimeline shall be present",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-ADDRESSING"
+   ],
    "note": ""
   },
   {
@@ -3484,8 +3498,10 @@
    "source": "LowLatency/MPD/SegmentURL.php",
    "context": "9.X.4.3",
    "text": "SegmentTemplate will have @duration set and have @media containing $Number$",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-ADDRESSING"
+   ],
    "note": ""
   },
   {
@@ -3493,17 +3509,22 @@
    "source": "LowLatency/MPD/SegmentURL.php",
    "context": "9.X.4.3",
    "text": "SegmentTimeline will have @media containing $Number$ and $Time$",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-ADDRESSING"
+   ],
+   "note": "upstream reads @media from SegmentTimeline and requires both $Number$ and $Time$, so it never passes"
   },
   {
    "id": "LL-10",
    "source": "LowLatency/MPD/ServiceDescription.php",
    "context": "9.X.4.2",
    "text": "At least one valid ServiceDescription element SHALL be present",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-SERVICEDESC",
+    "MPD-LL-SERVICEDESC-OPTIONAL"
+   ],
    "note": ""
   },
   {
@@ -3511,12 +3532,11 @@
    "source": "LowLatency/MPD/UTCTiming.php",
    "context": "9.X.4.2",
    "text": "At least one UTC timing description element SHALL be present with a correct @schemIdUri",
-   "status": "partial",
+   "status": "done",
    "rules": [
-    "MPD-DYN-UTCTIMING",
-    "MPD-UTCTIMING-SCHEME"
+    "MPD-LL-UTCTIMING"
    ],
-   "note": "not tied to low-latency signalling"
+   "note": ""
   },
   {
    "id": "LL-12",
@@ -3550,8 +3570,10 @@
    "source": "LowLatency/Segments/ChunkedAdaptation.php",
    "context": "9.X.4.5",
    "text": "A Resync element SHOULD be assigned to each Representation",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-RESYNC"
+   ],
    "note": ""
   },
   {
@@ -3559,8 +3581,10 @@
    "source": "LowLatency/Segments/ChunkedAdaptation.php",
    "context": "9.X.4.5",
    "text": "@availabilityTimeOffset SHALL be present for each represention",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-CHUNKED"
+   ],
    "note": ""
   },
   {
@@ -3568,9 +3592,11 @@
    "source": "LowLatency/Segments/ChunkedAdaptation.php",
    "context": "9.X.4.5",
    "text": "@availabilityTimeComple SHALL be present and set to 'FALSE' for each representation",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-CHUNKED"
+   ],
+   "note": "upstream compares with FALSE and always fails"
   },
   {
    "id": "LL-18",
@@ -3597,8 +3623,10 @@
    "source": "LowLatency/Segments/DASHProfile.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.4",
    "text": "@mimeType SHALL be either '<@contentType>/mp4' or <#contentType>/mp4, profiles='cmfc'",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-MIMETYPE"
+   ],
    "note": ""
   },
   {
@@ -3658,8 +3686,10 @@
    "source": "LowLatency/Segments/DASHProfile.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.4",
    "text": "Either segmentAlignment or subsegmentAlignment SHALL be set",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-ALIGNMENT"
+   ],
    "note": ""
   },
   {
@@ -3685,8 +3715,10 @@
    "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
    "context": "9.X.4.5",
    "text": "Resync element SHALL/SHOULD be present (conditional)",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-RESYNC"
+   ],
    "note": ""
   },
   {
@@ -3694,8 +3726,10 @@
    "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
    "context": "9.X.4.5",
    "text": "Resync element type SHALL be valid",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-RESYNC-VALUE"
+   ],
    "note": ""
   },
   {
@@ -3703,26 +3737,33 @@
    "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
    "context": "9.X.4.5",
    "text": "Resync element @marker SHALL be 'true'",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-RESYNC-VALUE"
+   ],
+   "note": "upstream compares with TRUE and always fails"
   },
   {
    "id": "LL-32",
    "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
    "context": "9.X.4.5",
    "text": "Resync element @dT SHOULD be lower than half the latency, and SHALL not exceed the target latency",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-RESYNC",
+    "MPD-LL-RESYNC-VALUE"
+   ],
+   "note": "dashcheck converts @dT from the Representation timescale to milliseconds; upstream compares the raw value"
   },
   {
    "id": "LL-33",
    "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
    "context": "9.X.4.5",
    "text": "@qualityRanking should be used",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-RESYNC"
+   ],
    "note": ""
   },
   {
@@ -3757,8 +3798,10 @@
    "source": "LowLatency/Segments/SegmentOrChunked.php",
    "context": "9.X.4.3",
    "text": "A Low Latency Adaptation Set SHALL either be a Segment or a Chunked Set",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-LL-MODE"
+   ],
    "note": ""
   },
   {
@@ -3777,9 +3820,11 @@
    "source": "LowLatency/Segments/SegmentTiming.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "If an 'S' elements and it predecessor share the same duration, they SHOULD be combined",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-TIMELINE-REPEAT"
+   ],
+   "note": "S elements with @t start a new run and are not flagged"
   },
   {
    "id": "LL-40",

@@ -100,6 +100,8 @@ type Rep struct {
 	PeriodDur   float64   // seconds, or -1 if open-ended
 	TSBD        float64   // timeShiftBufferDepth in seconds, +Inf if absent
 	ATO         float64   // availabilityTimeOffset in seconds
+	ATC         *bool     // effective availabilityTimeComplete, nil if absent
+	Media       string    // effective SegmentTemplate@media
 
 	tmpl  *m.SegmentTemplateType
 	list  *m.SegmentListType
@@ -269,6 +271,8 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 			r.PTO = *t.PresentationTimeOffset
 		}
 		r.ATO += float64(t.AvailabilityTimeOffset)
+		r.ATC = t.AvailabilityTimeComplete
+		r.Media = t.Media
 		hasTime := containsID(t.Media, "Time")
 		hasNumber := containsID(t.Media, "Number")
 		switch {
