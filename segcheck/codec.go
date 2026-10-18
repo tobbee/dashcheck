@@ -14,21 +14,22 @@ import (
 
 // sampleEntryInfo is what the checks need from the first sample entry.
 type sampleEntryInfo struct {
-	fourCC     string // original format for encrypted content
-	encrypted  bool
-	scheme     string // protection scheme type, e.g. cenc or cbcs
-	colrNclx   bool   // a colr box of type nclx is present
-	defaultKID string // tenc default KID of encrypted content
-	tenc       *mp4.TencBox
-	stppNS     string // namespace of an stpp sample entry
-	codec      string // full codecs string if it can be derived, else the 4CC
-	derived    bool   // codec is a full derived string
-	width      uint16
-	height     uint16
-	sampleRate uint32
-	channels   uint16
-	video      videoConfig
-	aac        *audioConfig
+	fourCC        string // original format for encrypted content
+	encrypted     bool
+	scheme        string // protection scheme type, e.g. cenc or cbcs
+	colrNclx      bool   // a colr box of type nclx is present
+	defaultKID    string // tenc default KID of encrypted content
+	tenc          *mp4.TencBox
+	noAudioConfig string // the missing audio decoder configuration box, if any
+	stppNS        string // namespace of an stpp sample entry
+	codec         string // full codecs string if it can be derived, else the 4CC
+	derived       bool   // codec is a full derived string
+	width         uint16
+	height        uint16
+	sampleRate    uint32
+	channels      uint16
+	video         videoConfig
+	aac           *audioConfig
 }
 
 // videoConfig describes an AVC or HEVC decoder configuration record.
@@ -105,6 +106,16 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 		}
 		info.codec, info.derived = audioCodec(info.fourCC, se)
 		info.aac = describeAAC(se)
+		switch {
+		case info.fourCC == "mp4a" && info.aac == nil:
+			info.noAudioConfig = "an AudioSpecificConfig in esds"
+		case info.fourCC == "ec-3" && se.Dec3 == nil:
+			info.noAudioConfig = "a dec3 box"
+		case info.fourCC == "ac-3" && se.Dac3 == nil:
+			info.noAudioConfig = "a dac3 box"
+		case info.fourCC == "ac-4" && se.Dac4 == nil:
+			info.noAudioConfig = "a dac4 box"
+		}
 	case *mp4.StppBox:
 		info.fourCC = se.Type()
 		info.codec = info.fourCC

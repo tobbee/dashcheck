@@ -3389,9 +3389,11 @@
    "source": "HbbTV/MPD.php",
    "context": "Codec Information",
    "text": "The codec should be supported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV-CODECS"
+   ],
+   "note": "ETSI TS 102 796 V1.4.1 E.2.1 asks for at least one AdaptationSet in a 7.3.1 codec (AVC, HEVC, HE-AAC, E-AC-3); upstream warns for each other codec, including HEVC (bug 49)"
   },
   {
    "id": "HBBTV-3",
@@ -3434,36 +3436,44 @@
    "source": "HbbTV/Segments/LegacyCodecs.php",
    "context": "",
    "text": "The codec should be supported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-CODEC"
+   ],
+   "note": "E.4.1 treats the HbbTV 2012 profile as DVB-DASH 2014 live, so dashcheck applies the DVB segment rules"
   },
   {
    "id": "HBBTV-8",
    "source": "HbbTV/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Profile used for AVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-AVC"
+   ],
+   "note": "the DVB-DASH conformance point check per Period; upstream requires Main or High in every Representation (bug 49)"
   },
   {
    "id": "HBBTV-9",
    "source": "HbbTV/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Level used for AVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-AVC"
+   ],
+   "note": "as HBBTV-8; upstream allows only levels 3.0 to 4.0 in every Representation (bug 49)"
   },
   {
    "id": "HBBTV-10",
    "source": "HbbTV/Segments/LegacyCodecs.php",
    "context": "",
    "text": "All info necessary to decode any audio segment shall be provided in the Initialization segment",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-HBBTV-AUDIO-CONFIG"
+   ],
+   "note": "requires the decoder configuration box (esds AudioSpecificConfig, dac3, dec3, dac4); the clause is from HbbTV 1.5 (TS 102 796 V1.2.1), which is not in the reference library"
   },
   {
    "id": "IOP-1",

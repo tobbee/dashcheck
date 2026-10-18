@@ -312,3 +312,20 @@ func TestDVBContinuityEPT(t *testing.T) {
 		}
 	}
 }
+
+func TestHbbTVAudioConfig(t *testing.T) {
+	audio, _ := dvbReps(t)
+	audio.Profiles = []string{profileHbbTV}
+	audio.AudioChannelConfigs = nil
+	init := &Init{Handler: "soun"}
+	if got := ruleIDs(dvbInitRules(&audio, init, sampleEntryInfo{fourCC: "mp4a", noAudioConfig: "an AudioSpecificConfig in esds"}, audio.Loc())); !slices.Equal(got, []string{"SEG-HBBTV-AUDIO-CONFIG"}) {
+		t.Errorf("missing config: got %v", got)
+	}
+	if got := ruleIDs(dvbInitRules(&audio, init, sampleEntryInfo{fourCC: "mp4a"}, audio.Loc())); len(got) > 0 {
+		t.Errorf("with config: got %v", got)
+	}
+	// The HbbTV profile is checked as DVB-DASH, so the DVB codec list applies.
+	if got := ruleIDs(dvbInitRules(&audio, init, sampleEntryInfo{fourCC: "Opus"}, audio.Loc())); !slices.Equal(got, []string{"SEG-DVB-CODEC"}) {
+		t.Errorf("DVB rules for HbbTV: got %v", got)
+	}
+}

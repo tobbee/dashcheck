@@ -14,11 +14,11 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
 | Module: DVB | 103 | 94 | 1 | 6 | 2 |
-| Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
+| Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 15 | 1 | 3 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **361** | **6** | **24** | **17** |
+| **Total** | **408** | **366** | **6** | **19** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -418,15 +418,15 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
 | HBBTV-1 | `Unknown`: Inherit DVB legacy checks | n/a |  | marker in the upstream tool: HbbTV inherits the DVB checks |
-| HBBTV-2 | `Codec Information`: The codec should be supported by the specification | todo |  |  |
+| HBBTV-2 | `Codec Information`: The codec should be supported by the specification | done | MPD-HBBTV-CODECS | ETSI TS 102 796 V1.4.1 E.2.1 asks for at least one AdaptationSet in a 7.3.1 codec (AVC, HEVC, HE-AAC, E-AC-3); upstream warns for each other codec, including HEVC (bug 49) |
 | HBBTV-3 | `Unknown`: Inherit DVB legacy checks | n/a |  | marker in the upstream tool: HbbTV inherits the DVB checks |
 | HBBTV-4 | `Unknown`: Inherit DVB legacy checks | n/a |  | marker in the upstream tool: HbbTV inherits the DVB checks |
 | HBBTV-5 | `DRM`: Inherit DVB legacy checks | n/a |  | marker in the upstream tool: HbbTV inherits the DVB checks |
 | HBBTV-6 | `DRM`: Inherit DVB legacy checks | n/a |  | marker in the upstream tool: HbbTV inherits the DVB checks |
-| HBBTV-7 | The codec should be supported by the specification | todo |  |  |
-| HBBTV-8 | Profile used for AVC must be suported by the specification | todo |  |  |
-| HBBTV-9 | Level used for AVC must be suported by the specification | todo |  |  |
-| HBBTV-10 | All info necessary to decode any audio segment shall be provided in the Initialization segment | todo |  |  |
+| HBBTV-7 | The codec should be supported by the specification | done | SEG-DVB-CODEC | E.4.1 treats the HbbTV 2012 profile as DVB-DASH 2014 live, so dashcheck applies the DVB segment rules |
+| HBBTV-8 | Profile used for AVC must be suported by the specification | done | SEG-DVB-AVC | the DVB-DASH conformance point check per Period; upstream requires Main or High in every Representation (bug 49) |
+| HBBTV-9 | Level used for AVC must be suported by the specification | done | SEG-DVB-AVC | as HBBTV-8; upstream allows only levels 3.0 to 4.0 in every Representation (bug 49) |
+| HBBTV-10 | All info necessary to decode any audio segment shall be provided in the Initialization segment | done | SEG-HBBTV-AUDIO-CONFIG | requires the decoder configuration box (esds AudioSpecificConfig, dac3, dec3, dac4); the clause is from HbbTV 1.5 (TS 102 796 V1.2.1), which is not in the reference library |
 
 ## Module: CTA WAVE
 

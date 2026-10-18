@@ -3,10 +3,12 @@ package mpdcheck
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
+	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/report"
 )
 
@@ -56,6 +58,12 @@ var (
 	RuleSRDBounds = report.Register(report.Rule{
 		ID: "MPD-SRD-BOUNDS", Severity: report.Error,
 		Desc: "SRD objects must fit within the total size: x+w <= W and y+h <= H", SpecRef: refSRD,
+	})
+	RuleHbbTVCodecs = report.Register(report.Rule{
+		ID: "MPD-HBBTV-CODECS", Severity: report.Error,
+		Desc: "An HbbTV MPD must have an AdaptationSet with a codec of ETSI TS 102 796 7.3.1 " +
+			"(AVC, HEVC, HE-AAC or E-AC-3)",
+		SpecRef: "ETSI TS 102 796 E.2.1",
 	})
 	RuleHbbTV = report.Register(report.Rule{
 		ID: "MPD-HBBTV", Severity: report.Error,
@@ -300,4 +308,29 @@ func hbbtvRules(p *m.Period, mpdP profiles, pPath string) []report.Finding {
 		}
 	}
 	return f
+}
+
+var hbbtvCodecs = []string{"avc1", "avc3", "hev1", "hvc1", "mp4a", "ec-3"}
+
+// hbbtvCodecRules checks that an HbbTV MPD has an AdaptationSet in a codec of
+// ETSI TS 102 796 7.3.1 (HBBTV-2). Upstream warns for every other codec,
+// including HEVC, while the spec only asks for at least one.
+func hbbtvCodecRules(md *m.MPD) []report.Finding {
+	reps, _ := addressing.Reps(md, "")
+	hbbtv := false
+	for _, r := range reps {
+		if !slices.Contains(r.Profiles, profileHbbTV) {
+			continue
+		}
+		hbbtv = true
+		for c := range strings.SplitSeq(r.Codecs, ",") {
+			if slices.ContainsFunc(hbbtvCodecs, func(p string) bool { return strings.HasPrefix(strings.TrimSpace(c), p) }) {
+				return nil
+			}
+		}
+	}
+	if !hbbtv {
+		return nil
+	}
+	return []report.Finding{RuleHbbTVCodecs.New(report.Location{Path: "MPD"}, "no AdaptationSet uses %s", strings.Join(hbbtvCodecs, ", "))}
 }

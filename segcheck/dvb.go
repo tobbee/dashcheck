@@ -20,6 +20,7 @@ const (
 	profileDVB2014     = "urn:dvb:dash:profile:dvb-dash:2014"
 	profileDVB2017     = "urn:dvb:dash:profile:dvb-dash:2017"
 	profileDVBOnDemand = "urn:dvb:dash:profile:dvb-dash:isoff-ext-on-demand:2014"
+	profileHbbTV       = "urn:hbbtv:dash:profile:isoff-live:2012"
 	refDVB             = "ETSI TS 103 285"
 )
 
@@ -100,6 +101,11 @@ var (
 		Desc:    "All Representations of a period-continuous AdaptationSet must share the earliest presentation time",
 		SpecRef: refDVB + " 10.5.2.3",
 	})
+	RuleHbbTVAudioConfig = report.Register(report.Rule{
+		ID: "SEG-HBBTV-AUDIO-CONFIG", Severity: report.Error,
+		Desc:    "With the HbbTV profile, the initialization segment must hold everything needed to decode the audio",
+		SpecRef: "ETSI TS 102 796 annex E",
+	})
 	RuleDVBSwitchable = report.Register(report.Rule{
 		ID: "SEG-DVB-SWITCHABLE", Severity: report.Error,
 		Desc:    "The Representations of a DVB AdaptationSet must have the same sample entry type, track ID and default KID",
@@ -109,8 +115,11 @@ var (
 
 var dvbSampleEntries = []string{"avc", "hev1", "hvc1", "mp4a", "ec-3", "ac-4", "dtsc", "dtsh", "dtse", "dtsl", "stpp"}
 
+// isDVB reports whether the DVB-DASH rules apply. ETSI TS 102 796 V1.4.1
+// E.4.1 treats the HbbTV 2012 profile as the DVB-DASH 2014 live profile,
+// and annex E moves the HbbTV content rules to DVB-DASH.
 func isDVB(rep *addressing.Rep) bool {
-	return rep.HasProfile(profileDVB2014) || rep.HasProfile(profileDVB2017)
+	return rep.HasProfile(profileDVB2014) || rep.HasProfile(profileDVB2017) || rep.HasProfile(profileHbbTV)
 }
 
 func dvbInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, loc report.Location) []report.Finding {
@@ -149,6 +158,10 @@ func dvbInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, loc rep
 				f = append(f, RuleDVBHEVCSPS.New(loc, "Main 10 profile with %d-bit luma and %d-bit chroma", v.bitDepth, v.chromaBitDepth))
 			}
 		}
+	}
+	// HBBTV-10 (upstream checks that the sample rate and channel count are known)
+	if init.Handler == "soun" && info.noAudioConfig != "" && rep.HasProfile(profileHbbTV) {
+		f = append(f, RuleHbbTVAudioConfig.New(loc, "%s sample entry without %s", fourCC, info.noAudioConfig))
 	}
 	// DVB-84 (upstream also fails when another channel configuration scheme is used)
 	if init.Handler == "soun" {

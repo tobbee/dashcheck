@@ -61,6 +61,7 @@ yet unless stated.
 | 46 | DVB SEILocations | hvc1 never checked; prefix SEI after VCL not found | Verified in code |
 | 47 | CTAWave | Outdated: required profiles per AdaptationSet, splice constraints always enforced | Verified in spec |
 | 48 | WaveHLSInterop | Valid cenc tracks fail; sidx required in every segment; key count wrong | Verified in code and spec |
+| 49 | HbbTV | Codec and AVC rules outdated and applied per Representation | Verified in spec |
 
 ## Manifest handling
 
@@ -773,6 +774,26 @@ table 6 items as recommendations.
 **Fix:** Check patterns only for cbcs (1:9 video, 10:0 audio), require 8-byte
 cenc IVs, compare the KID and IV of each fragment in a segment (from 'seig' or
 'tenc'), and check 'sidx' only for SegmentBase track files.
+
+### 49. The HbbTV codec and AVC rules are outdated
+
+**Where:** [MPD.php](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/HbbTV/MPD.php), [Segments/LegacyCodecs.php#L110](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/HbbTV/Segments/LegacyCodecs.php#L110) and
+[#L119](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/HbbTV/Segments/LegacyCodecs.php#L119)
+
+**Problem:** Since ETSI TS 102 796 V1.4.1, annex E defines the HbbTV DASH
+profile through DVB-DASH: E.4.1 treats `urn:hbbtv:dash:profile:isoff-live:2012`
+as the DVB-DASH 2014 live profile, and E.2.1 only requires the MPD to include
+at least one AdaptationSet in a codec of clause 7.3.1, which includes HEVC.
+Upstream warns for every Representation whose codec is not AVC, AAC or
+E-AC-3 (so also for HEVC), and requires every AVC Representation to be Main
+or High profile at level 3.0, 3.1, 3.2 or 4.0, instead of the DVB-DASH
+conformance points (bug 38).
+
+**Effect:** HEVC and additional Representations in other codecs are
+reported, and AVC ladders with lower levels fail.
+
+**Fix:** Require one AdaptationSet in a 7.3.1 codec and apply the DVB-DASH
+rules to HbbTV content.
 
 ## Other projects
 

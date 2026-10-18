@@ -149,3 +149,26 @@ func TestDVBContinuity(t *testing.T) {
 		})
 	}
 }
+
+func TestHbbTVCodecs(t *testing.T) {
+	hbbtv := strings.Replace(dvbMPD, `profiles="urn:dvb:dash:profile:dvb-dash:2014,urn:dvb:dash:profile:dvb-dash:isoff-ext-live:2014"`,
+		`profiles="urn:hbbtv:dash:profile:isoff-live:2012"`, 1)
+	cases := []struct {
+		name string
+		data string
+		want int
+	}{
+		{"AVC and AAC", hbbtv, 0},
+		{"only other codecs", strings.NewReplacer(`codecs="avc1.64001f"`, `codecs="vp09.00.40.08"`, `codecs="mp4a.40.2"`, `codecs="opus"`).Replace(hbbtv), 1},
+		{"not HbbTV", strings.NewReplacer(`codecs="avc1.64001f"`, `codecs="vp09.00.40.08"`, `codecs="mp4a.40.2"`, `codecs="opus"`).Replace(dvbMPD), 0},
+	}
+	for _, c := range cases {
+		md, findings := Check([]byte(c.data), "https://example.com/hbbtv.mpd")
+		if md == nil {
+			t.Fatalf("%s: not parsed: %v", c.name, findings)
+		}
+		if f := hbbtvCodecRules(md); len(f) != c.want {
+			t.Errorf("%s: got %v", c.name, f)
+		}
+	}
+}

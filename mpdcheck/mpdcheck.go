@@ -125,6 +125,7 @@ func Check(data []byte, mpdURL string) (*m.MPD, []report.Finding) {
 	raw := parseRaw(data)
 	findings = append(findings, rawStructureRules(raw)...)
 	findings = append(findings, dvbRules(md, raw, len(data), mpdURL)...)
+	findings = append(findings, hbbtvCodecRules(md)...)
 	return md, findings
 }
 
