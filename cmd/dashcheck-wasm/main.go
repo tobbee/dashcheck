@@ -25,6 +25,7 @@ import (
 // jsOptions are the options accepted from JavaScript.
 type jsOptions struct {
 	MaxSegments  int    `json:"maxSegments"`
+	MPDUpdates   int    `json:"mpdUpdates"`
 	Reference    string `json:"reference"`
 	Concurrency  int    `json:"concurrency"`
 	LiveMarginMS int    `json:"liveMarginMs"`
@@ -49,6 +50,7 @@ func options(optsJSON string, onProgress js.Value) (dashcheck.Options, error) {
 	opts := dashcheck.Options{
 		Fetcher:     fetch.Browser{},
 		MaxSegments: jo.MaxSegments,
+		MPDUpdates:  jo.MPDUpdates,
 		Reference:   jo.Reference,
 		Concurrency: jo.Concurrency,
 		LiveMargin:  time.Duration(jo.LiveMarginMS) * time.Millisecond,

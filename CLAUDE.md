@@ -40,8 +40,7 @@ upstream commit e311ec6e12b21394355fd1749101590400e31cbb (2026-10-16).
    with a commit-pinned link, problem, effect and fix.
 6. Commit one area per commit (see the user's commit rules).
 
-Remaining at the last update: DVB MPD update constraints (DVB-43 to DVB-55,
-which need two MPD fetches), DVB colour signalling against the bitstream
+Remaining at the last update: DVB colour signalling against the bitstream
 (DVB-60 to DVB-70), continuous Periods (DVB-79 to DVB-81), SEI locations
 (DVB-96, DVB-97), CTA WAVE, WAVE HLS interop, HbbTV, Dolby AC-4 TOC, two Common
 XSD checks (legacy DVB schemas) and a few Low Latency checks.
@@ -64,6 +63,10 @@ and must not be committed or quoted at length:
 
 Find a clause with `grep -n` and read around it with `sed -n`. Extract more
 documents the same way when a rule needs them.
+
+MPD update rules (`mpdcheck/update.go`) compare two fetches of a dynamic MPD;
+the runner refetches it (`update.go`, `-updates`). Put further two-version
+rules there.
 
 ## Commands
 

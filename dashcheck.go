@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	m "github.com/Eyevinn/dash-mpd/mpd"
 	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/clock"
@@ -38,6 +39,12 @@ type Options struct {
 	// LiveMargin keeps live checks away from the edges of the availability
 	// window, to allow for clock inaccuracy. Zero means DefaultLiveMargin.
 	LiveMargin time.Duration
+	// MPDUpdates is the number of times a dynamic MPD is fetched again to
+	// check its updates. Zero means DefaultMPDUpdates; negative disables it.
+	MPDUpdates int
+	// UpdateInterval is the time between MPD fetches. Zero means about one
+	// segment duration, between 2 and 10 seconds.
+	UpdateInterval time.Duration
 	// Progress, if set, receives progress updates. It may be called from several goroutines.
 	Progress func(Progress)
 }
@@ -54,6 +61,7 @@ const (
 	DefaultMaxSegments = 4
 	DefaultConcurrency = 4
 	DefaultLiveMargin  = time.Second
+	DefaultMPDUpdates  = 1
 )
 
 var (
@@ -89,6 +97,9 @@ func (o *Options) defaults() {
 	if o.LiveMargin == 0 {
 		o.LiveMargin = DefaultLiveMargin
 	}
+	if o.MPDUpdates == 0 {
+		o.MPDUpdates = DefaultMPDUpdates
+	}
 	if o.Reference == "" {
 		o.Reference = clock.DefaultReference
 	}
@@ -115,7 +126,9 @@ func Check(ctx context.Context, mpdURL string, opts Options) *report.Report {
 		rpt.Findings = append(rpt.Findings, RuleHTTPMPD.New(report.Location{URL: mpdURL}, "%v", err))
 		return rpt
 	}
-	checkMPD(ctx, rpt, resp.Body, resp, &opts)
+	if md, clk := checkMPD(ctx, rpt, resp.Body, resp, &opts); md != nil && rpt.Type == "dynamic" {
+		checkUpdates(ctx, rpt, mpdURL, md, resp, clk, &opts)
+	}
 	return rpt
 }
 
@@ -131,12 +144,14 @@ func CheckData(ctx context.Context, data []byte, mpdURL string, opts Options) *r
 	return rpt
 }
 
-func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.Response, opts *Options) {
+// checkMPD checks an MPD and its segments, and returns the parsed MPD and
+// the clock used.
+func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.Response, opts *Options) (*m.MPD, clock.Clock) {
 	opts.progress("mpd", 0, 1, "checking MPD")
 	md, findings := mpdcheck.Check(data, resp.URL)
 	rpt.Findings = append(rpt.Findings, findings...)
 	if md == nil {
-		return
+		return nil, nil
 	}
 	rpt.Type = md.GetType()
 	dynamic := rpt.Type == "dynamic"
@@ -209,6 +224,7 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 	}
 	rpt.Findings = append(rpt.Findings, segcheck.CheckAdaptationSet(asReps, asInits)...)
 	rpt.Findings = append(rpt.Findings, segcheck.CheckPresentation(reps, inits)...)
+	return md, clk
 }
 
 // repChecker checks the segments of one Representation.

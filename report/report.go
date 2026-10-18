@@ -194,6 +194,7 @@ type Report struct {
 	ClockSource string    `json:"clockSource,omitempty"`
 	ClockOffset float64   `json:"clockOffsetS,omitempty"` // reference clock minus local clock
 	Segments    int       `json:"segmentsChecked"`
+	MPDUpdates  int       `json:"mpdUpdatesChecked,omitempty"` // later fetches of a dynamic MPD that were compared
 	Findings    []Finding `json:"findings"`
 }
 

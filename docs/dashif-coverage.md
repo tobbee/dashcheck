@@ -13,12 +13,12 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
-| Module: DVB | 103 | 71 | 1 | 29 | 2 |
+| Module: DVB | 103 | 84 | 1 | 16 | 2 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **307** | **5** | **84** | **12** |
+| **Total** | **408** | **320** | **5** | **71** | **12** |
 
 ## Schematron: schematron.sch
 
@@ -351,19 +351,19 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-40 | `Bitrate information`: Terminal which does not support UHD, but not UHD HFR video (max 39 Mbit/s) | done | MPD-DVB-TLS-BITRATE | reported once per Period for the highest total bandwidth |
 | DVB-41 | `Bitrate information`: Terminal which does supports UHD HFR video (max 51 Mbit/s) | done | MPD-DVB-TLS-BITRATE | reported once per Period for the highest total bandwidth |
 | DVB-42 | `Section 4.7.2`: The MPD SHOULD contain at least one UTCTiming element with the @schemeIdUri attribute set to [...] | done | MPD-DVB-UTCTIMING |  |
-| DVB-43 | `Section 4.8.3`: MPD@timeShiftBufferDepth shall not change | todo |  |  |
-| DVB-44 | `Section 4.8.3`: MPD@availabilityStartTime shall not change | todo |  |  |
-| DVB-45 | `Section 4.8.3`: MPD@maxSegmentDuration shall not change to a larger duration | todo |  |  |
-| DVB-46 | `Section 4.8.3`: @id shall not change for a corresponding Period | todo |  |  |
-| DVB-47 | `Section 4.8.3`: @start shall not change for a corresponding Period | todo |  |  |
-| DVB-48 | `Section 4.8.3`: @AssetIdentifier shall not change for a corresponding Period | todo |  |  |
-| DVB-49 | `Section 4.8.3`: @id shall not change for a corresponding AdaptationSet | todo |  |  |
-| DVB-50 | `Section 4.8.3`: @id shall not change for a corresponding Representation | todo |  |  |
-| DVB-51 | `Section 4.8.3`: Role Element shall not change for a corresponding AdaptationSet or corresponding Representation | todo |  |  |
-| DVB-52 | `Section 4.8.3`: AudioConfiguration Element shall not change for a corresponding AdaptationSet … | todo |  |  |
-| DVB-53 | `Section 4.8.3`: @contentType shall not change for a corresponding AdaptationSet or corresponding Representation | todo |  |  |
-| DVB-54 | `Section 4.8.3`: @codecs shall not change for a corresponding AdaptationSet or corresponding Representation | todo |  |  |
-| DVB-55 | `Section 4.8.3`: @lang shall not change for a corresponding AdaptationSet or corresponding Representation | todo |  |  |
+| DVB-43 | `Section 4.8.3`: MPD@timeShiftBufferDepth shall not change | done | MPD-DVB-UPDATE | dashcheck fetches a dynamic MPD again (-updates, default once) and compares the versions |
+| DVB-44 | `Section 4.8.3`: MPD@availabilityStartTime shall not change | done | MPD-DVB-UPDATE |  |
+| DVB-45 | `Section 4.8.3`: MPD@maxSegmentDuration shall not change to a larger duration | done | MPD-DVB-UPDATE | upstream compares the durations as strings (bug 44) |
+| DVB-46 | `Section 4.8.3`: @id shall not change for a corresponding Period | done | MPD-UPDATE-ID | a Period starting at the same time under another @id; also an ISO/IEC 23009-1 5.4.1 rule for all dynamic MPDs |
+| DVB-47 | `Section 4.8.3`: @start shall not change for a corresponding Period | done | MPD-DVB-UPDATE |  |
+| DVB-48 | `Section 4.8.3`: @AssetIdentifier shall not change for a corresponding Period | done | MPD-DVB-UPDATE | upstream reads AssetIdentifier as an attribute and never fails (bug 44) |
+| DVB-49 | `Section 4.8.3`: @id shall not change for a corresponding AdaptationSet | done | MPD-UPDATE-ID | AdaptationSets correspond through their Representations; upstream pairs them by @id and cannot see a change (bug 44) |
+| DVB-50 | `Section 4.8.3`: @id shall not change for a corresponding Representation | done | MPD-DVB-UPDATE | a changed Representation@id shows as a removed Representation (TS 103 285 4.8.1 allows only additions) |
+| DVB-51 | `Section 4.8.3`: Role Element shall not change for a corresponding AdaptationSet or corresponding Representation | done | MPD-DVB-UPDATE |  |
+| DVB-52 | `Section 4.8.3`: AudioConfiguration Element shall not change for a corresponding AdaptationSet … | done | MPD-DVB-UPDATE | the AudioChannelConfiguration element; upstream looks for AudioConfiguration and never fails (bug 44) |
+| DVB-53 | `Section 4.8.3`: @contentType shall not change for a corresponding AdaptationSet or corresponding Representation | done | MPD-UPDATE-REP | compares the effective value of each Representation, so moving the attribute between levels is not a change |
+| DVB-54 | `Section 4.8.3`: @codecs shall not change for a corresponding AdaptationSet or corresponding Representation | done | MPD-UPDATE-REP | compares the effective value of each Representation |
+| DVB-55 | `Section 4.8.3`: @lang shall not change for a corresponding AdaptationSet or corresponding Representation | done | MPD-DVB-UPDATE |  |
 | DVB-56 | `Section 7.2.1.1`: A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles | done | MPD-DVB-FONT |  |
 | DVB-57 | `Section 4.4`: Elements and attributes are expected to be present [..] to enable selection and switching. | done | MPD-DVB-VIDEO |  |
 | DVB-58 | `Section 4.4`: @scanType SHALL be present [..] if interlaced pictures are used in any [..representation] | done | MPD-DVB-VIDEO |  |

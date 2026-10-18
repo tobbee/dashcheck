@@ -109,12 +109,59 @@ func TestLive(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			ts := server(t, liveMPD(t), c.override)
 			opts := Options{
-				Fetcher: fetch.NewNative(5 * time.Second),
-				Clock:   fixedClock(ast.Add(c.at)),
+				Fetcher:    fetch.NewNative(5 * time.Second),
+				Clock:      fixedClock(ast.Add(c.at)),
+				MPDUpdates: -1,
 			}
 			rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", opts)
 			if got := ruleSet(rpt.Findings, report.Warning); !slices.Equal(got, c.want) {
 				t.Errorf("got %v, want %v\n%v", got, c.want, rpt.Findings)
+			}
+		})
+	}
+}
+
+func TestLiveUpdate(t *testing.T) {
+	ast := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	v1 := liveMPD(t)
+	cases := []struct {
+		name string
+		v2   string
+		want []string
+	}{
+		{"unchanged", v1, nil},
+		{"changed without new publishTime", strings.Replace(v1, "<Period", "<!-- changed -->\n<Period", 1), []string{"MPD-UPDATE-PUBLISHTIME"}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			files := http.FileServer(http.Dir(testDir))
+			fetches := 0
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch {
+				case r.URL.Path != "/Manifest.mpd":
+					files.ServeHTTP(w, r)
+				case fetches == 0:
+					fetches++
+					w.Write([]byte(v1))
+				default:
+					w.Write([]byte(c.v2))
+				}
+			}))
+			t.Cleanup(ts.Close)
+			opts := Options{
+				Fetcher:        fetch.NewNative(5 * time.Second),
+				Clock:          fixedClock(ast.Add(9 * time.Second)),
+				UpdateInterval: time.Millisecond,
+			}
+			rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", opts)
+			var got []string
+			for _, f := range rpt.Findings {
+				if strings.HasPrefix(f.Rule, "MPD-UPDATE-") {
+					got = append(got, f.Rule)
+				}
+			}
+			if !slices.Equal(got, c.want) || rpt.MPDUpdates != 1 {
+				t.Errorf("got %v and %d updates, want %v and 1", got, rpt.MPDUpdates, c.want)
 			}
 		})
 	}

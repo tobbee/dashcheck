@@ -56,6 +56,7 @@ yet unless stated.
 | 41 | DVB LegacyCodecs | HEVC tier, profile, level and bit depth rules do not match the spec | Verified in code and spec |
 | 42 | SCH-7 | Requires a static MPD for the extended live profile | Verified in spec |
 | 43 | DVB ContentProtection | Outdated cenc-only scheme rule and a pssh SHOULD not in the spec | Verified in spec |
+| 44 | DVB UpdateConstraints | Several MPD update checks can never fail, others fail wrongly | Verified in code |
 
 ## Manifest handling
 
@@ -622,6 +623,35 @@ a warning.
 **Fix:** Fail schemes other than `cenc` and `cbcs`, fail `cbcs` with the 2014
 profile, add the fallback check per Period, and report the pssh case as
 information.
+
+### 44. Several DVB MPD update checks can never fail, others fail wrongly
+
+**Where:** [UpdateConstraints.php](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/UpdateConstraints.php)
+
+**Problem:**
+
+- [L243](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/UpdateConstraints.php#L243) reads `AssetIdentifier` as an attribute, but it is an
+  element, so both sides are empty and the check always passes (DVB-48).
+- [L296](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/UpdateConstraints.php#L296) and [L374](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/UpdateConstraints.php#L374) look for `AudioConfiguration`
+  elements; the element is `AudioChannelConfiguration`, so the check always
+  passes (DVB-52).
+- [L152-L153](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/UpdateConstraints.php#L152-L153) compares `maxSegmentDuration` values as strings,
+  so an increase from `PT2S` to `PT10S` is not found (DVB-45).
+  [L236](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/UpdateConstraints.php#L236) compares Period@start as strings too.
+- AdaptationSets and Representations are paired by @id only, so a changed @id
+  is never reported (DVB-49, DVB-50 always pass), while AdaptationSets without
+  the optional @id fail with "Unable to retrieve @id"
+  ([L259](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/UpdateConstraints.php#L259)).
+- `SegmentTemplate@timescale` (TS 103 285 4.8.3 item 8) and the removal of
+  AdaptationSets and Representations (4.8.1 item 1) are not checked.
+
+**Effect:** Changes to AssetIdentifier, AudioChannelConfiguration,
+maxSegmentDuration, ids and timescale pass, and MPDs without AdaptationSet@id
+fail.
+
+**Fix:** Compare the AssetIdentifier and AudioChannelConfiguration elements,
+parse durations, pair Representations by @id within a Period and
+AdaptationSets through their Representations, and add the missing checks.
 
 ## Other projects
 

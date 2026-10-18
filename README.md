@@ -20,6 +20,10 @@ It checks:
   as a player would do, and compared with a reference clock. The newest segments
   in the availability window must be available, the next one must not be
   available too early, and a SegmentTimeline must reach the live edge.
+* **MPD updates:** a live MPD is fetched again after about one segment
+  (`-updates N` sets how many times) and compared with the version before:
+  @publishTime, ids, Representation attributes and the timing of segments that
+  both versions describe, plus the DVB-DASH update constraints.
 
 All findings carry a stable rule ID; `dashcheck -rules` lists them.
 
@@ -84,9 +88,7 @@ Bugs found in the DASH-IF tool while porting its checks are listed in
 
 Planned next steps:
 
-* Port the remaining DASH-IF checks, Schematron rules first.
-* Profile-specific checks (CMAF, DVB, HbbTV, low latency) and bandwidth checks.
-* MPD update checks for live: fetch the MPD repeatedly and check the allowed
-  changes between versions.
+* Port the remaining DASH-IF checks (CTA WAVE, HbbTV, Dolby, the rest of DVB).
+* Bandwidth checks.
 * Chunk arrival timing for low-latency streams.
 * A long-running monitor mode.

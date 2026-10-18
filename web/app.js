@@ -31,6 +31,8 @@ function call(msg) {
 function options() {
   return {
     maxSegments: Number($('maxSegments').value) || 4,
+    // 0 in the form means no update checks, which the Go side spells -1.
+    mpdUpdates: Number($('mpdUpdates').value) || -1,
     reference: $('reference').value.trim() || 'none',
   };
 }
@@ -110,6 +112,10 @@ function render(rpt) {
     add('Clock', `synced to ${rpt.clockSource}; this computer's clock is ${describeLocal(rpt.clockOffsetS || 0)} it`);
   }
   add('Segments', `${rpt.segmentsChecked} checked in ${rpt.durationS.toFixed(1)} s`);
+  if (rpt.mpdUpdatesChecked) {
+    const n = rpt.mpdUpdatesChecked;
+    add('Updates', `MPD fetched ${n} more time${n > 1 ? 's' : ''} and compared with the version before`);
+  }
 
   const findings = rpt.findings || [];
   const counts = { error: 0, warning: 0, info: 0 };

@@ -46,6 +46,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 	nSegs := fs.Int("n", dashcheck.DefaultMaxSegments, "media segments to check per Representation")
 	all := fs.Bool("all", false, "check all segments (static MPDs)")
+	updates := fs.Int("updates", dashcheck.DefaultMPDUpdates, "times a dynamic MPD is fetched again to check its updates (0 for none)")
 	jsonOut := fs.Bool("json", false, "write the report as JSON")
 	minSev := fs.String("level", "info", "lowest severity to show: info, warning or error")
 	reference := fs.String("reference", "", "reference clock URL (http-iso), or \"none\" (default "+`"https://time.akamai.com/?iso&ms"`+")")
@@ -81,6 +82,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 	if *all {
 		opts.MaxSegments = -1
+	}
+	opts.MPDUpdates = *updates
+	if *updates <= 0 {
+		opts.MPDUpdates = -1
 	}
 	if *verbose {
 		opts.Progress = func(p dashcheck.Progress) {
@@ -143,7 +148,15 @@ func printReport(w io.Writer, rpt *report.Report, shown []report.Finding) {
 		offset := time.Duration(rpt.ClockOffset * float64(time.Second))
 		fmt.Fprintf(w, "Clock:    synced to %s; this computer's clock is %s it\n", rpt.ClockSource, clock.Describe(-offset))
 	}
-	fmt.Fprintf(w, "Segments: %d checked in %.1fs\n\n", rpt.Segments, rpt.Duration)
+	fmt.Fprintf(w, "Segments: %d checked in %.1fs\n", rpt.Segments, rpt.Duration)
+	if rpt.MPDUpdates > 0 {
+		times := "time"
+		if rpt.MPDUpdates > 1 {
+			times = "times"
+		}
+		fmt.Fprintf(w, "Updates:  MPD fetched %d more %s and compared with the version before\n", rpt.MPDUpdates, times)
+	}
+	fmt.Fprintln(w)
 	for _, f := range shown {
 		fmt.Fprintln(w, f)
 	}

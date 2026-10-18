@@ -2643,17 +2643,21 @@
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "MPD@timeShiftBufferDepth shall not change",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
+   "note": "dashcheck fetches a dynamic MPD again (-updates, default once) and compares the versions"
   },
   {
    "id": "DVB-44",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "MPD@availabilityStartTime shall not change",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
    "note": ""
   },
   {
@@ -2661,26 +2665,32 @@
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "MPD@maxSegmentDuration shall not change to a larger duration",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
+   "note": "upstream compares the durations as strings (bug 44)"
   },
   {
    "id": "DVB-46",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@id shall not change for a corresponding Period",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-UPDATE-ID"
+   ],
+   "note": "a Period starting at the same time under another @id; also an ISO/IEC 23009-1 5.4.1 rule for all dynamic MPDs"
   },
   {
    "id": "DVB-47",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@start shall not change for a corresponding Period",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
    "note": ""
   },
   {
@@ -2688,35 +2698,43 @@
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@AssetIdentifier shall not change for a corresponding Period",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
+   "note": "upstream reads AssetIdentifier as an attribute and never fails (bug 44)"
   },
   {
    "id": "DVB-49",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@id shall not change for a corresponding AdaptationSet",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-UPDATE-ID"
+   ],
+   "note": "AdaptationSets correspond through their Representations; upstream pairs them by @id and cannot see a change (bug 44)"
   },
   {
    "id": "DVB-50",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@id shall not change for a corresponding Representation",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
+   "note": "a changed Representation@id shows as a removed Representation (TS 103 285 4.8.1 allows only additions)"
   },
   {
    "id": "DVB-51",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "Role Element shall not change for a corresponding AdaptationSet or corresponding Representation",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
    "note": ""
   },
   {
@@ -2724,35 +2742,43 @@
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "AudioConfiguration Element shall not change for a corresponding AdaptationSet …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
+   "note": "the AudioChannelConfiguration element; upstream looks for AudioConfiguration and never fails (bug 44)"
   },
   {
    "id": "DVB-53",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@contentType shall not change for a corresponding AdaptationSet or corresponding Representation",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-UPDATE-REP"
+   ],
+   "note": "compares the effective value of each Representation, so moving the attribute between levels is not a change"
   },
   {
    "id": "DVB-54",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@codecs shall not change for a corresponding AdaptationSet or corresponding Representation",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-UPDATE-REP"
+   ],
+   "note": "compares the effective value of each Representation"
   },
   {
    "id": "DVB-55",
    "source": "DVB/MPD/UpdateConstraints.php",
    "context": "Section 4.8.3",
    "text": "@lang shall not change for a corresponding AdaptationSet or corresponding Representation",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-UPDATE"
+   ],
    "note": ""
   },
   {
