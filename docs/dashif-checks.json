@@ -329,8 +329,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentAlignment' as true",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV"
+   ],
    "note": ""
   },
   {
@@ -338,8 +340,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 1 or 2",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV"
+   ],
    "note": ""
   },
   {
@@ -347,8 +351,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 while not containing more than one Representation",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV"
+   ],
    "note": ""
   },
   {
@@ -400,8 +406,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an element that is not part of the HbbTV profile', i.e., found 'BaseURL' element",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV"
+   ],
    "note": ""
   },
   {
@@ -409,8 +417,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 with same value of mediaStreamStructureId in more than one Representation",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV"
+   ],
    "note": ""
   },
   {
@@ -418,8 +428,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - For HbbTV profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself as it is based on live profile",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV"
+   ],
    "note": ""
   },
   {
@@ -636,17 +648,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:FramePacking",
    "text": "The URI urn:mpeg:dash:14496:10:frame_packing_arrangement_type:2011 is used for Adaptation Sets or Representations that contain a video component that conforms to ISO/IEC 14496-10.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-FRAMEPACKING"
+   ],
+   "note": "uses the effective @codecs of the Representation"
   },
   {
    "id": "SCH-60",
    "source": "schematron/schematron.sch",
    "context": "dash:FramePacking",
    "text": "The URI urn:mpeg:dash:13818:1:stereo_video_format_type:2011 is used for Adaptation Sets or Representations that contain a video component that conforms to ISO/IEC 13818-1.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-FRAMEPACKING"
+   ],
    "note": ""
   },
   {
@@ -654,8 +670,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:FramePacking",
    "text": "schemeIdUri for FramePacking descriptor shall be urn:mpeg:dash:14496:10:frame_packing_arrangement_type:2011 or urn:mpeg:dash:13818:1:stereo_video_format_type:2011.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-FRAMEPACKING"
+   ],
    "note": ""
   },
   {
@@ -663,8 +681,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:FramePacking",
    "text": "The value of FramePacking shall be 0 to 6 as defined in ISO/IEC 23091(all parts).",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-FRAMEPACKING"
+   ],
    "note": ""
   },
   {
@@ -672,8 +692,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AudioChannelConfiguration",
    "text": "If URI urn:mpeg:dash:outputChannelPositionList:2012 is used the value attribute shall be a space-delimited list as defined in ISO/IEC 23091(all parts).",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-CHANNEL-POSITIONS"
+   ],
    "note": ""
   },
   {
@@ -758,17 +780,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "When every Adaptation Set in a MPD has a SRD descriptor, at least one of this descriptor shall be a SupplementalProperty.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-SRD-ESSENTIAL"
+   ],
+   "note": "upstream also fails for Periods without AdaptationSets"
   },
   {
    "id": "SCH-72",
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For a given source_id of the @value attribute, at least one of the EssentialProperty or SupplementalProperty in the containing Period shall specify the optional parameters W and H.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-TOTAL"
+   ],
    "note": ""
   },
   {
@@ -776,8 +802,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For a given source_id of the @value attribute, if two SRD elements (indistinctively EssentialProperty or SupplementalProperty) explicitly specify a different pair of values for the optional parameters (W,H) then all the remaining SRD element shall explicitly specify a pair of values for (W,H) too.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-TOTAL"
+   ],
    "note": ""
   },
   {
@@ -785,8 +813,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For a given source_id of the @value attribute, the values of x, w and W shall be such that, for each descriptor, the sum of x and w is smaller or equal to W.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-BOUNDS"
+   ],
    "note": ""
   },
   {
@@ -794,17 +824,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For a given source_id of the @value attribute, the values of x, w and W shall be such that, for each descriptor, the sum of x and w is smaller or equal to W.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-SRD-BOUNDS"
+   ],
+   "note": "upstream passes if any source meets the bound and fails for sources without a total size; dashcheck checks every source"
   },
   {
    "id": "SCH-76",
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For a given source_id of the @value attribute, the values of y, h and H shall be such that, for each descriptor, the sum of y and h is smaller or equal to H.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-BOUNDS"
+   ],
    "note": ""
   },
   {
@@ -812,17 +846,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For a given source_id of the @value attribute, the values of y, h and H shall be such that, for each descriptor, the sum of y and h is smaller or equal to H.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-SRD-BOUNDS"
+   ],
+   "note": "upstream passes if any source meets the bound and fails for sources without a total size; dashcheck checks every source"
   },
   {
    "id": "SCH-78",
    "source": "schematron/schematron.sch",
    "context": "dash:SupplementalProperty | dash:EssentialProperty",
    "text": "An EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” shall be the child element of an AdaptationSet or a SubRepresentation element.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-PLACEMENT"
+   ],
    "note": ""
   },
   {
@@ -830,8 +868,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:SupplementalProperty | dash:EssentialProperty",
    "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then the @value attribute must be present.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-VALUE"
+   ],
    "note": ""
   },
   {
@@ -839,8 +879,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:SupplementalProperty | dash:EssentialProperty",
    "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then the @value attribute must contain at least the mandatory comma separated parameters, i.e. source_id, x, y, w, h.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-VALUE"
+   ],
    "note": ""
   },
   {
@@ -848,8 +890,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:SupplementalProperty | dash:EssentialProperty",
    "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then each parameter value has to match the expected type format i.e. non-negative integer in decimal representation.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-VALUE"
+   ],
    "note": ""
   },
   {
@@ -857,8 +901,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:SupplementalProperty | dash:EssentialProperty",
    "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present and the @value attribute contains the optional parameter W then the optional parameter H shall be present too. In addition, if the optional parameter spatial_set_id is present, then the optional parameters W and H shall be present.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-SRD-VALUE"
+   ],
    "note": ""
   },
   {
@@ -1084,8 +1130,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - For HbbTV profile, @segmentAlignment shall be set to true for all Adaptation Sets as it is based on live profile",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-HBBTV"
+   ],
    "note": ""
   },
   {
