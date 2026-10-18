@@ -1,0 +1,3753 @@
+{
+ "upstream": {
+  "repo": "https://github.com/Dash-Industry-Forum/DASH-IF-Conformance",
+  "commit": "e311ec6",
+  "date": "2026-10-16"
+ },
+ "checks": [
+  {
+   "id": "SCH-1",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "If MPD is of type \"dynamic\" availabilityStartTime shall be defined.",
+   "status": "done",
+   "rules": [
+    "MPD-DYN-AST"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-2",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "If MPD is of type \"dynamic\" publishTime shall be defined.",
+   "status": "partial",
+   "rules": [
+    "MPD-DYN-PUBLISHTIME"
+   ],
+   "note": "dashcheck reports a warning, upstream an error"
+  },
+  {
+   "id": "SCH-3",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "If mediaPresentationDuration is not defined for the MPD minimumUpdatePeriod shall be defined or vice versa.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-4",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "At least one unknown profile string found. Known list in schematron file.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-5",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "For On-Demand profile, the MPD @type shall be \"static\".",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-6",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "If minimumUpdatePeriod is not present and the last period does not include the duration attribute the mediaPresentationDuration must be present.",
+   "status": "partial",
+   "rules": [
+    "ADDR-PERIOD"
+   ],
+   "note": "dashcheck reports when the end of the last Period of a static MPD cannot be derived"
+  },
+  {
+   "id": "SCH-7",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "For ISO BMFF extended live profile, MPD@type shall be static.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-8",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "For ISO BMFF extended on-demand profile, MPD@type shall be static.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-9",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "If bitstreamSwitching is set to true all bitstreamSwitching declarations for AdaptationSet within this Period shall not be set to false.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-10",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "The id of each Period shall be unique.",
+   "status": "done",
+   "rules": [
+    "MPD-PERIOD-ID"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-11",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Period.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-12",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "If the MPD is dynamic the Period element shall have an id.",
+   "status": "done",
+   "rules": [
+    "MPD-PERIOD-ID"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-13",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "At least one BaseURL, SegmentTemplate or SegmentList shall be defined in Period, AdaptationSet or Representation.",
+   "status": "partial",
+   "rules": [
+    "ADDR-NONE"
+   ],
+   "note": "Representations with only a BaseURL (one segment) are not supported yet"
+  },
+  {
+   "id": "SCH-14",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "If the duration attribute is set to zero, there should only be a single AdaptationSet present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-15",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "Neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-16",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For ISO BMFF extended live profile, Period.SegmentList shall not be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-17",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For ISO BMFF extended live profile: \"If a Period contains multiple Adaptation Sets with value of the @contentType=\"video\" then at least one Adaptation Set shall contain a Role el-ement $<$Role scheme=\"urn:mpeg:dash:role:2011\" value=\"main\">\"",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-18",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For ISO BMFF extended on-demand profile, neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-19",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For ISO BMFF extended on-demand profile: \"If a Period contains multiple Adaptation Sets with value of the @contentType=\"video\" then at least one Adaptation Set shall contain a Role el-ement $<$Role scheme=\"urn:mpeg:dash:role:2011\" value=\"main\">\"",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-20",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "The id of each AdaptationSet within a Period shall be unique.",
+   "status": "done",
+   "rules": [
+    "MPD-AS-ID"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-21",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "Attributes from the AdaptationSet shall not be repeated in the descendanding ContentComponent elements.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-22",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "Common attributes for AdaptationSet and Representation shall either be in one of the elements but not in both.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-23",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "Each minimum value (minWidth, minHeight, minBandwidth) shall be larger than the maximum value.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-24",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "The value of the bandwidth attribute shall be in the range defined by the AdaptationSet.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-25",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "The value of the width attribute shall be in the range defined by the AdaptationSet.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-26",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "The value of the height attribute shall be in the range defined by the AdaptationSet.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-27",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "An AdaptationSet shall have at least one Representation element.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-28",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in AdaptationSet.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-29",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "ISO/IEC 23009-1:2019, 5.3.3.1: The value of the frameRate attribute shall be in the range defined by the AdaptationSet.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-30",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentAlignment' as true",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-31",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 1 or 2",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-32",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 while not containing more than one Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-33",
+   "source": "schematron/schematron.sch",
+   "context": "dash:ContentComponent",
+   "text": "The id of each ContentComponent within an AdaptationSet shall be unique.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-34",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "Either the Representation or the containing AdaptationSet shall have the mimeType attribute.",
+   "status": "done",
+   "rules": [
+    "MPD-MIMETYPE"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-35",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "For live profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-36",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Representation.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-37",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an element that is not part of the HbbTV profile', i.e., found 'BaseURL' element",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-38",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 with same value of mediaStreamStructureId in more than one Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-39",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - For HbbTV profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself as it is based on live profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-40",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SubRepresentation",
+   "text": "If the level attribute is defined for a SubRepresentation also the bandwidth attribute shall be defined.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-41",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTemplate",
+   "text": "If more than one Media Segment is present the duration attribute or SegmentTimeline element shall be present.",
+   "status": "partial",
+   "rules": [
+    "ADDR-TEMPLATE"
+   ],
+   "note": "checked on the effective SegmentTemplate of each Representation"
+  },
+  {
+   "id": "SCH-42",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTemplate",
+   "text": "Either the duration attribute or SegmentTimeline element shall be present but not both.",
+   "status": "done",
+   "rules": [
+    "ADDR-TEMPLATE"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-43",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTemplate",
+   "text": "If indexRange is not present indexRangeExact shall not be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-44",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTemplate",
+   "text": "Neither $Number$ nor the $Time$ identifier shall be included in the initialization attribute.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-45",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTemplate",
+   "text": "Neither $Number$ nor the $Time$ identifier shall be included in the bitstreamSwitching attribute.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-46",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTemplate",
+   "text": "Only identifiers such as $Bandwidth$, $Time$, $RepresentationID$, or $Number$ shall be used.",
+   "status": "done",
+   "rules": [
+    "ADDR-TEMPLATE"
+   ],
+   "note": "checked when @media is expanded"
+  },
+  {
+   "id": "SCH-47",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTemplate",
+   "text": "$RepresentationID$ shall not have a format tag.",
+   "status": "done",
+   "rules": [
+    "ADDR-TEMPLATE"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-48",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentList",
+   "text": "If more than one Media Segment is present the duration attribute or SegmentTimeline element shall be present.",
+   "status": "done",
+   "rules": [
+    "ADDR-TEMPLATE"
+   ],
+   "note": ""
+  },
+  {
+   "id": "SCH-49",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentList",
+   "text": "Either the duration attribute or SegmentTimeline element shall be present but not both.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-50",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentList",
+   "text": "If indexRange is not present indexRangeExact shall not be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-51",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentBase",
+   "text": "If indexRange is not present indexRangeExact shall not be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-52",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentBase",
+   "text": "The timeShiftBufferDepth shall not be smaller than timeShiftBufferDepth specified in the MPD element",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-53",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentTimeline",
+   "text": "The d attribute of a SegmentTimeline shall not exceed the value give by the MPD maxSegmentDuration attribute.",
+   "status": "done",
+   "rules": [
+    "MPD-MAXSEGDUR"
+   ],
+   "note": "upstream adds the duration components without unit conversion, so PT1M counts as 1 s"
+  },
+  {
+   "id": "SCH-54",
+   "source": "schematron/schematron.sch",
+   "context": "dash:ProgramInformation",
+   "text": "If more than one ProgramInformation element is given each ProgramInformation element shall have a lang attribute.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-55",
+   "source": "schematron/schematron.sch",
+   "context": "dash:ContentProtection",
+   "text": "The value of ContentProtection shall be the 4CC contained in the Scheme Type Box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-56",
+   "source": "schematron/schematron.sch",
+   "context": "dash:ContentProtection",
+   "text": "The value of ContentProtection shall be the 4-digit lower-case hexadecimal Representation.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-57",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Role",
+   "text": "The value of Role (role) shall be caption, subtitle, main, alternate, supplementary, commentary or dub.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-58",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Role",
+   "text": "The value of Role (stereoid) shall start with 'l' or 'r'.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-59",
+   "source": "schematron/schematron.sch",
+   "context": "dash:FramePacking",
+   "text": "The URI urn:mpeg:dash:14496:10:frame_packing_arrangement_type:2011 is used for Adaptation Sets or Representations that contain a video component that conforms to ISO/IEC 14496-10.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-60",
+   "source": "schematron/schematron.sch",
+   "context": "dash:FramePacking",
+   "text": "The URI urn:mpeg:dash:13818:1:stereo_video_format_type:2011 is used for Adaptation Sets or Representations that contain a video component that conforms to ISO/IEC 13818-1.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-61",
+   "source": "schematron/schematron.sch",
+   "context": "dash:FramePacking",
+   "text": "schemeIdUri for FramePacking descriptor shall be urn:mpeg:dash:14496:10:frame_packing_arrangement_type:2011 or urn:mpeg:dash:13818:1:stereo_video_format_type:2011.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-62",
+   "source": "schematron/schematron.sch",
+   "context": "dash:FramePacking",
+   "text": "The value of FramePacking shall be 0 to 6 as defined in ISO/IEC 23091(all parts).",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-63",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AudioChannelConfiguration",
+   "text": "If URI urn:mpeg:dash:outputChannelPositionList:2012 is used the value attribute shall be a space-delimited list as defined in ISO/IEC 23091(all parts).",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-64",
+   "source": "schematron/schematron.sch",
+   "context": "dash:EventStream",
+   "text": "If href is not present actuate shall not be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-65",
+   "source": "schematron/schematron.sch",
+   "context": "dash:EventStream",
+   "text": "schemeIdUri shall be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-66",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Subset",
+   "text": "The id of each Subset shall be unique.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-67",
+   "source": "schematron/schematron.sch",
+   "context": "dash:UTCTiming",
+   "text": "@schemeIdUri for UTCTiming is not one of the 7 different types specified.",
+   "status": "done",
+   "rules": [
+    "MPD-UTCTIMING-SCHEME"
+   ],
+   "note": "dashcheck also warns for schemes that browsers cannot use"
+  },
+  {
+   "id": "SCH-68",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty",
+   "text": "If schemeIdUri urn:mpeg:dash:chaining:2016 is used, then value attribute shall be composed of the comma separated parameters (no comma needed if only first parameter is present).",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-69",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty",
+   "text": "MPD fallback chaining shall be signaled by Supplemental Descriptor on MPD level with schemeIdUri urn:mpeg:dash:fallback:2016.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-70",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty",
+   "text": "If schemeIdUri urn:mpeg:dash:fallback:2016 is used, then value attribute shall be composed of one URL or whitespace separated URLs.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-71",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "When every Adaptation Set in a MPD has a SRD descriptor, at least one of this descriptor shall be a SupplementalProperty.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-72",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For a given source_id of the @value attribute, at least one of the EssentialProperty or SupplementalProperty in the containing Period shall specify the optional parameters W and H.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-73",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For a given source_id of the @value attribute, if two SRD elements (indistinctively EssentialProperty or SupplementalProperty) explicitly specify a different pair of values for the optional parameters (W,H) then all the remaining SRD element shall explicitly specify a pair of values for (W,H) too.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-74",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For a given source_id of the @value attribute, the values of x, w and W shall be such that, for each descriptor, the sum of x and w is smaller or equal to W.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-75",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For a given source_id of the @value attribute, the values of x, w and W shall be such that, for each descriptor, the sum of x and w is smaller or equal to W.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-76",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For a given source_id of the @value attribute, the values of y, h and H shall be such that, for each descriptor, the sum of y and h is smaller or equal to H.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-77",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "For a given source_id of the @value attribute, the values of y, h and H shall be such that, for each descriptor, the sum of y and h is smaller or equal to H.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-78",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty | dash:EssentialProperty",
+   "text": "An EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” shall be the child element of an AdaptationSet or a SubRepresentation element.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-79",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty | dash:EssentialProperty",
+   "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then the @value attribute must be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-80",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty | dash:EssentialProperty",
+   "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then the @value attribute must contain at least the mandatory comma separated parameters, i.e. source_id, x, y, w, h.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-81",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty | dash:EssentialProperty",
+   "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then each parameter value has to match the expected type format i.e. non-negative integer in decimal representation.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-82",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SupplementalProperty | dash:EssentialProperty",
+   "text": "If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present and the @value attribute contains the optional parameter W then the optional parameter H shall be present too. In addition, if the optional parameter spatial_set_id is present, then the optional parameters W and H shall be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-83",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "If MPD is of type \"static\" and if the profile contains a DASH-IF IOP profile, then the timeShiftBufferDepth shall not be defined.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-84",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "If MPD is of type \"static\" and if the profile contains a DASH-IF IOP profile, then the minimumUpdatePeriod shall not be defined.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-85",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "DASH-IF IOP Section 3.2.2.2: For dynamic MPD, the @profile shall include urn:mpeg:dash:profile:isoff-live:2011.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-86",
+   "source": "schematron/schematron.sch",
+   "context": "dash:MPD",
+   "text": "DASH-IF IOP Section 3.10.2/3.10.3: \"MPD@minBufferTime shall be present\", not found.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-87",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "DASH-IF IOP Section 3.2.2: \"the Period.SegmentList element shall not be present\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-88",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "DASH-IF IOP Section 3.2.2: \"If a Period contains multiple Adaptation Sets with value of the @contentType=\"video\" then at least one Adaptation Set shall contain a Role el-ement $<$Role scheme=\"urn:mpeg:dash:role:2011\" value=\"main\">\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-89",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Period",
+   "text": "DASH-IF IOP Section 3.10.4: \"All Representations in one Period shall either conform to a DASH Live profile or DASH On-Demand profile\", both Live and On-Demand profiles are signaled for the Period.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-90",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "If the content author signals the ability of Adaptation Set switching and as @segmentAlignment or @subsegmentAlignment are set to TRUE for one Adaptation Set, the (Sub)Segment alignment shall hold for all Representations in all Adaptation Sets for which the @id value is included in the @value attribute of the Supplemental descriptor.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-91",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with value of the @contentType=\"video\" the following attributes shall be present: @par\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-92",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.4: \"For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType=\"video\" the attribute @scanType shall either not be present or shall be set to 'progressive' \", violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-93",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with value of the @contentType=\"audio\" the following attributes shall be present: @lang\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-94",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with @contentType=\"video\" the following attributes shall be present: @maxWidth or @width\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-95",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with @contentType=\"video\" the following attributes shall be present: @maxHeight or @height\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-96",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with @contentType=\"video\" the following attributes shall be present: @maxFrameRate or @frameRate\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-97",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.2.2: For Live Profile @segmentAlignment shall be set to true for all Adaptation Sets",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-98",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.2.2.2: For On-Demand Profile @subSegmentAlignment shall be set to true for all Adaptation Sets",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-99",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "If a DASH-IF profile identifier is present, for the Adaptation Sets the mimeType shall be one of the six following type: \"video/mp4\", \"audio/mp4\", \"application/mp4\", \"application/ttml+xml\", \"text/vtt\" or \"image/jpeg\"",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-100",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-101",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.10.3: \"AdaptationSet@subsegmentAlignment SHALL be present and set to true\", not set appropriately.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-102",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "DASH-IF IOP Section 3.10.3: \"AdaptationSet@subsegmentStartsWithSAP SHALL be present and set to 1 or 2\", not set appropriately.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-103",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AdaptationSet",
+   "text": "HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - For HbbTV profile, @segmentAlignment shall be set to true for all Adaptation Sets as it is based on live profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-104",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "DASH-IF IOP (v3.3), Section 3.2.13 : \"In contrast to MPEG-DASH which does not prohibit the use of multiplexed Representations, in the DASH-IF IOPs one Adaptation Set always contains exactly a single media type.\".",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-105",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with value of the @contentType=\"video\" the following attributes shall be present: @maxWidth (or @width if all Representations have the same width), @maxHeight (or @height if all Representations have the same width), @maxFrameRate (or @frameRate if all Representations have the same width)\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-106",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Representation within an Adaptation Set with value of the @contentType=\"video\" the following attributes shall be present: @width, if not present in AdaptationSet element; @height, if not present in AdaptationSet element; @frameRate, if not present in AdaptationSet element; @sar\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-107",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "DASH-IF IOP Section 3.2.4: \"For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType=\"video\" the attribute @scanType shall either not be present or shall be set to 'progressive' \", violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-108",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "DASH-IF IOP Section 3.2.4: \"For any Representation within an Adaptation Set with value of the @contentType=\"audio\" the following elements and attributes shall be present: @audioSamplingRate, if not present in AdaptationSet element; AudioChannelConfiguration, if not present in AdaptationSet element\" violated here",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-109",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "If profiles contain dash-if profile identifier, \"codecs\" attribute on AdaptationSet level OR Representation level shall not contain more than one identifiers as a comma separated list",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-110",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "The @dependencyId attribute on the Enhancement Layer Representation shall refer to the Base Layer Representation @id attribute.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-111",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-112",
+   "source": "schematron/schematron.sch",
+   "context": "dash:Representation",
+   "text": "DASH-IF IOP 4.3 Section 3.2.1 - \"For on-demand profiles, @indexRange attribute shall be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-113",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SubRepresentation",
+   "text": "The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-114",
+   "source": "schematron/schematron.sch",
+   "context": "dash:SegmentBase",
+   "text": "DASH-IF IOP 4.3 Section 3.2.1 - \"For on-demand profiles, @indexRange attribute shall be present.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-115",
+   "source": "schematron/schematron.sch",
+   "context": "dash:ContentProtection",
+   "text": "The ContentProtection descriptors shall always be present in the AdaptationSet element and apply to all contained Representations.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-116",
+   "source": "schematron/schematron.sch",
+   "context": "dash:ContentProtection",
+   "text": "The ContentProtection descriptor for the mp4 protection scheme with @schemeIdUri 'urn:mpeg:dash:mp4protection:2011' and @value 'cenc' shall be present in the AdaptationSet element.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-117",
+   "source": "schematron/schematron.sch",
+   "context": "dash:ContentProtection",
+   "text": "The ContentProtection Descriptor for the mp4protection scheme shall contain the attribute @cenc:default_KID.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-118",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AudioChannelConfiguration",
+   "text": "If profile http://dashif.org/guidelines/dashif#ac-4 is used, then schemeIdUri attribute shall be tag:dolby.com,2014:dash:audio_channel_configuration:2011.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-119",
+   "source": "schematron/schematron.sch",
+   "context": "dash:AudioChannelConfiguration",
+   "text": "If profile http://dashif.org/guidelines/dashif#mpeg-h-3da is used, then schemeIdUri attribute shall be urn:mpeg:mpegB:cicp:ChannelConfiguration.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-120",
+   "source": "schematron/schematron.sch",
+   "context": "dash:EssentialProperty",
+   "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then value shall provide horizontal and vertical number of tiles separated by an 'x'.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-121",
+   "source": "schematron/schematron.sch",
+   "context": "dash:EssentialProperty",
+   "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then bandwidth shall be used to describe the tiling.'.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-122",
+   "source": "schematron/schematron.sch",
+   "context": "dash:EssentialProperty",
+   "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then height shall be used to describe the tiling.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-123",
+   "source": "schematron/schematron.sch",
+   "context": "dash:EssentialProperty",
+   "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then width shall be used to describe the tiling.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-1",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation",
+   "text": "@mimeType shall be common between all Representations in an Adaptation Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-2",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation",
+   "text": "@codecs should be common between all Representations in an Adaptation Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-3",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation",
+   "text": "@audioSamplingRate should be common between all Representations in an Adaptation Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-4",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation/dash:AudioChannelConfiguration",
+   "text": "audioChannelConfiguration should be common between all Representations in an Adaptation Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-5",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][dlb:isAuxiliaryStream(.)]",
+   "text": "All Adaptation Sets that refer to Auxiliary Audio streams may not contain the @lang attribute and Role, Accessibility, AudioChannelConfiguration descriptors",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-6",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:Preselection[dlb:isAdaptationSetAudio(.)]",
+   "text": "Every AC-4 or MPEG-H Audio Preselection element shall include at least one Role element using the scheme \"urn:mpeg:dash:role:2011\" as defined in ISO/IEC 23009-1:2019 [1].",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-7",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:Preselection[dlb:isAdaptationSetAudio(.)]",
+   "text": "If there is more than one audio Preselection associated with an audio bundle, at least one of the Preselection elements shall be tagged with an @value set to \"main\".",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-8",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:Preselection[dlb:isAdaptationSetAudio(.)]",
+   "text": "@preselectionComponents specifies the ids of the contained Adaptation Sets or Content Components that belong to this Preselection as white space separated list in processing order.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-9",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
+   "text": "AC-4 audio should be encoded using bitstream_version = 2 (is ).",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-10",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
+   "text": "The presentation_version field according to clause 6.2.1.3 of ETSI TS 103 190-2 [46] shall be set to the value 1.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-11",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
+   "text": "The md_compat field as defined by clause 6.3.2.2.3 of ETSI TS 103 190-2 [46] shall be less than or equal to three.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-12",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
+   "text": "An AC-4 elementary stream shall be encoded with a sampling rate of 48 kHz, 96 kHz or 192 kHz.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-DVB-13",
+   "source": "schematron/dvb-dash.sch",
+   "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
+   "text": "An Adaptation Set shall not contain audio with a frame rate > 60 Hz unless all video adaptationSets in the Period contain only video with a frame rate > 60 Hz.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-1",
+   "source": "schematron/ac4-generic.sch",
+   "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
+   "text": "The @codecs attribute shall conform to the syntax described in IETF RFC 6381. The value of the parameter shall be set to a dot-separated list of four parts of which the last three are two-digit hexadecimal numbers.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-2",
+   "source": "schematron/ac4-generic.sch",
+   "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
+   "text": "The value of the mimeType attribute shall be set to 'audio/mp4' or 'video/mp4'.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-3",
+   "source": "schematron/ac4-generic.sch",
+   "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
+   "text": "@audioSamplingRate shall be set to the sampling frequency derived from the parameters fs_index and dsi_sf_multiplier, contained in ac4_dsi_v1.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-4",
+   "source": "schematron/ac4-generic.sch",
+   "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
+   "text": "The value of the mimeType attribute shall be set to 'audio/mp4'.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-5",
+   "source": "schematron/ac4-generic.sch",
+   "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
+   "text": "The @startWithSAP value shall be set to '1'.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-6",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:Representation[matches(dlb:getNearestCodecString(.), 'ac-4\\.00','i')]",
+   "text": "The representation DASH element shall include an AudioChannelConfiguration DASH descriptor.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-7",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:Role[matches(dlb:getNearestCodecString(.), 'ac-4\\.00')]",
+   "text": "The value of Role (role) shall be main, alternate, commentary.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-8",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:SupplementalProperty[@schemeIdUri = 'tag:dolby.com,2016:dash:virtualized_content:2016'][matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')]",
+   "text": "The @value attribute of the immersive audio for headphones descriptor shall be 1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-9",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.00')][@schemeIdUri eq $NSDLB_acc2014]",
+   "text": "It is recommended to use exactly one AudioChannelConfiguration element with a schemeIdURI of or",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-10",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.00')][@schemeIdUri eq $NSDLB_acc2014]",
+   "text": "The value element shall contain a four-digit hexadecimal representation of the 16-bit field which describes the channel assignment of the referenced AC-4 elementary stream",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-11",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.00')][@schemeIdUri eq $NSDLB_acc2014]",
+   "text": "Use < schemeIdUri=\"\" value=\"\"/>",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-12",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][not(@schemeIdUri = ($NSDLB_acc2015,$NSMPEG_acc))]",
+   "text": "Unspecified schemeIdUri in AudioChannelConfiguration element",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-13",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSDLB_acc2015]",
+   "text": "It is recommended to use exactly one AudioChannelConfiguration element with a schemeIdURI of or",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-14",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSDLB_acc2015]",
+   "text": "The value element shall contain a six-digit hexadecimal representation of the 24-bit field which describes the channel assignment of the referenced AC-4 elementary stream",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-15",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSDLB_acc2015]",
+   "text": "For all AC-4 channel configurations that are mappable to the MPEG channel configuration scheme, the scheme described by @schemeIdUri=\"urn:mpeg:mpegB:cicp:ChannelConfiguration\" shall be used",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-16",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSMPEG_acc]",
+   "text": "It is recommended to use exactly one AudioChannelConfiguration element with a schemeIdURI of or",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "SCH-AC4-17",
+   "source": "schematron/ac4-generic.sch",
+   "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSMPEG_acc]",
+   "text": "Valid values are 1-7, 9-12, 14, 16-17, and 19",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-1",
+   "source": "CMAF/Segments/AudioMediaProfile.php",
+   "context": "Section A.3",
+   "text": "The maximum encoding parameters [..as per the table..] SHALL not be exceeded",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-2",
+   "source": "CMAF/Segments/AudioMediaProfile.php",
+   "context": "Section A.1.2",
+   "text": "Audio adaptation sets SHALL include at least one 'caac' representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-3",
+   "source": "CMAF/Segments/CompositionTimes.php",
+   "context": "Section 9.2.1",
+   "text": "Video tracks SHALL contain either 'trun(v1)' OR 'elst' combined with 'trun(v0)', but not both",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-4",
+   "source": "CMAF/Segments/DataOffsets.php",
+   "context": "Section 7.3.5",
+   "text": "All media samples in a CMAF Fragment SHALL be addressed by byte offsets in the 'trun' box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-5",
+   "source": "CMAF/Segments/Durations.php",
+   "context": "Section 7.3.2.2",
+   "text": "baseMediaDecodeTime SHALL be equal to the sum of all prior segments",
+   "status": "done",
+   "rules": [
+    "SEG-CONTINUITY"
+   ],
+   "note": "dashcheck checks continuity between consecutive checked segments"
+  },
+  {
+   "id": "CMAF-6",
+   "source": "CMAF/Segments/EncryptionProfile.php",
+   "context": "Section A.1.2",
+   "text": "Tracks SHALL NOT contain a track encryption box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-7",
+   "source": "CMAF/Segments/EncryptionProfile.php",
+   "context": "Section A.1.3",
+   "text": "Tracks SHALL be available in 'cenc' encryption",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-8",
+   "source": "CMAF/Segments/EncryptionProfile.php",
+   "context": "Section A.1.4",
+   "text": "Tracks SHALL be available in 'cbcs' encryption",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-9",
+   "source": "CMAF/Segments/HEVCComparison.php",
+   "context": "Section B.2.4",
+   "text": "CMAF Switching sets SHALL be constrained to include identical SPS information",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-10",
+   "source": "CMAF/Segments/HEVCComparison.php",
+   "context": "Section B.2.4",
+   "text": "CMAF Switching sets SHALL be constrained to include identical SEI nals",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-11",
+   "source": "CMAF/Segments/Initialization.php",
+   "context": "Section 7.3.5",
+   "text": "Each AVC CMAF Fragment SHALL be independently accessible",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-12",
+   "source": "CMAF/Segments/Initialization.php",
+   "context": "Section 7.3.5",
+   "text": "Each HEVC CMAF Fragment SHALL be independently accessible",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-13",
+   "source": "CMAF/Segments/Initialization.php",
+   "context": "Section 7.3.5",
+   "text": "Each Audio CMAF Fragment SHALL be independently accessible",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-14",
+   "source": "CMAF/Segments/LegacyInitialization.php",
+   "context": "Section 7.3.2.4",
+   "text": "The HEVCSampleEntry SHALL contain a 'colr' box with type 'nclx'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-15",
+   "source": "CMAF/Segments/LegacyInitialization.php",
+   "context": "Section 7.3.2.4",
+   "text": "Each encrypted Fragment SHALL be independently decryptable",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-16",
+   "source": "CMAF/Segments/MetaData.php",
+   "context": "Section 7.5.2",
+   "text": "When metadata is carried in a 'meta' box, it SHALL NOT occur at the file level",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-17",
+   "source": "CMAF/Segments/MetaData.php",
+   "context": "Section 7.5.2",
+   "text": "When metadata is carried in a 'udta' box, it SHALL NOT occur at the file level",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-18",
+   "source": "CMAF/Segments/Miscellaneous.php",
+   "context": "Section 7.3.9.1",
+   "text": "A CMAF switching set SHALL have only media type",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-19",
+   "source": "CMAF/Segments/SegmentIndex.php",
+   "context": "Section 7.3.3.3",
+   "text": "Each subsegment referenced in the 'sidx' box SHALL be a single fragment",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-20",
+   "source": "CMAF/Segments/SubtitleMediaProfile.php",
+   "context": "Section 7.3.4.1",
+   "text": "All CMAF subtitle tracks in a CMAF Switching Set SHALL conform to one CMAF Media Profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-21",
+   "source": "CMAF/Segments/Subtitles.php",
+   "context": "Section 7.5.20",
+   "text": "All CMAF fragments in a 'im1i' track SHALL contain a 'subs' box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-22",
+   "source": "CMAF/Segments/VideoMediaProfile.php",
+   "context": "Section A.2 (AVC) / B.6 (HEVC)",
+   "text": "The maximum encoding parameters [..as per the table..] SHALL not be exceeded",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "CMAF-23",
+   "source": "CMAF/Segments/VideoMediaProfile.php",
+   "context": "Section A.1.2",
+   "text": "Video adaptation sets SHALL include at least one 'cfhd' representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-1",
+   "source": "CTAWave/Segments/AudioProfile.php",
+   "context": "4.3.1",
+   "text": "Each WAVE audio Media profile SHALL conform to normative ref. listed in Table 1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-2",
+   "source": "CTAWave/Segments/AudioProfile.php",
+   "context": "4.1",
+   "text": "Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-3",
+   "source": "CTAWave/Segments/AudioProfile.php",
+   "context": "5 ",
+   "text": "If an audio track is included, the conforming (presentation will at least …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-4",
+   "source": "CTAWave/Segments/AudioProfile.php",
+   "context": "7.2.2",
+   "text": "Sequential sets SHALL conform to the same CMAF profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-5",
+   "source": "CTAWave/Segments/PeriodEncryption.php",
+   "context": "7.2.2",
+   "text": "Wave content SHALL contain one CENC scheme per program",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-6",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Sample entries in Sequential Switching Sets Shall not change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-7",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Framerate in Sequential Switching Sets Shall not change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-8",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Channel count in Sequential Switching Sets Shall not change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-9",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Picture Aspect Ration (PAR) in Sequential Switching Sets Shall not change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-10",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Track Ids can change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-11",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Timescale can change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-12",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Encryption scheme can change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-13",
+   "source": "CTAWave/Segments/SplicingPoints.php",
+   "context": "7.2.2 - Presentation Splicing",
+   "text": "Default KID can change at Splice points",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-14",
+   "source": "CTAWave/Segments/SubtitleProfile.php",
+   "context": "4.4.1",
+   "text": "Each WAVE Subtitle Media profile SHALL conform to normative ref. listed in Table 1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-15",
+   "source": "CTAWave/Segments/SubtitleProfile.php",
+   "context": "4.1",
+   "text": "Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-16",
+   "source": "CTAWave/Segments/SubtitleProfile.php",
+   "context": "5 ",
+   "text": "If a subtitle track is included, the conforming (presentation will at least …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-17",
+   "source": "CTAWave/Segments/SubtitleProfile.php",
+   "context": "7.2.2",
+   "text": "Sequential sets SHALL conform to the same CMAF profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-18",
+   "source": "CTAWave/Segments/VideoProfile.php",
+   "context": "4.2.1",
+   "text": "Each WAVE video Media profile SHALL conform to normative ref. listed in Table 1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-19",
+   "source": "CTAWave/Segments/VideoProfile.php",
+   "context": "4.1",
+   "text": "Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-20",
+   "source": "CTAWave/Segments/VideoProfile.php",
+   "context": "5 ",
+   "text": "If a video tracks is included, the conforming (presentation will at least …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVE-21",
+   "source": "CTAWave/Segments/VideoProfile.php",
+   "context": "7.2.2",
+   "text": "Sequential sets SHALL conform to the same CMAF profile",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "COMMON-1",
+   "source": "Common/MPD/Schematron.php",
+   "context": "Conformance Tool",
+   "text": "Schematron shall be able to run",
+   "status": "n/a",
+   "rules": [],
+   "note": "checks that the upstream Schematron engine runs"
+  },
+  {
+   "id": "COMMON-2",
+   "source": "Common/MPD/XSDValidation.php",
+   "context": "DASH 5th",
+   "text": "MPD SHALL be valid",
+   "status": "done",
+   "rules": [
+    "MPD-XSD",
+    "MPD-XML"
+   ],
+   "note": "dashcheck uses the 6th edition schema"
+  },
+  {
+   "id": "COMMON-3",
+   "source": "Common/MPD/XSDValidation.php",
+   "context": "DASH 2nd (DVB 2018)",
+   "text": "MPD SHALL be valid",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "COMMON-4",
+   "source": "Common/MPD/XSDValidation.php",
+   "context": "DASH 4th-amd1 (DVB 2019)",
+   "text": "MPD SHALL be valid",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "COMMON-5",
+   "source": "Common/Segments/ErrorMessages.php",
+   "context": "",
+   "text": "Segment analysis should not result in errors",
+   "status": "done",
+   "rules": [
+    "INIT-PARSE",
+    "SEG-PARSE"
+   ],
+   "note": ""
+  },
+  {
+   "id": "DVB-1",
+   "source": "DVB/MPD.php",
+   "context": "Unknown",
+   "text": "MPD@minimumUpdatePeriod SHOULD have a value of 1 second or higher",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-2",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 7.2.1.1",
+   "text": "A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-3",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.3.1",
+   "text": "The AudioChannelConfiguration shall be compliant with the dolby scheme",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-4",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.1.2",
+   "text": "Each audio AdaptationSet shall include at least one Role Element",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-5",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.1.1",
+   "text": "All audio Representations SHALL have the attributes and elements in Table 4",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-6",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.1.1",
+   "text": "@mimeType SHALL be common for all audio Representations within an AdaptationSet",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-7",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.1.1",
+   "text": "@codec SHOULD be common for all audio Representations within an Adapation Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-8",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.1.1",
+   "text": "@audioSamplingRate SHOULD be common for all audio Representations within an Adapation Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-9",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.1.1",
+   "text": "AudioChannelConfiguration SHOULD be common for all audio Representations within an Adapation Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-10",
+   "source": "DVB/MPD/AudioChecks.php",
+   "context": "Section 6.6.3",
+   "text": "An audio fallback set shall have @value equal to the @id of the base set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-11",
+   "source": "DVB/MPD/BandwidthChecks.php",
+   "context": "Section 11.3.0",
+   "text": "Audio should be 20% or less of the total stream bandwith",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-12",
+   "source": "DVB/MPD/Codecs.php",
+   "context": "Codec Information",
+   "text": "The codec should be supported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-13",
+   "source": "DVB/MPD/ContentProtectionChecks.php",
+   "context": "Section 8.3",
+   "text": "ContentProtection descriptor(s) shall be placed at the AdaptationSet level",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-14",
+   "source": "DVB/MPD/Dimensions.php",
+   "context": "Section 4.5",
+   "text": "The MPD size SHALL NOT exceed 256 Kbytes",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-15",
+   "source": "DVB/MPD/Dimensions.php",
+   "context": "Section 4.5",
+   "text": "The MPD has a maximum of 64 periods",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-16",
+   "source": "DVB/MPD/Dimensions.php",
+   "context": "Section 4.5",
+   "text": "Each Period has a maximum of 16 Adaptation Sets",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-17",
+   "source": "DVB/MPD/Dimensions.php",
+   "context": "Section 4.5",
+   "text": "Each Adaptation Set has a maximum of 16 Representations",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-18",
+   "source": "DVB/MPD/EventChecks.php",
+   "context": "Section 9.1.2.1",
+   "text": "Events SHALL have @presentationTime set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-19",
+   "source": "DVB/MPD/EventChecks.php",
+   "context": "Section 9.1.2.1",
+   "text": "The event data shall be valid XML, either escaped or place in a CDATA section",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-20",
+   "source": "DVB/MPD/MetricReporting.php",
+   "context": "Section 10.12.3.3",
+   "text": "Reporting URL is required to be an absolute HTTP(S) url",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-21",
+   "source": "DVB/MPD/MetricReporting.php",
+   "context": "Section 10.12.3.4",
+   "text": "Probability - if present - is required to be an integer between 1 and 1000",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-22",
+   "source": "DVB/MPD/PeriodConstraints.php",
+   "context": "Section 4.2.2",
+   "text": "'The Period.SegmentList element SHALL NOT be present'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-23",
+   "source": "DVB/MPD/PeriodConstraints.php",
+   "context": "Section 4.2.2",
+   "text": "'The Period.SegmentTemplate element SHALL NOT be present'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-24",
+   "source": "DVB/MPD/PeriodConstraints.php",
+   "context": "Section 4.2.2",
+   "text": "Each Period element shall conform to either 4.2.4 or 4.2.6",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-25",
+   "source": "DVB/MPD/PeriodConstraints.php",
+   "context": "Section 4.2.2",
+   "text": "At least one Adaptation Set SHALL cary a 'main' role",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-26",
+   "source": "DVB/MPD/PeriodConstraints.php",
+   "context": "Section 6.1.2",
+   "text": "At least one Adaptation Set SHALL cary a 'main' role",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-27",
+   "source": "DVB/MPD/Profiles.php",
+   "context": "Section 11.1",
+   "text": "Each Representation @profile SHALL include at least one of those in section 4.1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-28",
+   "source": "DVB/MPD/Profiles.php",
+   "context": "Section 11.1",
+   "text": "Each representation @profile SHALL include either section 4.2.5 or section 4.2.8",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-29",
+   "source": "DVB/MPD/Profiles.php",
+   "context": "Section 11.1",
+   "text": "Each representation shall have only one segment",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-30",
+   "source": "DVB/MPD/Resolution.php",
+   "context": "Codec Information",
+   "text": "The resolution of the stream should conform to table 10.3",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-31",
+   "source": "DVB/MPD/SCTEChecks.php",
+   "context": "Section 9.1.9",
+   "text": "The @value attribute SHOULD be absent",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-32",
+   "source": "DVB/MPD/SCTEChecks.php",
+   "context": "Section 9.1.9",
+   "text": "The @presentationTimeOffset attribute MAY be present",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-33",
+   "source": "DVB/MPD/SCTEChecks.php",
+   "context": "Section 9.1.9",
+   "text": "The @timeScale attribute shall be set to an integer multiple of the video framerate",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-34",
+   "source": "DVB/MPD/SCTEChecks.php",
+   "context": "Section 9.1.9",
+   "text": "The @presentationTime of an event SHALL be set to the splice time of the enclosed marker",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-35",
+   "source": "DVB/MPD/SCTEChecks.php",
+   "context": "Section 9.1.9",
+   "text": "The @duration of an event SHALL be defined [..] and SHALL NOT be 0xFFFFFFFF",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-36",
+   "source": "DVB/MPD/SCTEChecks.php",
+   "context": "Section 9.1.9",
+   "text": "The @messageData of an event SHALL be absent",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-37",
+   "source": "DVB/MPD/SCTEChecks.php",
+   "context": "Section 9.1.9",
+   "text": "The @contentEncoding of an event is absent",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-38",
+   "source": "DVB/MPD/SubtitleChecks.php",
+   "context": "Section 7.1.1",
+   "text": "The @codecs attribute shall begin with 'stpp' to indicate the use of XML subtitles",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-39",
+   "source": "DVB/MPD/TLSBitrate.php",
+   "context": "Bitrate information",
+   "text": "Terminal which does not support UHD video (max 12 Mbit/s)",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-40",
+   "source": "DVB/MPD/TLSBitrate.php",
+   "context": "Bitrate information",
+   "text": "Terminal which does not support UHD, but not UHD HFR video (max 39 Mbit/s)",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-41",
+   "source": "DVB/MPD/TLSBitrate.php",
+   "context": "Bitrate information",
+   "text": "Terminal which does supports UHD HFR video (max 51 Mbit/s)",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-42",
+   "source": "DVB/MPD/UTCTiming.php",
+   "context": "Section 4.7.2",
+   "text": "The MPD SHOULD contain at least one UTCTiming element with the @schemeIdUri attribute set to [...]",
+   "status": "partial",
+   "rules": [
+    "MPD-DYN-UTCTIMING"
+   ],
+   "note": "dashcheck only checks dynamic MPDs and accepts any 2014 HTTP scheme"
+  },
+  {
+   "id": "DVB-43",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "MPD@timeShiftBufferDepth shall not change",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-44",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "MPD@availabilityStartTime shall not change",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-45",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "MPD@maxSegmentDuration shall not change to a larger duration",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-46",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@id shall not change for a corresponding Period",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-47",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@start shall not change for a corresponding Period",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-48",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@AssetIdentifier shall not change for a corresponding Period",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-49",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@id shall not change for a corresponding AdaptationSet",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-50",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@id shall not change for a corresponding Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-51",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "Role Element shall not change for a corresponding AdaptationSet or corresponding Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-52",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "AudioConfiguration Element shall not change for a corresponding AdaptationSet …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-53",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@contentType shall not change for a corresponding AdaptationSet or corresponding Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-54",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@codecs shall not change for a corresponding AdaptationSet or corresponding Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-55",
+   "source": "DVB/MPD/UpdateConstraints.php",
+   "context": "Section 4.8.3",
+   "text": "@lang shall not change for a corresponding AdaptationSet or corresponding Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-56",
+   "source": "DVB/MPD/VideoChecks.php",
+   "context": "Section 7.2.1.1",
+   "text": "A fontdownload descriptor SHALL only be placed in AdaptationSets containing subtitles",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-57",
+   "source": "DVB/MPD/VideoChecks.php",
+   "context": "Section 4.4",
+   "text": "Elements and attributes are expected to be present [..] to enable selection and switching.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-58",
+   "source": "DVB/MPD/VideoChecks.php",
+   "context": "Section 4.4",
+   "text": "@scanType SHALL be present [..] if interlaced pictures are used in any [..representation]",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-59",
+   "source": "DVB/MPD/VideoChecks.php",
+   "context": "Section 11.2.2",
+   "text": "The frame rates used should be integer multiples of eachother",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-60",
+   "source": "DVB/Segments/AVS3BitStream.php",
+   "context": "5.4.6",
+   "text": "The value of the signalled ColourPrimaries Property in the MPD SHALL match …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-61",
+   "source": "DVB/Segments/AVS3BitStream.php",
+   "context": "5.4.6",
+   "text": "The value of the signalled MatrixCoefficients Property in the MPD SHALL match …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-62",
+   "source": "DVB/Segments/AVS3BitStream.php",
+   "context": "5.4.6",
+   "text": "The value of the signalled TransferCharacteristics Property in the MPD SHALL match …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-63",
+   "source": "DVB/Segments/AVS3BitStream.php",
+   "context": "5.4.7",
+   "text": "Use of HLG10 within in an AdapationSet shall be signalled according to this section",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-64",
+   "source": "DVB/Segments/AVS3BitStream.php",
+   "context": "5.4.8",
+   "text": "Use of PQ10 within in an AdapationSet shall be signalled according to this section",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-65",
+   "source": "DVB/Segments/BitStream.php",
+   "context": "5.2.2",
+   "text": "The value of the @codecs attribute shall be set in accordance with ISO/IEC 14496-15",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-66",
+   "source": "DVB/Segments/BitStream.php",
+   "context": "5.2.2",
+   "text": "The value of the signalled ColourPrimaries Property in the MPD SHALL match …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-67",
+   "source": "DVB/Segments/BitStream.php",
+   "context": "5.2.2",
+   "text": "The value of the signalled MatrixCoefficients Property in the MPD SHALL match …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-68",
+   "source": "DVB/Segments/BitStream.php",
+   "context": "5.2.2",
+   "text": "The value of the signalled TransferCharacteristics Property in the MPD SHALL match …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-69",
+   "source": "DVB/Segments/BitStream.php",
+   "context": "5.2.6",
+   "text": "Use of HLG10 within in an AdapationSet shall be signalled according to this section",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-70",
+   "source": "DVB/Segments/BitStream.php",
+   "context": "5.2.7",
+   "text": "Use of PQ10 within in an AdapationSet shall be signalled according to this section",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-71",
+   "source": "DVB/Segments/BoxCount.php",
+   "context": "Section 4.3",
+   "text": "The 'moof' box shall contain only one 'traf' box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-72",
+   "source": "DVB/Segments/BoxCount.php",
+   "context": "Section 4.3",
+   "text": "The segment shall contain only one 'sidx' box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-73",
+   "source": "DVB/Segments/Codecs.php",
+   "context": "5.1.2",
+   "text": "Content SHOULD be offered using 'avc3' or 'avc4'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-74",
+   "source": "DVB/Segments/Codecs.php",
+   "context": "5.1.2",
+   "text": "All information necessary to decode any Segment shall be provided in the init segment",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-75",
+   "source": "DVB/Segments/ContentProtection.php",
+   "context": "DRM",
+   "text": "Content Protection SHALL contain a ContentProtectionDescriptor",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-76",
+   "source": "DVB/Segments/ContentProtection.php",
+   "context": "DRM",
+   "text": "PSSH Boxes SHOULD exist in either the MPD or the Initialization Segment",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-77",
+   "source": "DVB/Segments/ContentProtection.php",
+   "context": "DRM",
+   "text": "MPD DRM System information",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-78",
+   "source": "DVB/Segments/ContentProtection.php",
+   "context": "DRM",
+   "text": "The scheme SHOULD be set to 'cenc'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-79",
+   "source": "DVB/Segments/ContinuousPeriods.php",
+   "context": "Section 10.5.2.3",
+   "text": "Continous adaptation sets shall be signalled accordingly",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-80",
+   "source": "DVB/Segments/ContinuousPeriods.php",
+   "context": "Section 10.5.2.3",
+   "text": "All Representations in the Adaptation Set in the first Period shall share the same value EPT1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-81",
+   "source": "DVB/Segments/ContinuousPeriods.php",
+   "context": "Section 10.5.2.3",
+   "text": "All Representations in the Adaptation Set in a subsequent Period shall share the same value EPT2",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-82",
+   "source": "DVB/Segments/CrossAudio.php",
+   "context": "6.1.1",
+   "text": "@mimeType SHALL match the mimetype derived from the segments",
+   "status": "partial",
+   "rules": [
+    "XCHK-HANDLER"
+   ],
+   "note": "dashcheck compares the track handler with @mimeType"
+  },
+  {
+   "id": "DVB-83",
+   "source": "DVB/Segments/CrossAudio.php",
+   "context": "6.1.1",
+   "text": "@audioSamplingRate SHALL match the sample rate derived from the segments",
+   "status": "done",
+   "rules": [
+    "XCHK-SAMPLERATE"
+   ],
+   "note": "dashcheck reports a warning"
+  },
+  {
+   "id": "DVB-84",
+   "source": "DVB/Segments/CrossAudio.php",
+   "context": "6.1.1",
+   "text": "AudioChannelConfiguration SHALL match the configuration derived from the segments",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-85",
+   "source": "DVB/Segments/CrossCodecs.php",
+   "context": "5.x / 6.x",
+   "text": "For each representation, @codecs SHALL be match the codec derived from the segments",
+   "status": "done",
+   "rules": [
+    "XCHK-CODECS",
+    "XCHK-CODECS-DETAIL"
+   ],
+   "note": ""
+  },
+  {
+   "id": "DVB-86",
+   "source": "DVB/Segments/Durations.php",
+   "context": "4.5",
+   "text": "Each subsegment shall have a duration of not more than 15 seconds",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-87",
+   "source": "DVB/Segments/Durations.php",
+   "context": "4.5",
+   "text": "Each subsegment shall be at least 1 second",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-88",
+   "source": "DVB/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "The codec should be supported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-89",
+   "source": "DVB/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Profile used for AVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-90",
+   "source": "DVB/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Level used for AVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-91",
+   "source": "DVB/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Tier used for HEVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-92",
+   "source": "DVB/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Bit depth used for HEVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-93",
+   "source": "DVB/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Profile used for HEVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-94",
+   "source": "DVB/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Level used for HEVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-95",
+   "source": "DVB/Segments/SAPTypes.php",
+   "context": "5.1.2",
+   "text": "Segments shall start with SAP types 1 or 2",
+   "status": "partial",
+   "rules": [
+    "SEG-SAP"
+   ],
+   "note": "dashcheck requires a sync sample only when @startWithSAP is 1 or 2"
+  },
+  {
+   "id": "DVB-96",
+   "source": "DVB/Segments/SEILocations.php",
+   "context": "5.2.4",
+   "text": "For HEVC streams, SEI messages are placed according to ETSI TS 101 154 - L.3.3.8",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-97",
+   "source": "DVB/Segments/SEILocations.php",
+   "context": "5.2.4",
+   "text": "For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-98",
+   "source": "DVB/Segments/Subtitle.php",
+   "context": "Subtitles",
+   "text": "For subtitle media, handler SHALL be 'subt'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-99",
+   "source": "DVB/Segments/Subtitle.php",
+   "context": "Subtitles",
+   "text": "Sample entry shall be 'stpp'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-100",
+   "source": "DVB/Segments/Subtitle.php",
+   "context": "Subtitles",
+   "text": "Sample entry shall countain a namespace",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-101",
+   "source": "DVB/Segments/SwitchableRepresentation.php",
+   "context": "4.3",
+   "text": "Initialization segment for Representations with an Adaptation Set SHALL have the same …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-102",
+   "source": "DVB/Segments/SwitchableRepresentation.php",
+   "context": "4.3",
+   "text": "Initialization segment for Representations with an Adaptation Set SHALL have the same …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DVB-103",
+   "source": "DVB/Segments/SwitchableRepresentation.php",
+   "context": "8.3",
+   "text": "Initialization segment for Representations with an Adaptation Set SHALL have the same …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DOLBY-1",
+   "source": "Dolby/Segments/TocDac4.php",
+   "context": "E.6.3 [13197]",
+   "text": "Bitstream version must match between TOC and DAC4",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DOLBY-2",
+   "source": "Dolby/Segments/TocDac4.php",
+   "context": "E.6.4 [14309]",
+   "text": "FS index must match between TOC and DAC4",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DOLBY-3",
+   "source": "Dolby/Segments/TocDac4.php",
+   "context": "E.6.5 [14209]",
+   "text": "Framerate index version must match between TOC and DAC4",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DOLBY-4",
+   "source": "Dolby/Segments/TocDac4.php",
+   "context": "E.6.6 [14215]",
+   "text": "Number of presentations must match between TOC and DAC4",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "DOLBY-5",
+   "source": "Dolby/Segments/TocDac4.php",
+   "context": "E.6.7 [14221]",
+   "text": "Short program id must match between TOC and DAC4",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "HBBTV-1",
+   "source": "HbbTV/MPD.php",
+   "context": "Unknown",
+   "text": "Inherit DVB legacy checks",
+   "status": "n/a",
+   "rules": [],
+   "note": "marker in the upstream tool: HbbTV inherits the DVB checks"
+  },
+  {
+   "id": "HBBTV-2",
+   "source": "HbbTV/MPD.php",
+   "context": "Codec Information",
+   "text": "The codec should be supported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "HBBTV-3",
+   "source": "HbbTV/Segments/Dependencies.php",
+   "context": "Unknown",
+   "text": "Inherit DVB legacy checks",
+   "status": "n/a",
+   "rules": [],
+   "note": "marker in the upstream tool: HbbTV inherits the DVB checks"
+  },
+  {
+   "id": "HBBTV-4",
+   "source": "HbbTV/Segments/Dependencies.php",
+   "context": "Unknown",
+   "text": "Inherit DVB legacy checks",
+   "status": "n/a",
+   "rules": [],
+   "note": "marker in the upstream tool: HbbTV inherits the DVB checks"
+  },
+  {
+   "id": "HBBTV-5",
+   "source": "HbbTV/Segments/Dependencies.php",
+   "context": "DRM",
+   "text": "Inherit DVB legacy checks",
+   "status": "n/a",
+   "rules": [],
+   "note": "marker in the upstream tool: HbbTV inherits the DVB checks"
+  },
+  {
+   "id": "HBBTV-6",
+   "source": "HbbTV/Segments/Dependencies.php",
+   "context": "DRM",
+   "text": "Inherit DVB legacy checks",
+   "status": "n/a",
+   "rules": [],
+   "note": "marker in the upstream tool: HbbTV inherits the DVB checks"
+  },
+  {
+   "id": "HBBTV-7",
+   "source": "HbbTV/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "The codec should be supported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "HBBTV-8",
+   "source": "HbbTV/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Profile used for AVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "HBBTV-9",
+   "source": "HbbTV/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "Level used for AVC must be suported by the specification",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "HBBTV-10",
+   "source": "HbbTV/Segments/LegacyCodecs.php",
+   "context": "",
+   "text": "All info necessary to decode any audio segment shall be provided in the Initialization segment",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-1",
+   "source": "IOP/MPD/Common.php",
+   "context": "3.2.7.4",
+   "text": "MPD fields having datatype xs:duration shall not use year or month units",
+   "status": "done",
+   "rules": [
+    "MPD-DURATION-YM"
+   ],
+   "note": ""
+  },
+  {
+   "id": "IOP-2",
+   "source": "IOP/MPD/Live.php",
+   "context": "3.10.3",
+   "text": "SegmentTemplate@media attribute SHALL be present",
+   "status": "done",
+   "rules": [
+    "ADDR-TEMPLATE"
+   ],
+   "note": ""
+  },
+  {
+   "id": "IOP-3",
+   "source": "IOP/MPD/MixedOnDemand.php",
+   "context": "3.10.4",
+   "text": "@profiles signalling SHALL be present in each Period",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-4",
+   "source": "IOP/MPD/OnDemand.php",
+   "context": "3.10.3",
+   "text": "SegmentTemplate@indexRange attribute SHALL be present",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-5",
+   "source": "IOP/Segments/AVC.php",
+   "context": "6.2.5.2",
+   "text": "All AVC representations SHALL be encoded using avc3",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-6",
+   "source": "IOP/Segments/AVC.php",
+   "context": "6.2.5.2",
+   "text": "All AVC representations SHALL include an 'avcC' box containing SPS and PPS NALs",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-7",
+   "source": "IOP/Segments/CrossAdaptation.php",
+   "context": "6.2.5.2",
+   "text": "The level of the adaptation set SHALL match the maximum of the corresponding representations",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-8",
+   "source": "IOP/Segments/CrossAdaptation.php",
+   "context": "6.2.5.2",
+   "text": "The profile of the adaptation set SHALL match the maximum of the corresponding representations",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-9",
+   "source": "IOP/Segments/CrossAdaptation.php",
+   "context": "6.2.5.2",
+   "text": "The edit list, if present in one, SHALL be present in all representations",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-10",
+   "source": "IOP/Segments/HEVC.php",
+   "context": "6.2.5.2",
+   "text": "All HEVC representations SHALL be encoded using hev1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-11",
+   "source": "IOP/Segments/HEVC.php",
+   "context": "6.2.5.2",
+   "text": "All HEVC representations SHALL include an 'hvcC' box containing SPS, PPS and VPS NALs",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-12",
+   "source": "IOP/Segments/OnDemand.php",
+   "context": "3.10.3.2",
+   "text": "Only a single 'sidx' box shall be present",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-13",
+   "source": "IOP/Segments/OnDemand.php",
+   "context": "3.10.3.2",
+   "text": "Each representation SHALL have on segment",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-14",
+   "source": "IOP/Segments/Video.php",
+   "context": "6.2.5.2",
+   "text": "Edit lists SHALL NOT be present unless On-Demand profile is signalled",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "IOP-15",
+   "source": "IOP/Segments/Video.php",
+   "context": "6.2.5.2",
+   "text": "The composition time and decoded time for the first sample SHALL match",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-1",
+   "source": "LowLatency/MPD.php",
+   "context": "9.X.4.1",
+   "text": "Media presentation offering Low Latency SHOULD be signalled with …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-2",
+   "source": "LowLatency/MPD/InbandEventStream.php",
+   "context": "9.X.4.2",
+   "text": "Inband Event streams carrying MPD validity expiration events SHOULD be present",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-3",
+   "source": "LowLatency/MPD/InbandEventStream.php",
+   "context": "9.X.4.2",
+   "text": "If Inband Event streams carrying MPD validity expiration events are used, @value SHALL be set to 1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-4",
+   "source": "LowLatency/MPD/LeapSecond.php",
+   "context": "9.X.4.2",
+   "text": "LeapSecondInformation SHOULD be provided",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-5",
+   "source": "LowLatency/MPD/ProducerReferenceTime.php",
+   "context": "9.X.4.3",
+   "text": "At least one ProducerTimeReference SHALL be present",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-6",
+   "source": "LowLatency/MPD/ProducerReferenceTime.php",
+   "context": "9.X.4.3",
+   "text": "Each ProducerTimeReference SHALL have a unique @id",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-7",
+   "source": "LowLatency/MPD/SegmentURL.php",
+   "context": "9.X.4.3",
+   "text": "Either (constrained) SegmentTemplate or SegmentTimeline shall be present",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-8",
+   "source": "LowLatency/MPD/SegmentURL.php",
+   "context": "9.X.4.3",
+   "text": "SegmentTemplate will have @duration set and have @media containing $Number$",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-9",
+   "source": "LowLatency/MPD/SegmentURL.php",
+   "context": "9.X.4.3",
+   "text": "SegmentTimeline will have @media containing $Number$ and $Time$",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-10",
+   "source": "LowLatency/MPD/ServiceDescription.php",
+   "context": "9.X.4.2",
+   "text": "At least one valid ServiceDescription element SHALL be present",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-11",
+   "source": "LowLatency/MPD/UTCTiming.php",
+   "context": "9.X.4.2",
+   "text": "At least one UTC timing description element SHALL be present with a correct @schemIdUri",
+   "status": "partial",
+   "rules": [
+    "MPD-DYN-UTCTIMING",
+    "MPD-UTCTIMING-SCHEME"
+   ],
+   "note": "not tied to low-latency signalling"
+  },
+  {
+   "id": "LL-12",
+   "source": "LowLatency/Segments/ChunkedAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "Each Segment SHALL Conform to a CMAF Fragment",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-13",
+   "source": "LowLatency/Segments/ChunkedAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "EMSG box constraints",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-14",
+   "source": "LowLatency/Segments/ChunkedAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "Each Segment MAY (and typically SHOULD) contain more than one CMAF chunk",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-15",
+   "source": "LowLatency/Segments/ChunkedAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "A Resync element SHOULD be assigned to each Representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-16",
+   "source": "LowLatency/Segments/ChunkedAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "@availabilityTimeOffset SHALL be present for each represention",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-17",
+   "source": "LowLatency/Segments/ChunkedAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "@availabilityTimeComple SHALL be present and set to 'FALSE' for each representation",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-18",
+   "source": "LowLatency/Segments/ChunkedCrossAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "One of the following should hold",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-19",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "@contentType shall correspond with the hdlr type",
+   "status": "done",
+   "rules": [
+    "XCHK-HANDLER"
+   ],
+   "note": ""
+  },
+  {
+   "id": "LL-20",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "@mimeType SHALL be either '<@contentType>/mp4' or <#contentType>/mp4, profiles='cmfc'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-21",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "@maxWidth SHOULD correspond to the width in the 'tkhd' box",
+   "status": "partial",
+   "rules": [
+    "XCHK-SIZE"
+   ],
+   "note": "dashcheck compares @width with the sample entry"
+  },
+  {
+   "id": "LL-22",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "@maxHeight SHOULD correspond to the height in the 'tkhd' box",
+   "status": "partial",
+   "rules": [
+    "XCHK-SIZE"
+   ],
+   "note": "dashcheck compares @height with the sample entry"
+  },
+  {
+   "id": "LL-23",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "@codecs shall correspond with the sample descriptor type",
+   "status": "done",
+   "rules": [
+    "XCHK-CODECS",
+    "XCHK-CODECS-DETAIL"
+   ],
+   "note": ""
+  },
+  {
+   "id": "LL-24",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "If the content is protected, a ContentProtection element SHALL be present and set appropriately",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-25",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "@timescale SHALL correspond to the timescale in the 'mdhd' box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-26",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.4",
+   "text": "Either segmentAlignment or subsegmentAlignment SHALL be set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-27",
+   "source": "LowLatency/Segments/DASHProfile.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "Event message streams MAY be signalled with InbandEventStream elements",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-28",
+   "source": "LowLatency/Segments/EventMessages.php",
+   "context": "9.X.4.5",
+   "text": "All 'emsg' boxes inserted [..] after the start of the first CMAF chunk …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-29",
+   "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "Resync element SHALL/SHOULD be present (conditional)",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-30",
+   "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "Resync element type SHALL be valid",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-31",
+   "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "Resync element @marker SHALL be 'true'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-32",
+   "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "Resync element @dT SHOULD be lower than half the latency, and SHALL not exceed the target latency",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-33",
+   "source": "LowLatency/Segments/ResyncCrossAdaptation.php",
+   "context": "9.X.4.5",
+   "text": "@qualityRanking should be used",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-34",
+   "source": "LowLatency/Segments/SegmentAdaptation.php",
+   "context": "9.X.4.4",
+   "text": "Each Segment SHOULD include only a single 'moof' box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-35",
+   "source": "LowLatency/Segments/SegmentAdaptation.php",
+   "context": "9.X.4.4",
+   "text": "A segment with a single 'moof' box may carry an 'smds' brand",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-36",
+   "source": "LowLatency/Segments/SegmentAdaptation.php",
+   "context": "9.X.4.4",
+   "text": "A segment SHALL NOT exceed 50% and SHOULD not exceed 30% of the tareget latency",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-37",
+   "source": "LowLatency/Segments/SegmentOrChunked.php",
+   "context": "9.X.4.3",
+   "text": "A Low Latency Adaptation Set SHALL either be a Segment or a Chunked Set",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-38",
+   "source": "LowLatency/Segments/SegmentTiming.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The tolerance for the EPT relative to the first stegment SHALL NOT exceed 50%",
+   "status": "done",
+   "rules": [
+    "SEG-EPT"
+   ],
+   "note": "for all number-based streams, not only low latency"
+  },
+  {
+   "id": "LL-39",
+   "source": "LowLatency/Segments/SegmentTiming.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "If an 'S' elements and it predecessor share the same duration, they SHOULD be combined",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-40",
+   "source": "LowLatency/Segments/SegmentTiming.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "If each chunk is an addressable object, '@k SHALL be present in the SegmentTimeline",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-41",
+   "source": "LowLatency/Segments/SegmentTiming.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 't' attribute SHALL correspond to the EPT of the corresponding segment",
+   "status": "done",
+   "rules": [
+    "SEG-EPT",
+    "SEG-EPT-CTO"
+   ],
+   "note": "for all SegmentTimeline streams, not only low latency"
+  },
+  {
+   "id": "LL-42",
+   "source": "LowLatency/Segments/SegmentTiming.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'd' attribute SHALL correspond to the duration of the corresponding segment",
+   "status": "done",
+   "rules": [
+    "SEG-DURATION"
+   ],
+   "note": "for all SegmentTimeline streams, not only low latency"
+  },
+  {
+   "id": "LL-43",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "Exactly one 'sidx' box shall be used",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-44",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box shall be placed before any 'moof' boxes",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-45",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box reference_ID SHALL be equal to the track id",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-46",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box timescale SHALL be identical to the one in the 'mdhd' box",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-47",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box earliest presentation time SHALL match the segment EPT",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-48",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box reference count SHALL match the number of 'mmof' boxes",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-49",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box reference_type shall be set to 0",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-50",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box startwithsap shall be set to 1",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-51",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box sapType shall be set to 1 or 2",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-52",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The 'sidx' box sapDeltaTime shall be set to 0",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-53",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The baseMediaDecodeTime shall be 0",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "LL-54",
+   "source": "LowLatency/Segments/SelfInitializingSidx.php",
+   "context": "9.X.4.5 => MPEG-DASH 8.X.3",
+   "text": "The list of compatible brands SHALL contain 'dash'",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-1",
+   "source": "WaveHLSInterop/Segments/AddressableMediaObject.php",
+   "context": "4.1.2 - Basic On-Demand and Live Streaming",
+   "text": "CMAF Track Files [..] SHALL contain a single 'sidx' following the CMAF header …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-2",
+   "source": "WaveHLSInterop/Segments/Bitrate.php",
+   "context": "4.1.2 -  Basic On-Demand and Live Streaming",
+   "text": "The Average Bitrate of a CMAF Fragment [..] SHOULD be within 10% of the Average Bitrate …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-3",
+   "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
+   "context": "",
+   "text": "The common encryption `cbcs` scheme SHALL be used for encryption",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-4",
+   "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
+   "context": "",
+   "text": "Constant 16-byte Initialization Vectors SHALL be used",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-5",
+   "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
+   "context": "",
+   "text": "An alternative using the `cenc` scheme MAY be produced",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-6",
+   "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
+   "context": "",
+   "text": "Constant 8-byte Initialization Vectors SHALL be used for 'cenc' encrypted material",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-7",
+   "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
+   "context": "",
+   "text": "Sample auxiliary information, if present, SHALL be addressed by [.. a 'saio' box]",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-8",
+   "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
+   "context": "",
+   "text": "Video components SHALL be encrypted with a 1:9 pattern",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-9",
+   "source": "WaveHLSInterop/Segments/EncryptionScheme.php",
+   "context": "",
+   "text": "Audio components SHALL be encrypted with a 10:0 pattern",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-10",
+   "source": "WaveHLSInterop/Segments/KeyRotation.php",
+   "context": "4.6.2 - Rotation of Encryption Keys",
+   "text": "CMAF Segments [.. with differing encryption keys] SHALL provide an 'sbgp' box [..]",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-11",
+   "source": "WaveHLSInterop/Segments/KeyRotation.php",
+   "context": "4.6.2 - Rotation of Encryption Keys",
+   "text": "CMAF Segments [.. with differing encryption keys] SHALL provide a 'pssh' box [..]",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-12",
+   "source": "WaveHLSInterop/Segments/SegmentEncryption.php",
+   "context": "4.3.2 - Encrypted Media Presentations",
+   "text": "Any individual CMAF Segment SHALL have a single encryption key",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-13",
+   "source": "WaveHLSInterop/Segments/SegmentEncryption.php",
+   "context": "4.3.2 - Encrypted Media Presentations",
+   "text": "Any individual CMAF Segment SHALL have a single Initialization Vector",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-14",
+   "source": "WaveHLSInterop/Segments/SplicingPoints.php",
+   "context": "4.4.2 - Presentation Splicing",
+   "text": "CMAF Fragment boundaries SHALL be created at all splice points.",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-15",
+   "source": "WaveHLSInterop/Segments/SplicingPoints.php",
+   "context": "4.4.2 - Presentation Splicing",
+   "text": "CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-16",
+   "source": "WaveHLSInterop/Segments/TextComponentConstraints.php",
+   "context": "4.1.2 - Basic On-Demand and Live Streaming",
+   "text": "Text components SHALL be packaged in ISMC1, ISMC1.1 or WebVTT Tracks",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-17",
+   "source": "WaveHLSInterop/Segments/TimedEventData.php",
+   "context": "4.5.2 - Carriage of Timed Event Data",
+   "text": "All 'emsg' boxes inserted [..] after the start of the first CMAF chunk …",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-18",
+   "source": "WaveHLSInterop/Segments/TrackRoles.php",
+   "context": "",
+   "text": "Track roles SHALL be stored in one or more 'kind' boxes [..]",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  },
+  {
+   "id": "WAVEHLS-19",
+   "source": "WaveHLSInterop/Segments/TrackRoles.php",
+   "context": "",
+   "text": "Track roles SHALL be representaed by the DASH Role scheme when possible",
+   "status": "todo",
+   "rules": [],
+   "note": ""
+  }
+ ]
+}

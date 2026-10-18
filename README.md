@@ -74,9 +74,15 @@ internal DTD entities expanded.
 
 ## Status and next steps
 
-This is an early version. Planned next steps:
+This is an early version. [docs/dashif-coverage.md](docs/dashif-coverage.md)
+lists all 408 checks of the DASH-IF Conformance tool and which dashcheck rules
+cover them. It is generated from `docs/dashif-checks.json`; after changing that
+file, run `go test ./internal/coverage -update`. To refresh the list from a newer
+version of the DASH-IF tool, run `tools/dashif-inventory.py <clone> docs/dashif-checks.json`.
 
-* Port the remaining DASH-IF Schematron rules (about 156 asserts) to Go.
+Planned next steps:
+
+* Port the remaining DASH-IF checks, Schematron rules first.
 * Profile-specific checks (CMAF, DVB, HbbTV, low latency) and bandwidth checks.
 * MPD update checks for live: fetch the MPD repeatedly and check the allowed
   changes between versions.
