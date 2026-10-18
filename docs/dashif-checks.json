@@ -3793,9 +3793,11 @@
    "source": "LowLatency/Segments/ChunkedAdaptation.php",
    "context": "9.X.4.5",
    "text": "EMSG box constraints",
-   "status": "todo",
-   "rules": [],
-   "note": "upstream always passes (not implemented)"
+   "status": "done",
+   "rules": [
+    "SEG-EMSG-REPEAT"
+   ],
+   "note": "item 6 of 9.X.4.5: an emsg between moof and mdat fails parsing (SEG-PARSE); an emsg after the first moof must be repeated before the first moof of the next segment; upstream always passes"
   },
   {
    "id": "LL-14",
@@ -3955,9 +3957,11 @@
    "source": "LowLatency/Segments/EventMessages.php",
    "context": "9.X.4.5",
    "text": "All 'emsg' boxes inserted [..] after the start of the first CMAF chunk …",
-   "status": "todo",
-   "rules": [],
-   "note": "upstream always passes (not implemented)"
+   "status": "done",
+   "rules": [
+    "SEG-EMSG-REPEAT"
+   ],
+   "note": "compared between consecutive checked segments; upstream always passes"
   },
   {
    "id": "LL-29",
@@ -4423,9 +4427,11 @@
    "source": "WaveHLSInterop/Segments/TimedEventData.php",
    "context": "4.5.2 - Carriage of Timed Event Data",
    "text": "All 'emsg' boxes inserted [..] after the start of the first CMAF chunk …",
-   "status": "todo",
-   "rules": [],
-   "note": "emsg repetition across segments, as LL-28"
+   "status": "done",
+   "rules": [
+    "SEG-EMSG-REPEAT"
+   ],
+   "note": "as LL-28, with -hls-interop"
   },
   {
    "id": "WAVEHLS-18",

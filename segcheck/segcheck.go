@@ -264,6 +264,9 @@ type Media struct {
 	Samples    int
 	FirstCTO   int32 // composition time offset of the first sample
 	FirstSync  bool  // the first sample is a sync sample
+	// Event messages before the first moof and later in the segment, as
+	// "scheme value id" keys.
+	EarlyEmsgs, LateEmsgs []string
 }
 
 // End returns the decode time after the last sample.
@@ -334,6 +337,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 			}
 		}
 	}
+	media.EarlyEmsgs, media.LateEmsgs = emsgPlacement(mf)
 	if media.Samples == 0 {
 		if !wrongTrack {
 			f = append(f, RuleSegStructure.New(loc, "no samples"))
@@ -412,15 +416,19 @@ func ruleWithRef(r *report.Rule, ref string) *report.Rule {
 
 // CheckContinuity verifies that cur directly follows prev in decode time.
 func CheckContinuity(prev, cur *Media, init *Init, rep *addressing.Rep, seg addressing.Segment) []report.Finding {
-	if prev == nil || cur == nil || prev.End() == cur.DecodeTime {
+	if prev == nil || cur == nil {
 		return nil
+	}
+	f := emsgRepeatRules(prev, cur, init, rep, seg)
+	if prev.End() == cur.DecodeTime {
+		return f
 	}
 	diff := int64(cur.DecodeTime) - int64(prev.End())
 	kind := "gap"
 	if diff < 0 {
 		kind = "overlap"
 	}
-	return []report.Finding{RuleSegContinuity.New(rep.SegLoc(seg),
+	return append(f, RuleSegContinuity.New(rep.SegLoc(seg),
 		"%s of %d ticks (%.3fs): previous segment ends at %d, this starts at %d",
-		kind, diff, float64(diff)/float64(init.Timescale), prev.End(), cur.DecodeTime)}
+		kind, diff, float64(diff)/float64(init.Timescale), prev.End(), cur.DecodeTime))
 }

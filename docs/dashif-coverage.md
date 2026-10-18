@@ -12,13 +12,13 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: Common | 5 | 4 | 0 | 0 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
-| Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
+| Module: Low Latency | 54 | 48 | 4 | 1 | 1 |
 | Module: DVB | 103 | 95 | 1 | 5 | 2 |
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
-| Module: WAVE HLS interop | 19 | 15 | 1 | 3 | 0 |
+| Module: WAVE HLS interop | 19 | 16 | 1 | 2 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **374** | **6** | **11** | **17** |
+| **Total** | **408** | **377** | **6** | **8** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -262,7 +262,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-10 | `9.X.4.2`: At least one valid ServiceDescription element SHALL be present | done | MPD-LL-SERVICEDESC, MPD-LL-SERVICEDESC-OPTIONAL |  |
 | LL-11 | `9.X.4.2`: At least one UTC timing description element SHALL be present with a correct @schemIdUri | done | MPD-LL-UTCTIMING |  |
 | LL-12 | `9.X.4.5`: Each Segment SHALL Conform to a CMAF Fragment | partial | SEG-STRUCTURE, SEG-CMAF-DATAOFFSET | upstream always passes; dashcheck applies the CMAF fragment rules to tracks declared as CMAF |
-| LL-13 | `9.X.4.5`: EMSG box constraints | todo |  | upstream always passes (not implemented) |
+| LL-13 | `9.X.4.5`: EMSG box constraints | done | SEG-EMSG-REPEAT | item 6 of 9.X.4.5: an emsg between moof and mdat fails parsing (SEG-PARSE); an emsg after the first moof must be repeated before the first moof of the next segment; upstream always passes |
 | LL-14 | `9.X.4.5`: Each Segment MAY (and typically SHOULD) contain more than one CMAF chunk | done | SEG-LL-CHUNKS |  |
 | LL-15 | `9.X.4.5`: A Resync element SHOULD be assigned to each Representation | done | MPD-LL-RESYNC |  |
 | LL-16 | `9.X.4.5`: @availabilityTimeOffset SHALL be present for each represention | done | MPD-LL-CHUNKED |  |
@@ -277,7 +277,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-25 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @timescale SHALL correspond to the timescale in the 'mdhd' box | done | SEG-LL-TIMESCALE |  |
 | LL-26 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: Either segmentAlignment or subsegmentAlignment SHALL be set | done | MPD-LL-ALIGNMENT |  |
 | LL-27 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: Event message streams MAY be signalled with InbandEventStream elements | n/a |  | a permissive (MAY) statement |
-| LL-28 | `9.X.4.5`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | todo |  | upstream always passes (not implemented) |
+| LL-28 | `9.X.4.5`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | done | SEG-EMSG-REPEAT | compared between consecutive checked segments; upstream always passes |
 | LL-29 | `9.X.4.5`: Resync element SHALL/SHOULD be present (conditional) | done | MPD-LL-RESYNC |  |
 | LL-30 | `9.X.4.5`: Resync element type SHALL be valid | done | MPD-LL-RESYNC-VALUE |  |
 | LL-31 | `9.X.4.5`: Resync element @marker SHALL be 'true' | done | MPD-LL-RESYNC-VALUE | upstream compares with TRUE and always fails |
@@ -474,7 +474,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | WAVEHLS-14 | `4.4.2 - Presentation Splicing`: CMAF Fragment boundaries SHALL be created at all splice points. | todo |  | needs the segments at the end of each Period for all media types |
 | WAVEHLS-15 | `4.4.2 - Presentation Splicing`: CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration | todo |  | as WAVEHLS-14 |
 | WAVEHLS-16 | `4.1.2 - Basic On-Demand and Live Streaming`: Text components SHALL be packaged in ISMC1, ISMC1.1 or WebVTT Tracks | done | SEG-HLS-TEXT | IMSC1/IMSC1.1 Text from @codecs, or wvtt |
-| WAVEHLS-17 | `4.5.2 - Carriage of Timed Event Data`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | todo |  | emsg repetition across segments, as LL-28 |
+| WAVEHLS-17 | `4.5.2 - Carriage of Timed Event Data`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | done | SEG-EMSG-REPEAT | as LL-28, with -hls-interop |
 | WAVEHLS-18 | Track roles SHALL be stored in one or more 'kind' boxes [..] | done | SEG-HLS-ROLES | every AdaptationSet Role needs a kind box with the same scheme and value |
 | WAVEHLS-19 | Track roles SHALL be representaed by the DASH Role scheme when possible | done | SEG-HLS-ROLES | kind boxes without the DASH Role scheme |
 
