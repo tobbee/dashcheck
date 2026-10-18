@@ -9,7 +9,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Schematron: schematron.sch | 123 | 121 | 0 | 0 | 2 |
 | Schematron: dvb-dash.sch | 13 | 13 | 0 | 0 | 0 |
 | Schematron: ac4-generic.sch | 17 | 17 | 0 | 0 | 0 |
-| Module: Common | 5 | 2 | 0 | 2 | 1 |
+| Module: Common | 5 | 4 | 0 | 0 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
@@ -18,7 +18,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 15 | 1 | 3 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **371** | **6** | **14** | **17** |
+| **Total** | **408** | **373** | **6** | **12** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -194,8 +194,8 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 |---|---|---|---|---|
 | COMMON-1 | `Conformance Tool`: Schematron shall be able to run | n/a |  | checks that the upstream Schematron engine runs |
 | COMMON-2 | `DASH 5th`: MPD SHALL be valid | done | MPD-XSD, MPD-XML | dashcheck uses the 6th edition schema |
-| COMMON-3 | `DASH 2nd (DVB 2018)`: MPD SHALL be valid | todo |  |  |
-| COMMON-4 | `DASH 4th-amd1 (DVB 2019)`: MPD SHALL be valid | todo |  |  |
+| COMMON-3 | `DASH 2nd (DVB 2018)`: MPD SHALL be valid | done | MPD-DVB-XSD-2014 | information, for DVB MPDs: the 2nd edition schema with Amd 1, since DVB-DASH requires UTCTiming; upstream uses the schema without Amd 1 (bug 50) |
+| COMMON-4 | `DASH 4th-amd1 (DVB 2019)`: MPD SHALL be valid | done | MPD-DVB-XSD | a warning for DVB MPDs: the 4th edition with Amd 1, which DVB-DASH V1.3.1 and V1.4.1 reference; only the first error is reported |
 | COMMON-5 | Segment analysis should not result in errors | done | INIT-PARSE, SEG-PARSE |  |
 
 ## Module: IOP

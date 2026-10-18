@@ -3,13 +3,16 @@
 // The schema files in xsd/ are the 6th edition DASH-MPD.xsd from
 // github.com/MPEGGroup/DASHSchema with its internal DTD entities expanded
 // (xmllint --noent --dropdtd), since the validator does not support DTDs,
-// plus the W3C xlink.xsd and xml.xsd that it imports.
+// plus the W3C xlink.xsd and xml.xsd that it imports. The subdirectories
+// hold older editions from the branches 2nd-Ed+AMD1 and 4th-AMD1, which
+// other specifications reference.
 package schema
 
 import (
 	"bytes"
 	"embed"
 	"errors"
+	"fmt"
 	"path"
 	"sync"
 
@@ -18,8 +21,14 @@ import (
 	"github.com/tobbee/dashcheck/report"
 )
 
-//go:embed xsd/*.xsd
+//go:embed xsd/*.xsd xsd/2nd-Ed-AMD1/*.xsd xsd/4th-AMD1/*.xsd
 var xsdFiles embed.FS
+
+// Older schema editions for Errors.
+const (
+	Edition2 = "2nd-Ed-AMD1" // ISO/IEC 23009-1:2014 with Amd 1 (UTCTiming)
+	Edition4 = "4th-AMD1"    // ISO/IEC 23009-1:2019 with Amd 1
+)
 
 var (
 	RuleWellFormed = report.Register(report.Rule{
@@ -35,29 +44,38 @@ var (
 )
 
 var (
-	engineOnce sync.Once
-	engine     *xsd.Engine
-	engineErr  error
+	enginesMu sync.Mutex
+	engines   = map[string]*xsd.Engine{}
 )
 
-func source(name string) xsd.SchemaSource {
+// source reads a schema file from dir, or else from the top directory with
+// the shared xlink.xsd and xml.xsd.
+func source(dir, name string) xsd.SchemaSource {
 	name = path.Base(name)
-	data, err := xsdFiles.ReadFile("xsd/" + name)
+	data, err := xsdFiles.ReadFile(path.Join("xsd", dir, name))
 	if err != nil {
 		// The resolver below reports a missing import through Compile.
-		data = nil
+		data, _ = xsdFiles.ReadFile("xsd/" + name)
 	}
 	return xsd.Bytes(name, data).WithResolver(xsd.ResolverFunc(
 		func(base, location string) (xsd.SchemaSource, error) {
-			return source(location), nil
+			return source(dir, location), nil
 		}))
 }
 
-func compiled() (*xsd.Engine, error) {
-	engineOnce.Do(func() {
-		engine, engineErr = xsd.Compile(source("DASH-MPD.xsd"))
-	})
-	return engine, engineErr
+// compiled returns the engine of a schema edition; "" is the 6th edition.
+func compiled(edition string) (*xsd.Engine, error) {
+	enginesMu.Lock()
+	defer enginesMu.Unlock()
+	if e, ok := engines[edition]; ok {
+		return e, nil
+	}
+	e, err := xsd.Compile(source(edition, "DASH-MPD.xsd"))
+	if err != nil {
+		return nil, err
+	}
+	engines[edition] = e
+	return e, nil
 }
 
 // MaxErrors limits the number of schema errors reported for one MPD.
@@ -65,7 +83,7 @@ const MaxErrors = 100
 
 // Validate checks that data is well-formed and valid according to the schema.
 func Validate(data []byte, mpdURL string) ([]report.Finding, error) {
-	eng, err := compiled()
+	eng, err := compiled("")
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +109,29 @@ func Validate(data []byte, mpdURL string) ([]report.Finding, error) {
 		findings = append(findings, rule.New(loc, "%s", message(xe)))
 	}
 	return findings, nil
+}
+
+// Errors validates data against an older schema edition and returns the
+// errors with their line numbers.
+func Errors(data []byte, edition string) ([]string, error) {
+	eng, err := compiled(edition)
+	if err != nil {
+		return nil, err
+	}
+	err = eng.ValidateWithOptions(bytes.NewReader(data), xsd.ValidateOptions{MaxErrors: MaxErrors})
+	if err == nil {
+		return nil, nil
+	}
+	var msgs []string
+	for _, e := range flatten(err) {
+		var xe *xsderrors.Error
+		if errors.As(e, &xe) {
+			msgs = append(msgs, fmt.Sprintf("line %d: %s", xe.Line(), message(xe)))
+		} else {
+			msgs = append(msgs, e.Error())
+		}
+	}
+	return msgs, nil
 }
 
 // message combines the diagnostic message with its cause.

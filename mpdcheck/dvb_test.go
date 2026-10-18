@@ -83,7 +83,7 @@ func TestDVBRules(t *testing.T) {
 			}
 			var got []string
 			for _, f := range findings {
-				if f.Rule != "MPD-XSD" && f.Rule != "MPD-PROFILE-UNKNOWN" {
+				if f.Rule != "MPD-XSD" && f.Rule != "MPD-PROFILE-UNKNOWN" && !strings.HasPrefix(f.Rule, "MPD-DVB-XSD") {
 					got = append(got, f.Rule)
 				}
 			}
@@ -169,6 +169,36 @@ func TestHbbTVCodecs(t *testing.T) {
 		}
 		if f := hbbtvCodecRules(md); len(f) != c.want {
 			t.Errorf("%s: got %v", c.name, f)
+		}
+	}
+}
+
+func TestDVBSchemaEditions(t *testing.T) {
+	cases := []struct {
+		name     string
+		old, new string
+		want     []string
+	}{
+		{"valid in all editions", "", "", nil},
+		// ContentSteering is new in the 6th edition, so both older schemas reject it.
+		{"6th edition element", `</MPD>`, `<ContentSteering>https://example.com/steering</ContentSteering>
+</MPD>`, []string{"MPD-DVB-XSD", "MPD-DVB-XSD-2014"}},
+		// ServiceDescription came with the 4th edition Amd 1.
+		{"4th edition element", `<Period id="p0"`, `<ServiceDescription id="0"/>
+  <Period id="p0"`, []string{"MPD-DVB-XSD-2014"}},
+	}
+	for _, c := range cases {
+		data := strings.Replace(dvbMPD, c.old, c.new, 1)
+		md, findings := Check([]byte(data), "https://example.com/dvb.mpd")
+		if md == nil {
+			t.Fatalf("%s: not parsed: %v", c.name, findings)
+		}
+		var got []string
+		for _, f := range dvbSchemaRules(md, []byte(data), "") {
+			got = append(got, f.Rule)
+		}
+		if !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
 		}
 	}
 }

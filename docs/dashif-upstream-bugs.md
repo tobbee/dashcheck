@@ -62,6 +62,7 @@ yet unless stated.
 | 47 | CTAWave | Outdated: required profiles per AdaptationSet, splice constraints always enforced | Verified in spec |
 | 48 | WaveHLSInterop | Valid cenc tracks fail; sidx required in every segment; key count wrong | Verified in code and spec |
 | 49 | HbbTV | Codec and AVC rules outdated and applied per Representation | Verified in spec |
+| 50 | Common XSDValidation | The DVB 2018 schema lacks UTCTiming | Verified in code |
 
 ## Manifest handling
 
@@ -794,6 +795,20 @@ reported, and AVC ladders with lower levels fail.
 
 **Fix:** Require one AdaptationSet in a 7.3.1 codec and apply the DVB-DASH
 rules to HbbTV content.
+
+### 50. The DVB 2018 schema check rejects UTCTiming
+
+**Where:** [resources/xsd/DASH2nd.xsd](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/resources/xsd/DASH2nd.xsd),
+used by [app/Modules/Common/MPD/XSDValidation.php#L102](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/Common/MPD/XSDValidation.php#L102)
+
+**Problem:** COMMON-3 validates against the 2nd edition schema without
+Amendment 1, which has no UTCTiming element. DVB-DASH requires UTCTiming in
+live MPDs (4.7.2), and UTCTiming is defined in ISO/IEC 23009-1:2014/Amd 1.
+
+**Effect:** Every DVB MPD with UTCTiming fails the "DASH 2nd (DVB 2018)" check.
+
+**Fix:** Use the schema of the 2nd edition with Amd 1 (branch `2nd-Ed+AMD1` of
+MPEGGroup/DASHSchema).
 
 ## Other projects
 

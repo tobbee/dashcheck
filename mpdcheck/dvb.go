@@ -14,6 +14,7 @@ import (
 	m "github.com/Eyevinn/dash-mpd/mpd"
 	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/report"
+	"github.com/tobbee/dashcheck/schema"
 )
 
 // MPD rules ported from the DVB module of the DASH-IF Conformance tool
@@ -74,6 +75,17 @@ var (
 	RuleDVBContentProtection = report.Register(report.Rule{
 		ID: "MPD-DVB-CP", Severity: report.Error,
 		Desc: "DVB ContentProtection descriptors must be on the AdaptationSet and include the mp4protection descriptor", SpecRef: refDVB + " 8.3, 8.4",
+	})
+	RuleDVBSchema = report.Register(report.Rule{
+		ID: "MPD-DVB-XSD", Severity: report.Warning,
+		Desc: "A DVB MPD should validate against the schema of ISO/IEC 23009-1:2019 (4th edition with Amd 1), " +
+			"the edition DVB-DASH V1.3.1 and later reference",
+		SpecRef: refDVB + " V1.4.1 2.1 [1]",
+	})
+	RuleDVBSchema2014 = report.Register(report.Rule{
+		ID: "MPD-DVB-XSD-2014", Severity: report.Info,
+		Desc:    "A DVB MPD is not valid against the schema of ISO/IEC 23009-1:2014 with Amd 1, which DVB-DASH 2014 (V1.2.1) references",
+		SpecRef: refDVB + " V1.2.1 2.1",
 	})
 	RuleDVBContinuity = report.Register(report.Rule{
 		ID: "MPD-DVB-CONTINUITY", Severity: report.Error,
@@ -661,6 +673,31 @@ func dvbContinuity(md *m.MPD) []report.Finding {
 				}
 			}
 		}
+	}
+	return f
+}
+
+// dvbSchemaRules validates a DVB MPD against the older schema editions that
+// DVB-DASH versions reference (COMMON-3, COMMON-4). Only the first error of
+// each is reported, since one newer element can cause many.
+func dvbSchemaRules(md *m.MPD, data []byte, mpdURL string) []report.Finding {
+	if !isDVB(profiles(splitProfiles(string(md.Profiles)))) {
+		return nil
+	}
+	var f []report.Finding
+	for _, e := range []struct {
+		edition string
+		rule    *report.Rule
+	}{{schema.Edition4, RuleDVBSchema}, {schema.Edition2, RuleDVBSchema2014}} {
+		errs, err := schema.Errors(data, e.edition)
+		if err != nil || len(errs) == 0 {
+			continue
+		}
+		more := ""
+		if len(errs) > 1 {
+			more = fmt.Sprintf(" (and %d more)", len(errs)-1)
+		}
+		f = append(f, e.rule.New(report.Location{URL: mpdURL, Path: "MPD"}, "%s%s", errs[0], more))
 	}
 	return f
 }

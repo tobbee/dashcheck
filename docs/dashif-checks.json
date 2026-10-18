@@ -2185,18 +2185,22 @@
    "source": "Common/MPD/XSDValidation.php",
    "context": "DASH 2nd (DVB 2018)",
    "text": "MPD SHALL be valid",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-XSD-2014"
+   ],
+   "note": "information, for DVB MPDs: the 2nd edition schema with Amd 1, since DVB-DASH requires UTCTiming; upstream uses the schema without Amd 1 (bug 50)"
   },
   {
    "id": "COMMON-4",
    "source": "Common/MPD/XSDValidation.php",
    "context": "DASH 4th-amd1 (DVB 2019)",
    "text": "MPD SHALL be valid",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-XSD"
+   ],
+   "note": "a warning for DVB MPDs: the 4th edition with Amd 1, which DVB-DASH V1.3.1 and V1.4.1 reference; only the first error is reported"
   },
   {
    "id": "COMMON-5",

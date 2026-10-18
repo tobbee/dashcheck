@@ -73,7 +73,7 @@ func TestDescriptorRules(t *testing.T) {
 			}
 			var got []string
 			for _, f := range findings {
-				if f.Rule != "MPD-XSD" {
+				if f.Rule != "MPD-XSD" && !strings.HasPrefix(f.Rule, "MPD-DVB-XSD") {
 					got = append(got, f.Rule)
 				}
 			}
