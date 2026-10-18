@@ -4400,18 +4400,22 @@
    "source": "WaveHLSInterop/Segments/SplicingPoints.php",
    "context": "4.4.2 - Presentation Splicing",
    "text": "CMAF Fragment boundaries SHALL be created at all splice points.",
-   "status": "todo",
-   "rules": [],
-   "note": "needs the segments at the end of each Period for all media types"
+   "status": "done",
+   "rules": [
+    "SEG-HLS-SPLICE"
+   ],
+   "note": "the last segment of each Period that another follows must end at the Period end within one sample duration (static MPDs, with -hls-interop)"
   },
   {
    "id": "WAVEHLS-15",
    "source": "WaveHLSInterop/Segments/SplicingPoints.php",
    "context": "4.4.2 - Presentation Splicing",
    "text": "CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration",
-   "status": "todo",
-   "rules": [],
-   "note": "as WAVEHLS-14"
+   "status": "done",
+   "rules": [
+    "SEG-HLS-SPLICE"
+   ],
+   "note": "each media type ends within one sample duration of the splice point, which keeps them within that of each other"
   },
   {
    "id": "WAVEHLS-16",

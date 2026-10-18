@@ -40,11 +40,11 @@ upstream commit e311ec6e12b21394355fd1749101590400e31cbb (2026-10-16).
    with a commit-pinned link, problem, effect and fix.
 6. Commit one area per commit (see the user's commit rules).
 
-Remaining at the last update: HbbTV, Dolby AC-4 TOC, two Common XSD checks
-(legacy DVB schemas), a few Low Latency and WAVE HLS checks (splices, emsg
-repetition), and DVB AVS3 (DVB-60 to DVB-64) and VVC (DVB-97), which need
-mp4ff support. Rules for specifications that MPDs do not signal are opt-in
-options (`-hls-interop` for CTA-5005).
+Remaining at the last update: only DVB AVS3 (DVB-60 to DVB-64), which needs
+AVS3 support in mp4ff, plus six partial checks (see the coverage notes).
+Rules for specifications that MPDs do not signal are opt-in options
+(`-hls-interop` for CTA-5005). Segment Sequences (@k, $SubNumber$) are not
+addressed yet (ADDR-UNSUPPORTED).
 `docs/dashif-coverage.md` has the current numbers.
 
 ## Standards

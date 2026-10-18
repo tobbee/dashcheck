@@ -117,3 +117,22 @@ func TestHLSInteropSidxAndVariants(t *testing.T) {
 		t.Errorf("cenc only: got %v", got)
 	}
 }
+
+func TestHLSInteropSplice(t *testing.T) {
+	_, video := dvbReps(t)
+	video.PeriodDur, video.LastPeriod, video.PTO, video.Timescale = 30, false, 0, 1000
+	init := &Init{Timescale: 1000}
+	// 2 s segment of 50 samples (40 ms each) starting at 28 s.
+	media := &Media{EPT: 28, Duration: 2000, Samples: 50}
+	if f := CheckHLSInteropSplice(&video, init, media, addressing.Segment{}); len(f) > 0 {
+		t.Errorf("at the splice: %v", f)
+	}
+	media.Duration = 1900
+	if got := ruleIDs(CheckHLSInteropSplice(&video, init, media, addressing.Segment{})); !slices.Equal(got, []string{"SEG-HLS-SPLICE"}) {
+		t.Errorf("short of the splice: got %v", got)
+	}
+	video.LastPeriod = true
+	if f := CheckHLSInteropSplice(&video, init, media, addressing.Segment{}); len(f) > 0 {
+		t.Errorf("last Period: %v", f)
+	}
+}

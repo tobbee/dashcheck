@@ -56,6 +56,12 @@ var (
 			"and carry pssh boxes if the CMAF header has them",
 		SpecRef: refHLS + " 4.6.2",
 	})
+	RuleHLSSplice = report.Register(report.Rule{
+		ID: "SEG-HLS-SPLICE", Severity: report.Error,
+		Desc: "At a splice point (Period end), the last CMAF fragment must end at the splice point within one " +
+			"sample duration",
+		SpecRef: refHLS + " 4.4.2",
+	})
 	RuleHLSRoles = report.Register(report.Rule{
 		ID: "SEG-HLS-ROLES", Severity: report.Error,
 		Desc:    "Track roles must be stored in kind boxes in the CMAF header, using the DASH Role scheme when possible",
@@ -254,4 +260,22 @@ func hlsPresentationRules(reps []*addressing.Rep, inits []*Init) []report.Findin
 		}
 	}
 	return f
+}
+
+// CheckHLSInteropSplice checks that the last segment of a Period that is
+// followed by another ends at the splice point (WAVEHLS-14, WAVEHLS-15).
+// Fragments of all media types ending within one sample duration of the
+// Period end keeps them within one sample duration of each other.
+func CheckHLSInteropSplice(rep *addressing.Rep, init *Init, media *Media, seg addressing.Segment) []report.Finding {
+	if rep.LastPeriod || rep.PeriodDur <= 0 || media == nil || media.Samples == 0 || init.Timescale == 0 || rep.Timescale == 0 {
+		return nil
+	}
+	ts := float64(init.Timescale)
+	end := media.EPT + float64(media.Duration)/ts - float64(rep.PTO)/float64(rep.Timescale)
+	sample := float64(media.Duration) / float64(media.Samples) / ts
+	if math.Abs(end-rep.PeriodDur) > sample+1e-6 {
+		return []report.Finding{RuleHLSSplice.New(rep.SegLoc(seg), "the last fragment ends at %.3fs, the Period at %.3fs (sample duration %.3fs)",
+			end, rep.PeriodDur, sample)}
+	}
+	return nil
 }

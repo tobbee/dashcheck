@@ -104,6 +104,7 @@ type Rep struct {
 	AST         time.Time // MPD@availabilityStartTime (dynamic only)
 	PeriodStart float64   // seconds from the start of the presentation
 	PeriodDur   float64   // seconds, or -1 if open-ended
+	LastPeriod  bool      // no Period follows
 	TSBD        float64   // timeShiftBufferDepth in seconds, +Inf if absent
 	ATO         float64   // availabilityTimeOffset in seconds
 	ATC         *bool     // effective availabilityTimeComplete, nil if absent
@@ -271,6 +272,7 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 					AST:                  ast,
 					PeriodStart:          starts[pi],
 					PeriodDur:            durs[pi],
+					LastPeriod:           pi == len(md.Periods)-1,
 					TSBD:                 tsbd,
 					ATO:                  baseURLATO(md.BaseURL, p.BaseURLs, as.BaseURLs, rep.BaseURLs),
 					repID:                rep.Id,

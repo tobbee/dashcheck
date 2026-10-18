@@ -303,6 +303,9 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 	var prev, first *segcheck.Media
 	for i, seg := range segs {
 		media := rc.checkSegment(ctx, init, seg, seg == last)
+		if rc.opts.HLSInterop && seg == last && !rc.dynamic {
+			rc.add(segcheck.CheckHLSInteropSplice(rep, init, media, seg)...)
+		}
 		if i == 0 {
 			first = media
 			if media != nil && seg == periodFirst && rep.Timescale > 0 {

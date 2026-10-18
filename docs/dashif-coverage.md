@@ -16,9 +16,9 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: DVB | 103 | 95 | 1 | 5 | 2 |
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
-| Module: WAVE HLS interop | 19 | 16 | 1 | 2 | 0 |
+| Module: WAVE HLS interop | 19 | 18 | 1 | 0 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **378** | **6** | **7** | **17** |
+| **Total** | **408** | **380** | **6** | **5** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -471,8 +471,8 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | WAVEHLS-11 | `4.6.2 - Rotation of Encryption Keys`: CMAF Segments [.. with differing encryption keys] SHALL provide a 'pssh' box [..] | done | SEG-HLS-KEY-ROTATION | pssh boxes in the segment when the CMAF header has them |
 | WAVEHLS-12 | `4.3.2 - Encrypted Media Presentations`: Any individual CMAF Segment SHALL have a single encryption key | done | SEG-HLS-SEGMENT-KEY | compares the KID of each fragment (seig or tenc); upstream counts pssh KIDs (bug 48) |
 | WAVEHLS-13 | `4.3.2 - Encrypted Media Presentations`: Any individual CMAF Segment SHALL have a single Initialization Vector | done | SEG-HLS-SEGMENT-KEY | compares the constant IV of each fragment; upstream rejects per-sample IVs (bug 48) |
-| WAVEHLS-14 | `4.4.2 - Presentation Splicing`: CMAF Fragment boundaries SHALL be created at all splice points. | todo |  | needs the segments at the end of each Period for all media types |
-| WAVEHLS-15 | `4.4.2 - Presentation Splicing`: CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration | todo |  | as WAVEHLS-14 |
+| WAVEHLS-14 | `4.4.2 - Presentation Splicing`: CMAF Fragment boundaries SHALL be created at all splice points. | done | SEG-HLS-SPLICE | the last segment of each Period that another follows must end at the Period end within one sample duration (static MPDs, with -hls-interop) |
+| WAVEHLS-15 | `4.4.2 - Presentation Splicing`: CMAF Fragment [duration difference] SHALL be within one ISOBMFF sample duration | done | SEG-HLS-SPLICE | each media type ends within one sample duration of the splice point, which keeps them within that of each other |
 | WAVEHLS-16 | `4.1.2 - Basic On-Demand and Live Streaming`: Text components SHALL be packaged in ISMC1, ISMC1.1 or WebVTT Tracks | done | SEG-HLS-TEXT | IMSC1/IMSC1.1 Text from @codecs, or wvtt |
 | WAVEHLS-17 | `4.5.2 - Carriage of Timed Event Data`: All 'emsg' boxes inserted [..] after the start of the first CMAF chunk … | done | SEG-EMSG-REPEAT | as LL-28, with -hls-interop |
 | WAVEHLS-18 | Track roles SHALL be stored in one or more 'kind' boxes [..] | done | SEG-HLS-ROLES | every AdaptationSet Role needs a kind box with the same scheme and value |
