@@ -1361,35 +1361,43 @@
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation",
    "text": "@mimeType shall be common between all Representations in an Adaptation Set",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-COMMON"
+   ],
+   "note": "upstream compares each Representation with all of them, itself included, so it only fails when a Representation lacks @mimeType"
   },
   {
    "id": "SCH-DVB-2",
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation",
    "text": "@codecs should be common between all Representations in an Adaptation Set",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-SIMILAR"
+   ],
+   "note": "upstream compares each Representation with all of them, itself included, so it only fails when a Representation lacks @codecs"
   },
   {
    "id": "SCH-DVB-3",
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation",
    "text": "@audioSamplingRate should be common between all Representations in an Adaptation Set",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-SIMILAR"
+   ],
+   "note": "upstream compares each Representation with all of them, itself included, so it only fails when a Representation lacks @audioSamplingRate"
   },
   {
    "id": "SCH-DVB-4",
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][not(dlb:isAuxiliaryStream(.))]/dash:Representation/dash:AudioChannelConfiguration",
    "text": "audioChannelConfiguration should be common between all Representations in an Adaptation Set",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUDIO-SIMILAR"
+   ],
    "note": ""
   },
   {
@@ -1397,8 +1405,10 @@
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:AdaptationSet[dlb:isAdaptationSetAudio(.)][dlb:isAuxiliaryStream(.)]",
    "text": "All Adaptation Sets that refer to Auxiliary Audio streams may not contain the @lang attribute and Role, Accessibility, AudioChannelConfiguration descriptors",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AUXILIARY"
+   ],
    "note": ""
   },
   {
@@ -1406,8 +1416,10 @@
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:Preselection[dlb:isAdaptationSetAudio(.)]",
    "text": "Every AC-4 or MPEG-H Audio Preselection element shall include at least one Role element using the scheme \"urn:mpeg:dash:role:2011\" as defined in ISO/IEC 23009-1:2019 [1].",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PRESELECTION"
+   ],
    "note": ""
   },
   {
@@ -1415,8 +1427,10 @@
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:Preselection[dlb:isAdaptationSetAudio(.)]",
    "text": "If there is more than one audio Preselection associated with an audio bundle, at least one of the Preselection elements shall be tagged with an @value set to \"main\".",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PRESELECTION"
+   ],
    "note": ""
   },
   {
@@ -1424,8 +1438,10 @@
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]/dash:Period/dash:Preselection[dlb:isAdaptationSetAudio(.)]",
    "text": "@preselectionComponents specifies the ids of the contained Adaptation Sets or Content Components that belong to this Preselection as white space separated list in processing order.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-PRESELECTION"
+   ],
    "note": ""
   },
   {
@@ -1433,44 +1449,54 @@
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
    "text": "AC-4 audio should be encoded using bitstream_version = 2 (is ).",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AC4-VERSION"
+   ],
+   "note": "upstream's rule context lacks the dash: prefix for Representation, so Representations are never checked"
   },
   {
    "id": "SCH-DVB-10",
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
    "text": "The presentation_version field according to clause 6.2.1.3 of ETSI TS 103 190-2 [46] shall be set to the value 1.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AC4"
+   ],
+   "note": "upstream's rule context lacks the dash: prefix for Representation, so Representations are never checked"
   },
   {
    "id": "SCH-DVB-11",
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
    "text": "The md_compat field as defined by clause 6.3.2.2.3 of ETSI TS 103 190-2 [46] shall be less than or equal to three.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AC4"
+   ],
+   "note": "upstream's rule context lacks the dash: prefix for Representation, so Representations are never checked"
   },
   {
    "id": "SCH-DVB-12",
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
    "text": "An AC-4 elementary stream shall be encoded with a sampling rate of 48 kHz, 96 kHz or 192 kHz.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AC4"
+   ],
+   "note": "upstream's rule context lacks the dash: prefix for Representation, so Representations are never checked"
   },
   {
    "id": "SCH-DVB-13",
    "source": "schematron/dvb-dash.sch",
    "context": "dash:MPD[dlb:isProfile(.,$dvbdash-profile-2017)]//*[self::dash:AdaptationSet or self::dash:Preselection or self::Representation][dlb:isAdaptationSetAC4(.)]",
    "text": "An Adaptation Set shall not contain audio with a frame rate > 60 Hz unless all video adaptationSets in the Period contain only video with a frame rate > 60 Hz.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-AC4"
+   ],
    "note": ""
   },
   {
@@ -1478,8 +1504,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
    "text": "The @codecs attribute shall conform to the syntax described in IETF RFC 6381. The value of the parameter shall be set to a dot-separated list of four parts of which the last three are two-digit hexadecimal numbers.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CODECS"
+   ],
    "note": ""
   },
   {
@@ -1487,17 +1515,21 @@
    "source": "schematron/ac4-generic.sch",
    "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
    "text": "The value of the mimeType attribute shall be set to 'audio/mp4' or 'video/mp4'.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-AC4-ATTRS"
+   ],
+   "note": "upstream's test is inverted and fails for audio/mp4 and video/mp4"
   },
   {
    "id": "SCH-AC4-3",
    "source": "schematron/ac4-generic.sch",
    "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
    "text": "@audioSamplingRate shall be set to the sampling frequency derived from the parameters fs_index and dsi_sf_multiplier, contained in ac4_dsi_v1.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-ATTRS"
+   ],
    "note": ""
   },
   {
@@ -1505,8 +1537,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
    "text": "The value of the mimeType attribute shall be set to 'audio/mp4'.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-ATTRS"
+   ],
    "note": ""
   },
   {
@@ -1514,8 +1548,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "*[self::dash:AdaptationSet or self::dash:Preselection][dlb:isAdaptationSetAC4(.)]",
    "text": "The @startWithSAP value shall be set to '1'.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-ATTRS"
+   ],
    "note": ""
   },
   {
@@ -1523,17 +1559,21 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:Representation[matches(dlb:getNearestCodecString(.), 'ac-4\\.00','i')]",
    "text": "The representation DASH element shall include an AudioChannelConfiguration DASH descriptor.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG"
+   ],
+   "note": "dashcheck also accepts an AudioChannelConfiguration inherited from the AdaptationSet"
   },
   {
    "id": "SCH-AC4-7",
    "source": "schematron/ac4-generic.sch",
    "context": "dash:Role[matches(dlb:getNearestCodecString(.), 'ac-4\\.00')]",
    "text": "The value of Role (role) shall be main, alternate, commentary.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-ROLE"
+   ],
    "note": ""
   },
   {
@@ -1541,8 +1581,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:SupplementalProperty[@schemeIdUri = 'tag:dolby.com,2016:dash:virtualized_content:2016'][matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')]",
    "text": "The @value attribute of the immersive audio for headphones descriptor shall be 1",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-VIRTUALIZED"
+   ],
    "note": ""
   },
   {
@@ -1550,8 +1592,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.00')][@schemeIdUri eq $NSDLB_acc2014]",
    "text": "It is recommended to use exactly one AudioChannelConfiguration element with a schemeIdURI of or",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG-COUNT"
+   ],
    "note": ""
   },
   {
@@ -1559,8 +1603,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.00')][@schemeIdUri eq $NSDLB_acc2014]",
    "text": "The value element shall contain a four-digit hexadecimal representation of the 16-bit field which describes the channel assignment of the referenced AC-4 elementary stream",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG"
+   ],
    "note": ""
   },
   {
@@ -1568,8 +1614,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.00')][@schemeIdUri eq $NSDLB_acc2014]",
    "text": "Use < schemeIdUri=\"\" value=\"\"/>",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG"
+   ],
    "note": ""
   },
   {
@@ -1577,8 +1625,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][not(@schemeIdUri = ($NSDLB_acc2015,$NSMPEG_acc))]",
    "text": "Unspecified schemeIdUri in AudioChannelConfiguration element",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG-COUNT"
+   ],
    "note": ""
   },
   {
@@ -1586,8 +1636,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSDLB_acc2015]",
    "text": "It is recommended to use exactly one AudioChannelConfiguration element with a schemeIdURI of or",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG-COUNT"
+   ],
    "note": ""
   },
   {
@@ -1595,8 +1647,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSDLB_acc2015]",
    "text": "The value element shall contain a six-digit hexadecimal representation of the 24-bit field which describes the channel assignment of the referenced AC-4 elementary stream",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG"
+   ],
    "note": ""
   },
   {
@@ -1604,8 +1658,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSDLB_acc2015]",
    "text": "For all AC-4 channel configurations that are mappable to the MPEG channel configuration scheme, the scheme described by @schemeIdUri=\"urn:mpeg:mpegB:cicp:ChannelConfiguration\" shall be used",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG"
+   ],
    "note": ""
   },
   {
@@ -1613,8 +1669,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSMPEG_acc]",
    "text": "It is recommended to use exactly one AudioChannelConfiguration element with a schemeIdURI of or",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG-COUNT"
+   ],
    "note": ""
   },
   {
@@ -1622,8 +1680,10 @@
    "source": "schematron/ac4-generic.sch",
    "context": "dash:AudioChannelConfiguration[matches(dlb:getNearestCodecString(.),'ac-4\\.(01|02)')][@schemeIdUri eq $NSMPEG_acc]",
    "text": "Valid values are 1-7, 9-12, 14, 16-17, and 19",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AC4-CHANNELCONFIG"
+   ],
    "note": ""
   },
   {
