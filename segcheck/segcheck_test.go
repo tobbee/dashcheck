@@ -140,3 +140,16 @@ func TestIsSync(t *testing.T) {
 		}
 	}
 }
+
+func TestImplicitAAC(t *testing.T) {
+	info := sampleEntryInfo{fourCC: "mp4a", codec: "mp4a.40.2", derived: true}
+	for _, c := range []struct {
+		mpd  string
+		want bool
+	}{{"mp4a.40.2", true}, {"mp4a.40.5", true}, {"mp4a.40.29", true}, {"mp4a.40.42", false}} {
+		reason, _ := compareCodecs(c.mpd, info)
+		if (reason == "") != c.want {
+			t.Errorf("%s: reason %q", c.mpd, reason)
+		}
+	}
+}

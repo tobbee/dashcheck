@@ -233,10 +233,23 @@ func compareCodecs(mpdCodecs string, info sampleEntryInfo) (reason string, major
 		if strings.ToLower(prefix) != fourCC {
 			continue
 		}
-		if !info.derived || strings.EqualFold(c, info.codec) {
+		if !info.derived || strings.EqualFold(c, info.codec) || implicitAAC(c, info.codec) {
 			return "", false
 		}
 		return fmt.Sprintf("@codecs %q but sample entry gives %q", mpdCodecs, info.codec), false
 	}
 	return fmt.Sprintf("@codecs %q but sample entry is %q", mpdCodecs, info.fourCC), true
+}
+
+// implicitAAC reports whether an AAC @codecs value is consistent with the
+// AudioSpecificConfig. With implicit signaling of SBR (HE-AAC, mp4a.40.5) and
+// PS (HE-AACv2, mp4a.40.29), the config carries the core object type.
+func implicitAAC(mpdCodecs, derived string) bool {
+	switch strings.ToLower(mpdCodecs) {
+	case "mp4a.40.5":
+		return derived == "mp4a.40.2"
+	case "mp4a.40.29":
+		return derived == "mp4a.40.2" || derived == "mp4a.40.5"
+	}
+	return false
 }
