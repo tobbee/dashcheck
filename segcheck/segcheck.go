@@ -106,6 +106,7 @@ type Init struct {
 	Encrypted   bool
 	Scheme      string // protection scheme type
 	CMAF        bool   // the track is declared as CMAF
+	cmafBrand   string // the highest CMAF media profile brand of the track
 	trex        *mp4.TrexBox
 }
 
@@ -181,6 +182,10 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	f = append(f, crossCheckInit(rep, init, info, loc)...)
 	f = append(f, iopInitRules(rep, init, loc)...)
 	f = append(f, cmafInitRules(rep, init, info, mf.Init.Children, loc)...)
+	init.cmafBrand = mediaProfileBrand(init.Brands, init.Handler, info.fourCC)
+	if init.CMAF {
+		f = append(f, cmafMediaProfileRules(rep, init, info, loc)...)
+	}
 	return init, f
 }
 

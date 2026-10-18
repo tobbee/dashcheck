@@ -24,6 +24,7 @@ type sampleEntryInfo struct {
 	sampleRate uint32
 	channels   uint16
 	video      videoConfig
+	aac        *audioConfig
 }
 
 // videoConfig describes an AVC or HEVC decoder configuration record.
@@ -33,6 +34,19 @@ type videoConfig struct {
 	hasSPS, hasPPS bool
 	hasVPS         bool // HEVC only
 	profile, level int
+	highTier       bool // HEVC general_tier_flag
+
+	// From the SPS video usability information.
+	colourDescribed             bool
+	primaries, transfer, matrix int
+	frameRate                   float64 // 0 if not signaled
+	spsSummary                  string  // HEVC SPS fields that must match in a switching set
+	seiNalus                    string  // HEVC SEI NAL units in hvcC
+}
+
+// audioConfig describes an AAC AudioSpecificConfig.
+type audioConfig struct {
+	objectType, sampleRate, channels int
 }
 
 func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
@@ -70,6 +84,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 			}
 		}
 		info.codec, info.derived = audioCodec(info.fourCC, se)
+		info.aac = describeAAC(se)
 	default:
 		info.fourCC = stsd.Children[0].Type()
 		info.codec = info.fourCC
@@ -104,14 +119,75 @@ func describeVideoConfig(se *mp4.VisualSampleEntryBox) videoConfig {
 	case se.AvcC != nil:
 		vc = videoConfig{codec: "avc", hasConfig: true, hasSPS: len(se.AvcC.SPSnalus) > 0, hasPPS: len(se.AvcC.PPSnalus) > 0,
 			profile: int(se.AvcC.AVCProfileIndication), level: int(se.AvcC.AVCLevelIndication)}
+		if vc.hasSPS {
+			if sps, err := avc.ParseSPSNALUnit(se.AvcC.SPSnalus[0], true); err == nil && sps.VUI != nil {
+				v := sps.VUI
+				if v.ColourDescriptionFlag {
+					vc.colourDescribed = true
+					vc.primaries, vc.transfer, vc.matrix = int(v.ColourPrimaries), int(v.TransferCharacteristics), int(v.MatrixCoefficients)
+				}
+				if v.TimingInfoPresentFlag && v.NumUnitsInTick > 0 {
+					vc.frameRate = float64(v.TimeScale) / float64(2*v.NumUnitsInTick)
+				}
+			}
+		}
 	case se.HvcC != nil:
 		vc = videoConfig{codec: "hevc", hasConfig: true,
-			hasVPS:  len(se.HvcC.GetNalusForType(hevc.NALU_VPS)) > 0,
-			hasSPS:  len(se.HvcC.GetNalusForType(hevc.NALU_SPS)) > 0,
-			hasPPS:  len(se.HvcC.GetNalusForType(hevc.NALU_PPS)) > 0,
-			profile: int(se.HvcC.GeneralProfileIDC), level: int(se.HvcC.GeneralLevelIDC)}
+			hasVPS:   len(se.HvcC.GetNalusForType(hevc.NALU_VPS)) > 0,
+			hasSPS:   len(se.HvcC.GetNalusForType(hevc.NALU_SPS)) > 0,
+			hasPPS:   len(se.HvcC.GetNalusForType(hevc.NALU_PPS)) > 0,
+			profile:  int(se.HvcC.GeneralProfileIDC),
+			level:    int(se.HvcC.GeneralLevelIDC),
+			highTier: se.HvcC.GeneralTierFlag,
+		}
+		var sei []string
+		for _, n := range append(se.HvcC.GetNalusForType(hevc.NALU_SEI_PREFIX), se.HvcC.GetNalusForType(hevc.NALU_SEI_SUFFIX)...) {
+			sei = append(sei, fmt.Sprintf("%x", n))
+		}
+		vc.seiNalus = strings.Join(sei, ",")
+		if spss := se.HvcC.GetNalusForType(hevc.NALU_SPS); len(spss) > 0 {
+			if sps, err := hevc.ParseSPSNALUnit(spss[0]); err == nil {
+				vc.spsSummary = hevcSPSSummary(sps)
+				if v := sps.VUI; v != nil {
+					if v.ColourDescriptionFlag {
+						vc.colourDescribed = true
+						vc.primaries, vc.transfer, vc.matrix = int(v.ColourPrimaries), int(v.TransferCharacteristics), int(v.MatrixCoefficients)
+					}
+					if v.TimingInfoPresentFlag && v.NumUnitsInTick > 0 {
+						vc.frameRate = float64(v.TimeScale) / float64(v.NumUnitsInTick)
+					}
+				}
+			}
+		}
 	}
 	return vc
+}
+
+// hevcSPSSummary collects the SPS fields that the DASH-IF tool compares
+// within a CMAF switching set.
+func hevcSPSSummary(sps *hevc.SPS) string {
+	s := fmt.Sprintf("vui=%v ext=%v range=%v", sps.VUI != nil, sps.ExtensionPresentFlag, sps.RangeExtensionFlag)
+	if sps.RangeExtension != nil {
+		s += fmt.Sprintf(" extprec=%v", sps.RangeExtension.ExtendedPrecisionProcessingFlag)
+	}
+	if v := sps.VUI; v != nil {
+		s += fmt.Sprintf(" signal=%v colour=%v %d/%d/%d chromaloc=%v neutral=%v", v.VideoSignalTypePresentFlag,
+			v.ColourDescriptionFlag, v.ColourPrimaries, v.TransferCharacteristics, v.MatrixCoefficients,
+			v.ChromaLocInfoPresentFlag, v.NeutralChromaIndicationFlag)
+	}
+	return s
+}
+
+func describeAAC(se *mp4.AudioSampleEntryBox) *audioConfig {
+	if se.Esds == nil || se.Esds.DecConfigDescriptor == nil || se.Esds.DecConfigDescriptor.ObjectType != 0x40 ||
+		se.Esds.DecConfigDescriptor.DecSpecificInfo == nil {
+		return nil
+	}
+	asc, err := aac.DecodeAudioSpecificConfig(bytes.NewReader(se.Esds.DecConfigDescriptor.DecSpecificInfo.DecConfig))
+	if err != nil {
+		return nil
+	}
+	return &audioConfig{objectType: int(asc.ObjectType), sampleRate: asc.SamplingFrequency, channels: int(asc.ChannelConfiguration)}
 }
 
 func audioCodec(fourCC string, se *mp4.AudioSampleEntryBox) (string, bool) {

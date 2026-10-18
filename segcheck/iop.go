@@ -109,7 +109,8 @@ func CheckAdaptationSet(reps []*addressing.Rep, inits []*Init) []report.Finding 
 		return nil
 	}
 	f := iopAdaptationSetRules(reps, inits)
-	return append(f, cmafAdaptationSetRules(reps, inits)...)
+	f = append(f, cmafAdaptationSetRules(reps, inits)...)
+	return append(f, cmafMediaProfileSetRules(reps, inits)...)
 }
 
 func iopAdaptationSetRules(reps []*addressing.Rep, inits []*Init) []report.Finding {

@@ -1691,8 +1691,10 @@
    "source": "CMAF/Segments/AudioMediaProfile.php",
    "context": "Section A.3",
    "text": "The maximum encoding parameters [..as per the table..] SHALL not be exceeded",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-MEDIAPROFILE"
+   ],
    "note": ""
   },
   {
@@ -1700,8 +1702,10 @@
    "source": "CMAF/Segments/AudioMediaProfile.php",
    "context": "Section A.1.2",
    "text": "Audio adaptation sets SHALL include at least one 'caac' representation",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-PRESENTATIONPROFILE"
+   ],
    "note": ""
   },
   {
@@ -1776,8 +1780,10 @@
    "source": "CMAF/Segments/HEVCComparison.php",
    "context": "Section B.2.4",
    "text": "CMAF Switching sets SHALL be constrained to include identical SPS information",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-HEVC-SWITCHING"
+   ],
    "note": ""
   },
   {
@@ -1785,9 +1791,11 @@
    "source": "CMAF/Segments/HEVCComparison.php",
    "context": "Section B.2.4",
    "text": "CMAF Switching sets SHALL be constrained to include identical SEI nals",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-HEVC-SWITCHING"
+   ],
+   "note": "dashcheck compares the SEI NAL units in hvcC; upstream compares NAL header fields"
   },
   {
    "id": "CMAF-11",
@@ -1893,9 +1901,11 @@
    "source": "CMAF/Segments/SubtitleMediaProfile.php",
    "context": "Section 7.3.4.1",
    "text": "All CMAF subtitle tracks in a CMAF Switching Set SHALL conform to one CMAF Media Profile",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-SUBTITLEPROFILE"
+   ],
+   "note": "upstream only checks AdaptationSets whose @mimeType starts with text/, which excludes CMAF subtitles in application/mp4"
   },
   {
    "id": "CMAF-21",
@@ -1913,17 +1923,21 @@
    "source": "CMAF/Segments/VideoMediaProfile.php",
    "context": "Section A.2 (AVC) / B.6 (HEVC)",
    "text": "The maximum encoding parameters [..as per the table..] SHALL not be exceeded",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-MEDIAPROFILE"
+   ],
+   "note": "upstream never checks the frame rate (always 0), treats missing colour information as BT.709, and asks for an HEVC profile named Main8 for cud8, which always fails; dashcheck checks the frame rate, skips unsignaled colour information and uses Main for cud8"
   },
   {
    "id": "CMAF-23",
    "source": "CMAF/Segments/VideoMediaProfile.php",
    "context": "Section A.1.2",
    "text": "Video adaptation sets SHALL include at least one 'cfhd' representation",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-PRESENTATIONPROFILE"
+   ],
    "note": ""
   },
   {
