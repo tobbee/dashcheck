@@ -37,7 +37,7 @@ The exit code is 1 if any error was found, which makes it usable in CI.
 ## Browser
 
 ```sh
-make serve   # builds web/dashcheck.wasm and serves web/ on http://localhost:8080
+make serve   # builds web/dashcheck.wasm and serves web/ on http://localhost:8080 (localhost only)
 ```
 
 The page runs the checker in a Web Worker. It can check a URL, or a local

@@ -16,7 +16,7 @@ wasm:
 	cp $(GOROOT)/lib/wasm/wasm_exec.js web/
 
 serve: wasm
-	cd web && python3 -m http.server $(PORT)
+	cd web && python3 -m http.server $(PORT) --bind 127.0.0.1
 
 lint:
 	go vet ./...
