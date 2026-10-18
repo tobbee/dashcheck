@@ -111,6 +111,7 @@ type Init struct {
 	Channels    int      // audio channel count in the sample entry
 	cmafBrand   string   // the highest CMAF media profile brand of the track
 	trex        *mp4.TrexBox
+	aac         *audioConfig // AAC AudioSpecificConfig, if any
 }
 
 // CheckInit parses and checks an initialization segment.
@@ -184,6 +185,7 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	init.CMAF = isCMAF(rep, init.Brands)
 	init.DefaultKID = info.defaultKID
 	init.Channels = int(info.channels)
+	init.aac = info.aac
 	for _, p := range moov.Psshs {
 		init.PsshSystems = append(init.PsshSystems, p.SystemID.String())
 	}

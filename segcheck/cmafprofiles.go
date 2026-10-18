@@ -46,8 +46,9 @@ type videoProfile struct {
 	maxFrameRate                float64
 }
 
-// videoProfiles are the brands checked by the DASH-IF tool. Its cud8 entry
-// asks for an HEVC profile named "Main8", which never matches; dashcheck uses Main (1).
+// videoProfiles are the CMAF video media profiles (ISO/IEC 23000-19 tables
+// 11 and 12, CTA-5001-F table 1). The DASH-IF tool's cud8 entry asks for an
+// HEVC profile named "Main8", which never matches; dashcheck uses Main (1).
 var videoProfiles = map[string]videoProfile{
 	"cfsd": {"avc", []int{66, 77, 100}, 31, []int{1, 5, 6}, []int{1, 6}, []int{1, 5, 6}, 864, 576, 60},
 	"cfhd": {"avc", []int{66, 77, 100}, 40, []int{1}, []int{1}, []int{1}, 1920, 1080, 60},
@@ -55,8 +56,10 @@ var videoProfiles = map[string]videoProfile{
 	"chhd": {"hevc", []int{1}, 123, []int{1}, []int{1}, []int{1}, 1920, 1080, 60},
 	"chh1": {"hevc", []int{2}, 123, []int{1}, []int{1}, []int{1}, 1920, 1080, 60},
 	"cud8": {"hevc", []int{1}, 150, []int{1}, []int{1}, []int{1}, 3840, 2160, 60},
-	"cud1": {"hevc", []int{2}, 153, []int{1}, []int{1}, []int{1}, 3840, 2160, 60},
+	"cud1": {"hevc", []int{2}, 153, []int{1, 9}, []int{1, 14}, []int{1, 9}, 3840, 2160, 60}, // BT.709 or BT.2020
 	"chr1": {"hevc", []int{2}, 153, []int{1}, []int{1}, []int{1}, 3840, 2160, 60},
+	"clg1": {"hevc", []int{2}, 153, []int{9}, []int{14, 18}, []int{9}, 3840, 2160, 60},
+	"chd1": {"hevc", []int{2}, 153, []int{9}, []int{16}, []int{9}, 3840, 2160, 60},
 }
 
 // mediaProfileBrand returns the CMAF media profile brand of a track, or "".

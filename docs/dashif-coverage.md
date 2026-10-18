@@ -15,10 +15,10 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
 | Module: DVB | 103 | 94 | 1 | 6 | 2 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
-| Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
+| Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **330** | **5** | **61** | **12** |
+| **Total** | **408** | **346** | **5** | **40** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -432,27 +432,27 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
-| WAVE-1 | `4.3.1`: Each WAVE audio Media profile SHALL conform to normative ref. listed in Table 1 | todo |  |  |
-| WAVE-2 | `4.1`: Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile | todo |  |  |
-| WAVE-3 | `5 `: If an audio track is included, the conforming (presentation will at least … | todo |  |  |
-| WAVE-4 | `7.2.2`: Sequential sets SHALL conform to the same CMAF profile | todo |  |  |
-| WAVE-5 | `7.2.2`: Wave content SHALL contain one CENC scheme per program | todo |  |  |
-| WAVE-6 | `7.2.2 - Presentation Splicing`: Sample entries in Sequential Switching Sets Shall not change at Splice points | todo |  |  |
-| WAVE-7 | `7.2.2 - Presentation Splicing`: Framerate in Sequential Switching Sets Shall not change at Splice points | todo |  |  |
-| WAVE-8 | `7.2.2 - Presentation Splicing`: Channel count in Sequential Switching Sets Shall not change at Splice points | todo |  |  |
-| WAVE-9 | `7.2.2 - Presentation Splicing`: Picture Aspect Ration (PAR) in Sequential Switching Sets Shall not change at Splice points | todo |  |  |
-| WAVE-10 | `7.2.2 - Presentation Splicing`: Track Ids can change at Splice points | todo |  |  |
-| WAVE-11 | `7.2.2 - Presentation Splicing`: Timescale can change at Splice points | todo |  |  |
-| WAVE-12 | `7.2.2 - Presentation Splicing`: Encryption scheme can change at Splice points | todo |  |  |
-| WAVE-13 | `7.2.2 - Presentation Splicing`: Default KID can change at Splice points | todo |  |  |
-| WAVE-14 | `4.4.1`: Each WAVE Subtitle Media profile SHALL conform to normative ref. listed in Table 1 | todo |  |  |
-| WAVE-15 | `4.1`: Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile | todo |  |  |
-| WAVE-16 | `5 `: If a subtitle track is included, the conforming (presentation will at least … | todo |  |  |
-| WAVE-17 | `7.2.2`: Sequential sets SHALL conform to the same CMAF profile | todo |  |  |
-| WAVE-18 | `4.2.1`: Each WAVE video Media profile SHALL conform to normative ref. listed in Table 1 | todo |  |  |
-| WAVE-19 | `4.1`: Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile | todo |  |  |
-| WAVE-20 | `5 `: If a video tracks is included, the conforming (presentation will at least … | todo |  |  |
-| WAVE-21 | `7.2.2`: Sequential sets SHALL conform to the same CMAF profile | todo |  |  |
+| WAVE-1 | `4.3.1`: Each WAVE audio Media profile SHALL conform to normative ref. listed in Table 1 | done | SEG-CMAF-MEDIAPROFILE | the limits of signalled media profile brands are checked by the CMAF rule; cud1 now also allows BT.2020 (bug 25) |
+| WAVE-2 | `4.1`: Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile | done | SEG-WAVE-PROFILE | per selection set (media type and @lang in a Period); a track conforms by its ftyp brand, @containerProfiles or its parameters, since the brand is only a SHOULD in CMAF; for MPDs with a urn:cta:wave: profile |
+| WAVE-3 | `5 `: If an audio track is included, the conforming (presentation will at least … | done | SEG-CMAF-PRESENTATIONPROFILE | CTA-5001-F 5 requires AAC Core only for the CMFHD presentation profiles, which the CMAF rule checks; upstream requires it in every audio AdaptationSet (bug 47) |
+| WAVE-4 | `7.2.2`: Sequential sets SHALL conform to the same CMAF profile | done | SEG-WAVE-SPLICE | information: the Baseline Splice Constraint Profile is optional and not signalled (CTA-5001-F 6.1); upstream fails (bug 47) |
+| WAVE-5 | `7.2.2`: Wave content SHALL contain one CENC scheme per program | done | SEG-WAVE-SCHEME | a warning: one scheme per presentation for CMAF presentation profiles (5) and per program for the splice profile (7.2.2) |
+| WAVE-6 | `7.2.2 - Presentation Splicing`: Sample entries in Sequential Switching Sets Shall not change at Splice points | done | SEG-WAVE-SPLICE | information, as WAVE-4 |
+| WAVE-7 | `7.2.2 - Presentation Splicing`: Framerate in Sequential Switching Sets Shall not change at Splice points | done | SEG-WAVE-SPLICE | table 5 only requires the media profile limits; dashcheck reports a different frame rate family as the table 6 recommendation (bug 47) |
+| WAVE-8 | `7.2.2 - Presentation Splicing`: Channel count in Sequential Switching Sets Shall not change at Splice points | n/a |  | table 5 only requires the media profile limits (SEG-CMAF-MEDIAPROFILE); the table 6 channel recommendation is not testable (bug 47) |
+| WAVE-9 | `7.2.2 - Presentation Splicing`: Picture Aspect Ration (PAR) in Sequential Switching Sets Shall not change at Splice points | done | SEG-WAVE-SPLICE | reported as the table 6 recommendation (bug 47) |
+| WAVE-10 | `7.2.2 - Presentation Splicing`: Track Ids can change at Splice points | n/a |  | a permissive statement: track IDs can change at splice points |
+| WAVE-11 | `7.2.2 - Presentation Splicing`: Timescale can change at Splice points | n/a |  | a permissive statement: the timescale can change at splice points |
+| WAVE-12 | `7.2.2 - Presentation Splicing`: Encryption scheme can change at Splice points | n/a |  | a permissive statement: the encryption can change at splice points (one scheme per program is WAVE-5) |
+| WAVE-13 | `7.2.2 - Presentation Splicing`: Default KID can change at Splice points | n/a |  | a permissive statement: the default KID can change at splice points |
+| WAVE-14 | `4.4.1`: Each WAVE Subtitle Media profile SHALL conform to normative ref. listed in Table 1 | done | SEG-CMAF-SUBTITLEPROFILE | checked by the CMAF subtitle profile rule |
+| WAVE-15 | `4.1`: Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile | done | SEG-WAVE-PROFILE | as WAVE-2 |
+| WAVE-16 | `5 `: If a subtitle track is included, the conforming (presentation will at least … | done | SEG-CMAF-PRESENTATIONPROFILE | as WAVE-3, for IMSC1 Text (bug 47) |
+| WAVE-17 | `7.2.2`: Sequential sets SHALL conform to the same CMAF profile | done | SEG-WAVE-SPLICE | as WAVE-4 |
+| WAVE-18 | `4.2.1`: Each WAVE video Media profile SHALL conform to normative ref. listed in Table 1 | done | SEG-CMAF-MEDIAPROFILE | as WAVE-1 |
+| WAVE-19 | `4.1`: Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile | done | SEG-WAVE-PROFILE | as WAVE-2 |
+| WAVE-20 | `5 `: If a video tracks is included, the conforming (presentation will at least … | done | SEG-CMAF-PRESENTATIONPROFILE | as WAVE-3, for AVC HD (bug 47) |
+| WAVE-21 | `7.2.2`: Sequential sets SHALL conform to the same CMAF profile | done | SEG-WAVE-SPLICE | as WAVE-4 |
 
 ## Module: WAVE HLS interop
 

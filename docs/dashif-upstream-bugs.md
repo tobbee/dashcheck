@@ -37,7 +37,7 @@ yet unless stated.
 | 22 | CMAF CompositionTimes | Requires elst without composition offsets | Verified in code |
 | 23 | CMAF Durations | Ignores per-sample durations | Already reported: #772 |
 | 24 | CMAF Subtitles | Not implemented, always fails | Verified in code |
-| 25 | CMAF VideoMediaProfile | Frame rate never checked, cud8 always fails | Verified in code |
+| 25 | CMAF VideoMediaProfile | Frame rate never checked, cud8 always fails, cud1 BT.2020 rejected | Verified in code |
 | 26 | CMAF SubtitleMediaProfile | Skips CMAF subtitles | Verified in code |
 | 27 | Low Latency LeapSecond | Misspelled element name, always fails | Verified in code |
 | 28 | Low Latency SegmentURL | SegmentTimeline never valid | Verified in code |
@@ -59,6 +59,7 @@ yet unless stated.
 | 44 | DVB UpdateConstraints | Several MPD update checks can never fail, others fail wrongly | Verified in code |
 | 45 | DVB BitStream | Colour checked against 'colr' instead of the VUI; HDR checks never fail; @codecs too strict | Verified in code and spec |
 | 46 | DVB SEILocations | hvc1 never checked; prefix SEI after VCL not found | Verified in code |
+| 47 | CTAWave | Outdated: required profiles per AdaptationSet, splice constraints always enforced | Verified in spec |
 
 ## Manifest handling
 
@@ -370,13 +371,18 @@ Already reported as [#772](https://github.com/Dash-Industry-Forum/DASH-IF-Confor
 
 **Problem:** `signalledFrameRate` is always 0. The cud8 brand requires the HEVC
 profile "Main8", but the signaled profile is mapped only to "Main", "Main10" or
-"Other". Missing colour information is treated as value 1 (BT.709).
+"Other". Missing colour information is treated as value 1 (BT.709). The cud1
+brand allows only BT.709 ([L201-L203](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/CMAF/Segments/VideoMediaProfile.php#L201-L203)), but CMAF table 12 and
+CTA-5001-F table 1 also allow BT.2020 (colour primaries 9, transfer
+characteristics 14).
 
-**Effect:** Frame rate limits are never checked, every cud8 track fails, and
-colour checks pass for streams that do not signal colour.
+**Effect:** Frame rate limits are never checked, every cud8 track fails,
+colour checks pass for streams that do not signal colour, and BT.2020 cud1
+tracks such as the WAVE cud1 test vectors fail.
 
-**Fix:** Take the frame rate from the VUI or the MPD, use "Main" for cud8, and
-skip colour checks when colour is not signaled (or treat it as unspecified, 2).
+**Fix:** Take the frame rate from the VUI or the MPD, use "Main" for cud8,
+skip colour checks when colour is not signaled (or treat it as unspecified, 2),
+and accept BT.2020 for cud1.
 
 ### 26. SubtitleMediaProfile skips CMAF subtitles
 
@@ -703,6 +709,37 @@ pass, and valid suffix SEI before end of sequence fail.
 
 **Fix:** Check `hvc1`, fail a prefix SEI after a VCL NAL unit, and compare
 suffix SEI positions only with VCL NAL units.
+
+### 47. The CTA WAVE checks follow the 2018 edition and misread it
+
+**Where:** [AudioProfile.php#L98](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/CTAWave/Segments/AudioProfile.php#L98),
+[VideoProfile.php#L99](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/CTAWave/Segments/VideoProfile.php#L99),
+[SubtitleProfile.php#L101](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/CTAWave/Segments/SubtitleProfile.php#L101),
+[SplicingPoints.php#L126](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/CTAWave/Segments/SplicingPoints.php#L126)
+
+**Problem:** The module reports against "WAVE Content Spec 2018Ed".
+In CTA-5001-F (2025 edition):
+
+- The AAC Core, AVC HD and IMSC1 Text profiles are required only for
+  presentations that conform to the CMFHD presentation profiles (clause 5),
+  per selection set. Upstream requires them in every audio, video and
+  subtitle AdaptationSet of all WAVE content.
+- WAVE programs "MAY conform" to a splice constraint profile (clause 6.1),
+  and none is signalled, but upstream fails every splice that breaks the
+  Baseline Splice Constraint Profile.
+- Within that profile, frame rate, picture aspect ratio and channel
+  configuration only have to conform to the media profile (table 5); keeping
+  them the same is a recommendation (table 6). Upstream fails any change.
+- Only the first Representation of AdaptationSets at the same index in the
+  two Periods is compared.
+
+**Effect:** WAVE content with additional AdaptationSets (for example a second
+audio language in E-AC-3, or HEVC next to AVC) fails, and multi-Period
+content fails for allowed changes.
+
+**Fix:** Check the required profiles only for CMFHD presentation profiles and
+per selection set, and report splice constraints as information, with the
+table 6 items as recommendations.
 
 ## Other projects
 

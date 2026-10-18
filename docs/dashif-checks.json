@@ -1943,189 +1943,221 @@
    "source": "CTAWave/Segments/AudioProfile.php",
    "context": "4.3.1",
    "text": "Each WAVE audio Media profile SHALL conform to normative ref. listed in Table 1",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-MEDIAPROFILE"
+   ],
+   "note": "the limits of signalled media profile brands are checked by the CMAF rule; cud1 now also allows BT.2020 (bug 25)"
   },
   {
    "id": "WAVE-2",
    "source": "CTAWave/Segments/AudioProfile.php",
    "context": "4.1",
    "text": "Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-PROFILE"
+   ],
+   "note": "per selection set (media type and @lang in a Period); a track conforms by its ftyp brand, @containerProfiles or its parameters, since the brand is only a SHOULD in CMAF; for MPDs with a urn:cta:wave: profile"
   },
   {
    "id": "WAVE-3",
    "source": "CTAWave/Segments/AudioProfile.php",
    "context": "5 ",
    "text": "If an audio track is included, the conforming (presentation will at least …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-PRESENTATIONPROFILE"
+   ],
+   "note": "CTA-5001-F 5 requires AAC Core only for the CMFHD presentation profiles, which the CMAF rule checks; upstream requires it in every audio AdaptationSet (bug 47)"
   },
   {
    "id": "WAVE-4",
    "source": "CTAWave/Segments/AudioProfile.php",
    "context": "7.2.2",
    "text": "Sequential sets SHALL conform to the same CMAF profile",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-SPLICE"
+   ],
+   "note": "information: the Baseline Splice Constraint Profile is optional and not signalled (CTA-5001-F 6.1); upstream fails (bug 47)"
   },
   {
    "id": "WAVE-5",
    "source": "CTAWave/Segments/PeriodEncryption.php",
    "context": "7.2.2",
    "text": "Wave content SHALL contain one CENC scheme per program",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-SCHEME"
+   ],
+   "note": "a warning: one scheme per presentation for CMAF presentation profiles (5) and per program for the splice profile (7.2.2)"
   },
   {
    "id": "WAVE-6",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Sample entries in Sequential Switching Sets Shall not change at Splice points",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-SPLICE"
+   ],
+   "note": "information, as WAVE-4"
   },
   {
    "id": "WAVE-7",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Framerate in Sequential Switching Sets Shall not change at Splice points",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-SPLICE"
+   ],
+   "note": "table 5 only requires the media profile limits; dashcheck reports a different frame rate family as the table 6 recommendation (bug 47)"
   },
   {
    "id": "WAVE-8",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Channel count in Sequential Switching Sets Shall not change at Splice points",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "table 5 only requires the media profile limits (SEG-CMAF-MEDIAPROFILE); the table 6 channel recommendation is not testable (bug 47)"
   },
   {
    "id": "WAVE-9",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Picture Aspect Ration (PAR) in Sequential Switching Sets Shall not change at Splice points",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-SPLICE"
+   ],
+   "note": "reported as the table 6 recommendation (bug 47)"
   },
   {
    "id": "WAVE-10",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Track Ids can change at Splice points",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "a permissive statement: track IDs can change at splice points"
   },
   {
    "id": "WAVE-11",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Timescale can change at Splice points",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "a permissive statement: the timescale can change at splice points"
   },
   {
    "id": "WAVE-12",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Encryption scheme can change at Splice points",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "a permissive statement: the encryption can change at splice points (one scheme per program is WAVE-5)"
   },
   {
    "id": "WAVE-13",
    "source": "CTAWave/Segments/SplicingPoints.php",
    "context": "7.2.2 - Presentation Splicing",
    "text": "Default KID can change at Splice points",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "a permissive statement: the default KID can change at splice points"
   },
   {
    "id": "WAVE-14",
    "source": "CTAWave/Segments/SubtitleProfile.php",
    "context": "4.4.1",
    "text": "Each WAVE Subtitle Media profile SHALL conform to normative ref. listed in Table 1",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-SUBTITLEPROFILE"
+   ],
+   "note": "checked by the CMAF subtitle profile rule"
   },
   {
    "id": "WAVE-15",
    "source": "CTAWave/Segments/SubtitleProfile.php",
    "context": "4.1",
    "text": "Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-PROFILE"
+   ],
+   "note": "as WAVE-2"
   },
   {
    "id": "WAVE-16",
    "source": "CTAWave/Segments/SubtitleProfile.php",
    "context": "5 ",
    "text": "If a subtitle track is included, the conforming (presentation will at least …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-PRESENTATIONPROFILE"
+   ],
+   "note": "as WAVE-3, for IMSC1 Text (bug 47)"
   },
   {
    "id": "WAVE-17",
    "source": "CTAWave/Segments/SubtitleProfile.php",
    "context": "7.2.2",
    "text": "Sequential sets SHALL conform to the same CMAF profile",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-SPLICE"
+   ],
+   "note": "as WAVE-4"
   },
   {
    "id": "WAVE-18",
    "source": "CTAWave/Segments/VideoProfile.php",
    "context": "4.2.1",
    "text": "Each WAVE video Media profile SHALL conform to normative ref. listed in Table 1",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-MEDIAPROFILE"
+   ],
+   "note": "as WAVE-1"
   },
   {
    "id": "WAVE-19",
    "source": "CTAWave/Segments/VideoProfile.php",
    "context": "4.1",
    "text": "Wave content SHALL include one or more switch sets conforming to at least one approved CMAF profile",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-PROFILE"
+   ],
+   "note": "as WAVE-2"
   },
   {
    "id": "WAVE-20",
    "source": "CTAWave/Segments/VideoProfile.php",
    "context": "5 ",
    "text": "If a video tracks is included, the conforming (presentation will at least …",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-PRESENTATIONPROFILE"
+   ],
+   "note": "as WAVE-3, for AVC HD (bug 47)"
   },
   {
    "id": "WAVE-21",
    "source": "CTAWave/Segments/VideoProfile.php",
    "context": "7.2.2",
    "text": "Sequential sets SHALL conform to the same CMAF profile",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-WAVE-SPLICE"
+   ],
+   "note": "as WAVE-4"
   },
   {
    "id": "COMMON-1",

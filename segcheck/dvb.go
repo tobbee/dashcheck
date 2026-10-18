@@ -436,6 +436,8 @@ func dvbClearFallback(reps []*addressing.Rep, inits []*Init, loc report.Location
 // mediaName turns a handler type into words for messages.
 func mediaName(handler string) string {
 	switch handler {
+	case "vide":
+		return "video"
 	case "soun":
 		return "audio"
 	case "subt", "text":

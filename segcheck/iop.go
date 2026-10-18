@@ -127,7 +127,8 @@ func CheckPresentation(reps []*addressing.Rep, inits []*Init, firstEPTs []float6
 		}
 	}
 	f := dvbPeriodRules(reps, inits)
-	return append(f, dvbContinuityEPT(reps, firstEPTs)...)
+	f = append(f, dvbContinuityEPT(reps, firstEPTs)...)
+	return append(f, waveRules(reps, inits)...)
 }
 
 func iopAdaptationSetRules(reps []*addressing.Rep, inits []*Init) []report.Finding {
