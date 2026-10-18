@@ -11,14 +11,14 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Schematron: ac4-generic.sch | 17 | 17 | 0 | 0 | 0 |
 | Module: Common | 5 | 2 | 0 | 2 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
-| Module: CMAF | 23 | 1 | 0 | 22 | 0 |
+| Module: CMAF | 23 | 16 | 0 | 7 | 0 |
 | Module: Low Latency | 54 | 5 | 3 | 46 | 0 |
 | Module: DVB | 103 | 2 | 3 | 98 | 0 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **173** | **9** | **218** | **8** |
+| **Total** | **408** | **188** | **9** | **203** | **8** |
 
 ## Schematron: schematron.sch
 
@@ -224,25 +224,25 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 |---|---|---|---|---|
 | CMAF-1 | `Section A.3`: The maximum encoding parameters [..as per the table..] SHALL not be exceeded | todo |  |  |
 | CMAF-2 | `Section A.1.2`: Audio adaptation sets SHALL include at least one 'caac' representation | todo |  |  |
-| CMAF-3 | `Section 9.2.1`: Video tracks SHALL contain either 'trun(v1)' OR 'elst' combined with 'trun(v0)', but not both | todo |  |  |
-| CMAF-4 | `Section 7.3.5`: All media samples in a CMAF Fragment SHALL be addressed by byte offsets in the 'trun' box | todo |  |  |
+| CMAF-3 | `Section 9.2.1`: Video tracks SHALL contain either 'trun(v1)' OR 'elst' combined with 'trun(v0)', but not both | done | SEG-CMAF-COMPTIME | upstream requires an edit list with trun version 0 even when there are no composition offsets |
+| CMAF-4 | `Section 7.3.5`: All media samples in a CMAF Fragment SHALL be addressed by byte offsets in the 'trun' box | done | SEG-CMAF-DATAOFFSET, SEG-PARSE | upstream compares trun sample sizes with parsed NAL samples; dashcheck requires moof-relative data offsets, and mp4ff checks that samples lie within mdat |
 | CMAF-5 | `Section 7.3.2.2`: baseMediaDecodeTime SHALL be equal to the sum of all prior segments | done | SEG-CONTINUITY | dashcheck checks continuity between consecutive checked segments |
-| CMAF-6 | `Section A.1.2`: Tracks SHALL NOT contain a track encryption box | todo |  |  |
-| CMAF-7 | `Section A.1.3`: Tracks SHALL be available in 'cenc' encryption | todo |  |  |
-| CMAF-8 | `Section A.1.4`: Tracks SHALL be available in 'cbcs' encryption | todo |  |  |
+| CMAF-6 | `Section A.1.2`: Tracks SHALL NOT contain a track encryption box | done | SEG-CMAF-ENCRYPTION |  |
+| CMAF-7 | `Section A.1.3`: Tracks SHALL be available in 'cenc' encryption | done | SEG-CMAF-ENCRYPTION |  |
+| CMAF-8 | `Section A.1.4`: Tracks SHALL be available in 'cbcs' encryption | done | SEG-CMAF-ENCRYPTION |  |
 | CMAF-9 | `Section B.2.4`: CMAF Switching sets SHALL be constrained to include identical SPS information | todo |  |  |
 | CMAF-10 | `Section B.2.4`: CMAF Switching sets SHALL be constrained to include identical SEI nals | todo |  |  |
-| CMAF-11 | `Section 7.3.5`: Each AVC CMAF Fragment SHALL be independently accessible | todo |  |  |
-| CMAF-12 | `Section 7.3.5`: Each HEVC CMAF Fragment SHALL be independently accessible | todo |  |  |
-| CMAF-13 | `Section 7.3.5`: Each Audio CMAF Fragment SHALL be independently accessible | todo |  |  |
-| CMAF-14 | `Section 7.3.2.4`: The HEVCSampleEntry SHALL contain a 'colr' box with type 'nclx' | todo |  |  |
-| CMAF-15 | `Section 7.3.2.4`: Each encrypted Fragment SHALL be independently decryptable | todo |  |  |
-| CMAF-16 | `Section 7.5.2`: When metadata is carried in a 'meta' box, it SHALL NOT occur at the file level | todo |  |  |
-| CMAF-17 | `Section 7.5.2`: When metadata is carried in a 'udta' box, it SHALL NOT occur at the file level | todo |  |  |
-| CMAF-18 | `Section 7.3.9.1`: A CMAF switching set SHALL have only media type | todo |  |  |
-| CMAF-19 | `Section 7.3.3.3`: Each subsegment referenced in the 'sidx' box SHALL be a single fragment | todo |  |  |
+| CMAF-11 | `Section 7.3.5`: Each AVC CMAF Fragment SHALL be independently accessible | done | SEG-CMAF-INIT | like upstream, checks that the decoder configuration and size are present |
+| CMAF-12 | `Section 7.3.5`: Each HEVC CMAF Fragment SHALL be independently accessible | done | SEG-CMAF-INIT | like upstream, checks that the decoder configuration and size are present |
+| CMAF-13 | `Section 7.3.5`: Each Audio CMAF Fragment SHALL be independently accessible | done | SEG-CMAF-INIT | like upstream, checks that sample rate and channel count are present |
+| CMAF-14 | `Section 7.3.2.4`: The HEVCSampleEntry SHALL contain a 'colr' box with type 'nclx' | done | SEG-CMAF-COLR | dashcheck checks hvc1 and hev1, upstream only hev1 |
+| CMAF-15 | `Section 7.3.2.4`: Each encrypted Fragment SHALL be independently decryptable | done | SEG-CMAF-SENC | upstream only checks with the dash264 profile; dashcheck checks all encrypted CMAF tracks |
+| CMAF-16 | `Section 7.5.2`: When metadata is carried in a 'meta' box, it SHALL NOT occur at the file level | done | SEG-CMAF-TOPLEVEL |  |
+| CMAF-17 | `Section 7.5.2`: When metadata is carried in a 'udta' box, it SHALL NOT occur at the file level | done | SEG-CMAF-TOPLEVEL |  |
+| CMAF-18 | `Section 7.3.9.1`: A CMAF switching set SHALL have only media type | done | SEG-CMAF-SWITCHINGSET |  |
+| CMAF-19 | `Section 7.3.3.3`: Each subsegment referenced in the 'sidx' box SHALL be a single fragment | done | SEG-CMAF-SIDX |  |
 | CMAF-20 | `Section 7.3.4.1`: All CMAF subtitle tracks in a CMAF Switching Set SHALL conform to one CMAF Media Profile | todo |  |  |
-| CMAF-21 | `Section 7.5.20`: All CMAF fragments in a 'im1i' track SHALL contain a 'subs' box | todo |  |  |
+| CMAF-21 | `Section 7.5.20`: All CMAF fragments in a 'im1i' track SHALL contain a 'subs' box | done | SEG-CMAF-SUBS | not implemented upstream, where the check always fails |
 | CMAF-22 | `Section A.2 (AVC) / B.6 (HEVC)`: The maximum encoding parameters [..as per the table..] SHALL not be exceeded | todo |  |  |
 | CMAF-23 | `Section A.1.2`: Video adaptation sets SHALL include at least one 'cfhd' representation | todo |  |  |
 

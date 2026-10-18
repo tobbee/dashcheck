@@ -15,6 +15,8 @@ import (
 type sampleEntryInfo struct {
 	fourCC     string // original format for encrypted content
 	encrypted  bool
+	scheme     string // protection scheme type, e.g. cenc or cbcs
+	colrNclx   bool   // a colr box of type nclx is present
 	codec      string // full codecs string if it can be derived, else the 4CC
 	derived    bool   // codec is a full derived string
 	width      uint16
@@ -45,6 +47,14 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 		if se.Sinf != nil && se.Sinf.Frma != nil {
 			info.fourCC = se.Sinf.Frma.DataFormat
 			info.encrypted = true
+			if se.Sinf.Schm != nil {
+				info.scheme = se.Sinf.Schm.SchemeType
+			}
+		}
+		for _, c := range se.Children {
+			if colr, ok := c.(*mp4.ColrBox); ok && colr.ColorType == "nclx" {
+				info.colrNclx = true
+			}
 		}
 		info.codec, info.derived = visualCodec(info.fourCC, se)
 		info.video = describeVideoConfig(se)
@@ -55,6 +65,9 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 		if se.Sinf != nil && se.Sinf.Frma != nil {
 			info.fourCC = se.Sinf.Frma.DataFormat
 			info.encrypted = true
+			if se.Sinf.Schm != nil {
+				info.scheme = se.Sinf.Schm.SchemeType
+			}
 		}
 		info.codec, info.derived = audioCodec(info.fourCC, se)
 	default:

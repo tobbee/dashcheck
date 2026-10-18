@@ -1709,18 +1709,23 @@
    "source": "CMAF/Segments/CompositionTimes.php",
    "context": "Section 9.2.1",
    "text": "Video tracks SHALL contain either 'trun(v1)' OR 'elst' combined with 'trun(v0)', but not both",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-COMPTIME"
+   ],
+   "note": "upstream requires an edit list with trun version 0 even when there are no composition offsets"
   },
   {
    "id": "CMAF-4",
    "source": "CMAF/Segments/DataOffsets.php",
    "context": "Section 7.3.5",
    "text": "All media samples in a CMAF Fragment SHALL be addressed by byte offsets in the 'trun' box",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-DATAOFFSET",
+    "SEG-PARSE"
+   ],
+   "note": "upstream compares trun sample sizes with parsed NAL samples; dashcheck requires moof-relative data offsets, and mp4ff checks that samples lie within mdat"
   },
   {
    "id": "CMAF-5",
@@ -1738,8 +1743,10 @@
    "source": "CMAF/Segments/EncryptionProfile.php",
    "context": "Section A.1.2",
    "text": "Tracks SHALL NOT contain a track encryption box",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-ENCRYPTION"
+   ],
    "note": ""
   },
   {
@@ -1747,8 +1754,10 @@
    "source": "CMAF/Segments/EncryptionProfile.php",
    "context": "Section A.1.3",
    "text": "Tracks SHALL be available in 'cenc' encryption",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-ENCRYPTION"
+   ],
    "note": ""
   },
   {
@@ -1756,8 +1765,10 @@
    "source": "CMAF/Segments/EncryptionProfile.php",
    "context": "Section A.1.4",
    "text": "Tracks SHALL be available in 'cbcs' encryption",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-ENCRYPTION"
+   ],
    "note": ""
   },
   {
@@ -1783,53 +1794,65 @@
    "source": "CMAF/Segments/Initialization.php",
    "context": "Section 7.3.5",
    "text": "Each AVC CMAF Fragment SHALL be independently accessible",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-INIT"
+   ],
+   "note": "like upstream, checks that the decoder configuration and size are present"
   },
   {
    "id": "CMAF-12",
    "source": "CMAF/Segments/Initialization.php",
    "context": "Section 7.3.5",
    "text": "Each HEVC CMAF Fragment SHALL be independently accessible",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-INIT"
+   ],
+   "note": "like upstream, checks that the decoder configuration and size are present"
   },
   {
    "id": "CMAF-13",
    "source": "CMAF/Segments/Initialization.php",
    "context": "Section 7.3.5",
    "text": "Each Audio CMAF Fragment SHALL be independently accessible",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-INIT"
+   ],
+   "note": "like upstream, checks that sample rate and channel count are present"
   },
   {
    "id": "CMAF-14",
    "source": "CMAF/Segments/LegacyInitialization.php",
    "context": "Section 7.3.2.4",
    "text": "The HEVCSampleEntry SHALL contain a 'colr' box with type 'nclx'",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-COLR"
+   ],
+   "note": "dashcheck checks hvc1 and hev1, upstream only hev1"
   },
   {
    "id": "CMAF-15",
    "source": "CMAF/Segments/LegacyInitialization.php",
    "context": "Section 7.3.2.4",
    "text": "Each encrypted Fragment SHALL be independently decryptable",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-SENC"
+   ],
+   "note": "upstream only checks with the dash264 profile; dashcheck checks all encrypted CMAF tracks"
   },
   {
    "id": "CMAF-16",
    "source": "CMAF/Segments/MetaData.php",
    "context": "Section 7.5.2",
    "text": "When metadata is carried in a 'meta' box, it SHALL NOT occur at the file level",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-TOPLEVEL"
+   ],
    "note": ""
   },
   {
@@ -1837,8 +1860,10 @@
    "source": "CMAF/Segments/MetaData.php",
    "context": "Section 7.5.2",
    "text": "When metadata is carried in a 'udta' box, it SHALL NOT occur at the file level",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-TOPLEVEL"
+   ],
    "note": ""
   },
   {
@@ -1846,8 +1871,10 @@
    "source": "CMAF/Segments/Miscellaneous.php",
    "context": "Section 7.3.9.1",
    "text": "A CMAF switching set SHALL have only media type",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-SWITCHINGSET"
+   ],
    "note": ""
   },
   {
@@ -1855,8 +1882,10 @@
    "source": "CMAF/Segments/SegmentIndex.php",
    "context": "Section 7.3.3.3",
    "text": "Each subsegment referenced in the 'sidx' box SHALL be a single fragment",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-SIDX"
+   ],
    "note": ""
   },
   {
@@ -1873,9 +1902,11 @@
    "source": "CMAF/Segments/Subtitles.php",
    "context": "Section 7.5.20",
    "text": "All CMAF fragments in a 'im1i' track SHALL contain a 'subs' box",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-CMAF-SUBS"
+   ],
+   "note": "not implemented upstream, where the check always fails"
   },
   {
    "id": "CMAF-22",

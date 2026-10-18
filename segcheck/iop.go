@@ -105,7 +105,15 @@ func iopMediaRules(rep *addressing.Rep, init *Init, media *Media, loc report.Loc
 // CheckAdaptationSet runs checks across the Representations of one
 // AdaptationSet, given their initialization segments (nil if not available).
 func CheckAdaptationSet(reps []*addressing.Rep, inits []*Init) []report.Finding {
-	if len(reps) == 0 || !isIOP(reps[0]) {
+	if len(reps) == 0 {
+		return nil
+	}
+	f := iopAdaptationSetRules(reps, inits)
+	return append(f, cmafAdaptationSetRules(reps, inits)...)
+}
+
+func iopAdaptationSetRules(reps []*addressing.Rep, inits []*Init) []report.Finding {
+	if !isIOP(reps[0]) {
 		return nil
 	}
 	var f []report.Finding

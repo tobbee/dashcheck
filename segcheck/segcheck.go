@@ -102,6 +102,10 @@ type Init struct {
 	EditOffset  int64 // media time of the first edit, subtracted from composition times
 	HasEditList bool
 	Video       videoConfig
+	Brands      []string // ftyp major and compatible brands
+	Encrypted   bool
+	Scheme      string // protection scheme type
+	CMAF        bool   // the track is declared as CMAF
 	trex        *mp4.TrexBox
 }
 
@@ -168,8 +172,15 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	init.SampleEntry = info.fourCC
 	init.Codec = info.codec
 	init.Video = info.video
+	init.Encrypted = info.encrypted
+	init.Scheme = info.scheme
+	if ftyp := mf.Init.Ftyp; ftyp != nil {
+		init.Brands = append([]string{ftyp.MajorBrand()}, ftyp.CompatibleBrands()...)
+	}
+	init.CMAF = isCMAF(rep, init.Brands)
 	f = append(f, crossCheckInit(rep, init, info, loc)...)
 	f = append(f, iopInitRules(rep, init, loc)...)
+	f = append(f, cmafInitRules(rep, init, info, mf.Init.Children, loc)...)
 	return init, f
 }
 
@@ -300,6 +311,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	media.EPT = float64(minCT-init.EditOffset) / mediaTS
 	f = append(f, checkTiming(rep, seg, media, mediaTS, last, loc)...)
 	f = append(f, iopMediaRules(rep, init, media, loc)...)
+	f = append(f, cmafMediaRules(rep, init, mf, loc)...)
 	return media, f
 }
 
