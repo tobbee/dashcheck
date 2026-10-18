@@ -75,6 +75,14 @@ var (
 		ID: "MPD-DVB-CP", Severity: report.Error,
 		Desc: "DVB ContentProtection descriptors must be on the AdaptationSet and include the mp4protection descriptor", SpecRef: refDVB + " 8.3, 8.4",
 	})
+	RuleDVBContinuity = report.Register(report.Rule{
+		ID: "MPD-DVB-CONTINUITY", Severity: report.Error,
+		Desc: "A period-continuity descriptor must name an earlier Period with an AdaptationSet of the same @id, " +
+			"and the two AdaptationSets must be associated: equivalent AssetIdentifier on both Periods and the same " +
+			"@lang, @contentType, @par, Role, Accessibility, Viewpoint and, for audio, @mimeType, @codecs, " +
+			"@audioSamplingRate and AudioChannelConfiguration",
+		SpecRef: refDVB + " 10.5.2.2, 10.5.2.3",
+	})
 	RuleDVBEvent = report.Register(report.Rule{
 		ID: "MPD-DVB-EVENT", Severity: report.Error,
 		Desc: "DVB TV-Anytime events need @presentationTime and valid XML data", SpecRef: refDVB + " 9.1.2.1",
@@ -141,6 +149,8 @@ func dvbRules(md *m.MPD, raw *rawElem, size int, mpdURL string) []report.Finding
 	}
 	var f []report.Finding
 	mpdLoc := report.Location{Path: "MPD"}
+	// DVB-79
+	f = append(f, dvbContinuity(md)...)
 	// DVB-14 to DVB-17
 	if size > 256*1024 {
 		f = append(f, RuleDVBLimits.New(mpdLoc, "MPD is %d bytes", size))
@@ -572,4 +582,85 @@ func wellFormed(s string) bool {
 			return err.Error() == "EOF"
 		}
 	}
+}
+
+var continuitySchemes = []string{"urn:dvb:dash:period_continuity:2014", "urn:mpeg:dash:period-continuity:2015"}
+
+// dvbContinuity checks period-continuity signalling (TS 103 285 10.5.2.3)
+// and the association it requires (10.5.2.2). Upstream only finds the
+// AdaptationSets and leaves the association unchecked.
+func dvbContinuity(md *m.MPD) []report.Finding {
+	var f []report.Finding
+	reps, _ := addressing.Reps(md, "")
+	audio := map[string][]string{} // AdaptationSet path -> Table 4 values of its Representations
+	for _, r := range reps {
+		audio[r.ASPath] = append(audio[r.ASPath], fmt.Sprintf("%s %s %s %s", r.MimeType, r.Codecs, r.AudioSamplingRate, descriptorsString(r.AudioChannelConfigs)))
+	}
+	for k := range audio {
+		slices.Sort(audio[k])
+		audio[k] = slices.Compact(audio[k])
+	}
+	periodIndex := map[string]int{}
+	for pi, p := range md.Periods {
+		if p.Id != "" {
+			periodIndex[p.Id] = pi
+		}
+	}
+	for pi, p := range md.Periods {
+		for ai, as := range p.AdaptationSets {
+			path := fmt.Sprintf("Period[%d]/AdaptationSet[%d]", pi, ai)
+			loc := report.Location{Path: path}
+			for _, d := range as.SupplementalProperties {
+				if !slices.Contains(continuitySchemes, string(d.SchemeIdUri)) {
+					continue
+				}
+				fi, ok := periodIndex[d.Value]
+				if !ok && pi == 0 && md.GetType() == "dynamic" {
+					continue // the Period may have left the time-shift window
+				}
+				if !ok || fi >= pi {
+					f = append(f, RuleDVBContinuity.New(loc, "%s names Period %q, which is not an earlier Period", d.SchemeIdUri, d.Value))
+					continue
+				}
+				if as.Id == nil {
+					f = append(f, RuleDVBContinuity.New(loc, "%s on an AdaptationSet without @id", d.SchemeIdUri))
+					continue
+				}
+				fp := md.Periods[fi]
+				fai := slices.IndexFunc(fp.AdaptationSets, func(a *m.AdaptationSetType) bool { return a.Id != nil && *a.Id == *as.Id })
+				if fai < 0 {
+					f = append(f, RuleDVBContinuity.New(loc, "Period %q has no AdaptationSet with @id %d", d.Value, *as.Id))
+					continue
+				}
+				fas := fp.AdaptationSets[fai]
+				var diffs []string
+				if p.AssetIdentifier == nil || fp.AssetIdentifier == nil {
+					diffs = append(diffs, "AssetIdentifier missing")
+				} else if descriptorString(p.AssetIdentifier) != descriptorString(fp.AssetIdentifier) {
+					diffs = append(diffs, "AssetIdentifier")
+				}
+				pairs := []struct{ name, a, b string }{
+					{"@lang", fas.Lang, as.Lang},
+					{"@contentType", string(fas.ContentType), string(as.ContentType)},
+					{"@par", string(fas.Par), string(as.Par)},
+					{"Role", descriptorsString(fas.Roles), descriptorsString(as.Roles)},
+					{"Accessibility", descriptorsString(fas.Accessibilities), descriptorsString(as.Accessibilities)},
+					{"Viewpoint", descriptorsString(fas.Viewpoints), descriptorsString(as.Viewpoints)},
+				}
+				for _, pr := range pairs {
+					if pr.a != pr.b {
+						diffs = append(diffs, pr.name)
+					}
+				}
+				firstPath := fmt.Sprintf("Period[%d]/AdaptationSet[%d]", fi, fai)
+				if as.ContentType == "audio" && !slices.Equal(audio[path], audio[firstPath]) {
+					diffs = append(diffs, "@mimeType, @codecs, @audioSamplingRate or AudioChannelConfiguration")
+				}
+				if len(diffs) > 0 {
+					f = append(f, RuleDVBContinuity.New(loc, "continues %s but is not associated with it: %s differ", firstPath, strings.Join(diffs, ", ")))
+				}
+			}
+		}
+	}
+	return f
 }

@@ -94,3 +94,58 @@ func TestDVBRules(t *testing.T) {
 		})
 	}
 }
+
+func TestDVBContinuity(t *testing.T) {
+	// Two Periods with the same AssetIdentifier; both AdaptationSets of p1 continue p0.
+	period := dvbMPD[strings.Index(dvbMPD, "  <Period"):strings.Index(dvbMPD, "  <UTCTiming")]
+	asset := `<AssetIdentifier schemeIdUri="urn:example:asset" value="show"/>
+`
+	p0 := strings.Replace(period, `start="PT0S">
+`, `start="PT0S">
+    `+asset, 1)
+	p1 := strings.ReplaceAll(p0, `start="PT0S"`, `start="PT60S"`)
+	p1 = strings.Replace(p1, `<Period id="p0"`, `<Period id="p1"`, 1)
+	p1 = strings.ReplaceAll(p1, `startWithSAP="1">
+`, `startWithSAP="1">
+      <SupplementalProperty schemeIdUri="urn:dvb:dash:period_continuity:2014" value="p0"/>
+`)
+	base := strings.Replace(dvbMPD, period, p0+p1, 1)
+	cases := []struct {
+		name     string
+		old, new string
+		want     int
+	}{
+		{"associated", "", "", 0},
+		{"unknown Period", `value="p0"/>`, `value="p9"/>`, 1},
+		{"no AdaptationSet with the id", `<AdaptationSet id="2" contentType="audio" mimeType="audio/mp4" codecs="mp4a.40.2" lang="en" audioSamplingRate="48000" segmentAlignment="true" startWithSAP="1">
+      <Supplemental`, `<AdaptationSet id="3" contentType="audio" mimeType="audio/mp4" codecs="mp4a.40.2" lang="en" audioSamplingRate="48000" segmentAlignment="true" startWithSAP="1">
+      <Supplemental`, 1},
+		{"other language", `lang="en" audioSamplingRate="48000" segmentAlignment="true" startWithSAP="1">
+      <Supplemental`, `lang="sv" audioSamplingRate="48000" segmentAlignment="true" startWithSAP="1">
+      <Supplemental`, 1},
+		{"other sampling rate", `audioSamplingRate="48000" segmentAlignment="true" startWithSAP="1">
+      <Supplemental`, `audioSamplingRate="44100" segmentAlignment="true" startWithSAP="1">
+      <Supplemental`, 1},
+		{"no AssetIdentifier", `start="PT60S">
+    ` + asset, `start="PT60S">
+`, 2},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			data := base
+			if c.old != "" {
+				if !strings.Contains(data, c.old) {
+					t.Fatalf("test MPD lacks %q", c.old)
+				}
+				data = strings.Replace(data, c.old, c.new, 1)
+			}
+			md, findings := Check([]byte(data), "https://example.com/dvb.mpd")
+			if md == nil {
+				t.Fatalf("MPD not parsed: %v", findings)
+			}
+			if f := dvbContinuity(md); len(f) != c.want {
+				t.Errorf("got %d findings, want %d: %v", len(f), c.want, f)
+			}
+		})
+	}
+}

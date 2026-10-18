@@ -13,12 +13,12 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
-| Module: DVB | 103 | 91 | 1 | 9 | 2 |
+| Module: DVB | 103 | 94 | 1 | 6 | 2 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **327** | **5** | **64** | **12** |
+| **Total** | **408** | **330** | **5** | **61** | **12** |
 
 ## Schematron: schematron.sch
 
@@ -387,9 +387,9 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-76 | `DRM`: PSSH Boxes SHOULD exist in either the MPD or the Initialization Segment | done | SEG-DVB-PSSH | reported as info: TS 103 285 V1.4.1 8.5.0 lets the initialization and/or media segments carry pssh and has no SHOULD for the MPD or initialization segment (bug 43) |
 | DVB-77 | `DRM`: MPD DRM System information | n/a |  | an informational listing of the DRM systems; upstream always passes |
 | DVB-78 | `DRM`: The scheme SHOULD be set to 'cenc' | done | SEG-DVB-CENC, SEG-DVB-CENC-FALLBACK | TS 103 285 V1.3.1 and V1.4.1 8.6.0 allow cenc or cbcs (cbcs not with the 2014 profile) and require a clear or cenc fallback per media type when AVC is used; upstream asks for cenc only (bug 43) |
-| DVB-79 | `Section 10.5.2.3`: Continous adaptation sets shall be signalled accordingly | todo |  |  |
-| DVB-80 | `Section 10.5.2.3`: All Representations in the Adaptation Set in the first Period shall share the same value EPT1 | todo |  |  |
-| DVB-81 | `Section 10.5.2.3`: All Representations in the Adaptation Set in a subsequent Period shall share the same value EPT2 | todo |  |  |
+| DVB-79 | `Section 10.5.2.3`: Continous adaptation sets shall be signalled accordingly | done | MPD-DVB-CONTINUITY | also checks the association of 10.5.2.2 (AssetIdentifier, @lang, @contentType, @par, Role, Accessibility, Viewpoint, audio Table 4 values), which upstream leaves as a TODO, and accepts the MPEG period-continuity URN too |
+| DVB-80 | `Section 10.5.2.3`: All Representations in the Adaptation Set in the first Period shall share the same value EPT1 | done | SEG-DVB-CONTINUITY-EPT | compares the first segment of each Representation, so only for static MPDs where the first segment of the Period is checked |
+| DVB-81 | `Section 10.5.2.3`: All Representations in the Adaptation Set in a subsequent Period shall share the same value EPT2 | done | SEG-DVB-CONTINUITY-EPT | as DVB-80 |
 | DVB-82 | `6.1.1`: @mimeType SHALL match the mimetype derived from the segments | done | XCHK-HANDLER | dashcheck compares the track handler with @contentType or @mimeType |
 | DVB-83 | `6.1.1`: @audioSamplingRate SHALL match the sample rate derived from the segments | done | XCHK-SAMPLERATE | dashcheck reports a warning |
 | DVB-84 | `6.1.1`: AudioChannelConfiguration SHALL match the configuration derived from the segments | done | SEG-DVB-CHANNELS | only with the 23003:3 scheme; upstream fails with other schemes |

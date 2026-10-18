@@ -3,6 +3,7 @@ package segcheck
 import (
 	"fmt"
 	"maps"
+	"math"
 	"slices"
 	"strconv"
 	"strings"
@@ -93,6 +94,11 @@ var (
 		Desc: "A DVB Period with AVC video must have an AVC video AdaptationSet and an AdaptationSet of each other " +
 			"media type that is unencrypted or uses the cenc scheme",
 		SpecRef: refDVB + " 8.6.0",
+	})
+	RuleDVBContinuityEPT = report.Register(report.Rule{
+		ID: "SEG-DVB-CONTINUITY-EPT", Severity: report.Error,
+		Desc:    "All Representations of a period-continuous AdaptationSet must share the earliest presentation time",
+		SpecRef: refDVB + " 10.5.2.3",
 	})
 	RuleDVBSwitchable = report.Register(report.Rule{
 		ID: "SEG-DVB-SWITCHABLE", Severity: report.Error,
@@ -436,4 +442,62 @@ func mediaName(handler string) string {
 		return "subtitle"
 	}
 	return handler
+}
+
+var continuitySchemes = []string{"urn:dvb:dash:period_continuity:2014", "urn:mpeg:dash:period-continuity:2015"}
+
+// dvbContinuityEPT checks DVB-80 and DVB-81: when an AdaptationSet continues
+// one in an earlier Period, the Representations of each share the same
+// earliest presentation time (EPT1 and EPT2). Only Representations whose
+// first segment of the Period was checked take part.
+func dvbContinuityEPT(reps []*addressing.Rep, firstEPTs []float64) []report.Finding {
+	const tolerance = 0.001
+	var f []report.Finding
+	reported := map[string]bool{}
+	check := func(asPath string, idx []int, which string) {
+		if reported[asPath] {
+			return
+		}
+		reported[asPath] = true
+		var known []string
+		lo, hi := math.Inf(1), math.Inf(-1)
+		for _, i := range idx {
+			if math.IsNaN(firstEPTs[i]) {
+				continue
+			}
+			lo, hi = min(lo, firstEPTs[i]), max(hi, firstEPTs[i])
+			known = append(known, fmt.Sprintf("%s %.3fs", reps[i].ID, firstEPTs[i]))
+		}
+		if len(known) > 1 && hi-lo > tolerance {
+			f = append(f, RuleDVBContinuityEPT.New(report.Location{Path: asPath}, "%s differs: %s", which, strings.Join(known, ", ")))
+		}
+	}
+	byAS := map[string][]int{}
+	var order []string
+	for i, r := range reps {
+		if _, ok := byAS[r.ASPath]; !ok {
+			order = append(order, r.ASPath)
+		}
+		byAS[r.ASPath] = append(byAS[r.ASPath], i)
+	}
+	for _, asPath := range order {
+		idx := byAS[asPath]
+		r := reps[idx[0]]
+		if !isDVB(r) || r.ASID == "" {
+			continue
+		}
+		for _, d := range r.Supplementals {
+			if !slices.Contains(continuitySchemes, string(d.SchemeIdUri)) {
+				continue
+			}
+			for _, prevPath := range order {
+				p := reps[byAS[prevPath][0]]
+				if p.PeriodID == d.Value && p.ASID == r.ASID && p.PeriodIndex < r.PeriodIndex {
+					check(prevPath, byAS[prevPath], "EPT1")
+					check(asPath, idx, "EPT2")
+				}
+			}
+		}
+	}
+	return f
 }

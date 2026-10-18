@@ -2,6 +2,7 @@ package segcheck
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -114,10 +115,19 @@ func CheckAdaptationSet(reps []*addressing.Rep, inits []*Init) []report.Finding 
 	return append(f, dvbAdaptationSetRules(reps, inits)...)
 }
 
-// CheckPresentation runs the checks that need the initialization segments of
-// all Representations of the MPD, in MPD order (nil where unavailable).
-func CheckPresentation(reps []*addressing.Rep, inits []*Init) []report.Finding {
-	return dvbPeriodRules(reps, inits)
+// CheckPresentation runs the checks that need results from all
+// Representations of the MPD, in MPD order: the initialization segments (nil
+// where unavailable) and the presentation time of the first segment of each
+// Period in seconds (NaN where not checked).
+func CheckPresentation(reps []*addressing.Rep, inits []*Init, firstEPTs []float64) []report.Finding {
+	if len(firstEPTs) != len(reps) {
+		firstEPTs = make([]float64, len(reps))
+		for i := range firstEPTs {
+			firstEPTs[i] = math.NaN()
+		}
+	}
+	f := dvbPeriodRules(reps, inits)
+	return append(f, dvbContinuityEPT(reps, firstEPTs)...)
 }
 
 func iopAdaptationSetRules(reps []*addressing.Rep, inits []*Init) []report.Finding {

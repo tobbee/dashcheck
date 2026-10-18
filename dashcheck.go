@@ -8,6 +8,7 @@ package dashcheck
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 	"sync"
 	"time"
@@ -184,6 +185,7 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 	results := make([][]report.Finding, len(reps))
 	counts := make([]int, len(reps))
 	inits := make([]*segcheck.Init, len(reps))
+	firstEPTs := make([]float64, len(reps))
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, opts.Concurrency)
 	var mu sync.Mutex
@@ -197,9 +199,9 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			rc := &repChecker{rep: rep, opts: opts, clk: clk, dynamic: dynamic}
+			rc := &repChecker{rep: rep, opts: opts, clk: clk, dynamic: dynamic, firstEPT: math.NaN()}
 			results[i], counts[i] = rc.run(ctx)
-			inits[i] = rc.init
+			inits[i], firstEPTs[i] = rc.init, rc.firstEPT
 			mu.Lock()
 			done++
 			opts.progress("segments", done, len(reps), "checked %s", rep.ID)
@@ -223,7 +225,7 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 		asInits = append(asInits, inits[i])
 	}
 	rpt.Findings = append(rpt.Findings, segcheck.CheckAdaptationSet(asReps, asInits)...)
-	rpt.Findings = append(rpt.Findings, segcheck.CheckPresentation(reps, inits)...)
+	rpt.Findings = append(rpt.Findings, segcheck.CheckPresentation(reps, inits, firstEPTs)...)
 	return md, clk
 }
 
@@ -237,6 +239,7 @@ type repChecker struct {
 	checked  int
 	init     *segcheck.Init
 	sidx     *mp4.SidxBox // index of a SegmentBase Representation
+	firstEPT float64      // presentation time of the first segment of the Period, NaN if not checked
 	nSidx    int          // number of sidx boxes in its index range
 }
 
@@ -273,6 +276,10 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		return rc.findings, rc.checked
 	}
 	rc.init = init
+	var periodFirst addressing.Segment
+	if !rc.dynamic && len(segs) > 0 {
+		periodFirst = segs[0]
+	}
 	if rep.Kind == addressing.KindSegmentBase {
 		segs = rc.selectStatic(segs)
 	} else if rc.dynamic {
@@ -286,6 +293,9 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		media := rc.checkSegment(ctx, init, seg, seg == last)
 		if i == 0 {
 			first = media
+			if media != nil && seg == periodFirst && rep.Timescale > 0 {
+				rc.firstEPT = media.EPT - float64(rep.PTO)/float64(rep.Timescale)
+			}
 		}
 		if prev != nil && media != nil && consecutive(prevSeg, seg) {
 			rc.add(segcheck.CheckContinuity(prev, media, init, rep, seg)...)

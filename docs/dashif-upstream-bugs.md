@@ -706,7 +706,7 @@ suffix SEI positions only with VCL NAL units.
 
 ## Other projects
 
-Found during the same work in projects that dashcheck builds on.
+Found during the same work in projects that dashcheck builds on or tests with.
 
 | Project | Problem |
 |---|---|
@@ -716,3 +716,5 @@ Found during the same work in projects that dashcheck builds on.
 | dash-mpd | An absent `@indexRangeExact` cannot be told from `false`. |
 | [livesim2](https://github.com/Dash-Industry-Forum/livesim2) | In SegmentTimeline mode, audio segments of up to 2.005333 s exceed `maxSegmentDuration="PT2S"`. |
 | livesim2 | The test asset `cmd/livesim2/app/testdata/assets/testpic_2s/Manifest.mpd` has `DASH-MPD.xsd"bprofiles=` (malformed XML) since commit d6fd0a2. |
+| livesim2 | With `continuous_1`, the period-continuity descriptors have `value="1"` instead of the @id of the earlier Period, and the AdaptationSets have no @id (ISO/IEC 23009-1 5.3.2.4 needs both). The first Period also carries the descriptor. |
+| BBC test card | The live test card's subtitle initialization segments (`testcard2020/*-subs/IS.mp4`) have an 8-byte 'sthd' box without the FullBox version and flags, so mp4ff cannot parse them. |

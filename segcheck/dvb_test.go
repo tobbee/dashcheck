@@ -2,6 +2,7 @@ package segcheck
 
 import (
 	"fmt"
+	"math"
 	"slices"
 	"testing"
 
@@ -213,7 +214,7 @@ func TestDVBConformancePoints(t *testing.T) {
 			}
 			reps[i] = &r
 		}
-		if got := ruleIDs(CheckPresentation(reps, c.inits)); !slices.Equal(got, c.want) {
+		if got := ruleIDs(CheckPresentation(reps, c.inits, nil)); !slices.Equal(got, c.want) {
 			t.Errorf("%s: got %v, want %v", c.desc, got, c.want)
 		}
 	}
@@ -241,14 +242,14 @@ func TestDVBConformancePoints(t *testing.T) {
 			r.ASPath = fmt.Sprintf("Period[0]/AdaptationSet[%d]", i)
 			reps[i] = &r
 		}
-		if got := ruleIDs(CheckPresentation(reps, c.inits)); !slices.Equal(got, c.want) {
+		if got := ruleIDs(CheckPresentation(reps, c.inits, nil)); !slices.Equal(got, c.want) {
 			t.Errorf("%s: got %v, want %v", c.desc, got, c.want)
 		}
 	}
 	// Each Period is checked on its own.
 	p0, p1 := video, video
 	p1.PeriodIndex = 1
-	f := CheckPresentation([]*addressing.Rep{&p0, &p1}, []*Init{avc(100, 40, 0, 1920, 1080), avc(100, 42, 0, 1920, 1080)})
+	f := CheckPresentation([]*addressing.Rep{&p0, &p1}, []*Init{avc(100, 40, 0, 1920, 1080), avc(100, 42, 0, 1920, 1080)}, nil)
 	if len(f) != 1 || f[0].Location.Path != "Period[1]" {
 		t.Errorf("periods: got %v", f)
 	}
@@ -274,5 +275,40 @@ func TestDVBMediaAndSets(t *testing.T) {
 	f = CheckDVBSidx(&ondemand, sidx, 2)
 	if got := ruleIDs(f); !slices.Equal(got, []string{"SEG-DVB-SIDX", "SEG-DVB-DURATION", "SEG-DVB-SAP"}) {
 		t.Errorf("sidx: got %v", f)
+	}
+}
+
+func TestDVBContinuityEPT(t *testing.T) {
+	_, video := dvbReps(t)
+	video.Supplementals = nil
+	mk := func(period int, id string, ept float64) (*addressing.Rep, float64) {
+		r := video
+		r.PeriodIndex, r.PeriodID, r.ID, r.ASID = period, fmt.Sprintf("p%d", period), id, "1"
+		r.ASPath = fmt.Sprintf("Period[%d]/AdaptationSet[0]", period)
+		if period > 0 {
+			r.Supplementals = []*m.DescriptorType{{SchemeIdUri: "urn:dvb:dash:period_continuity:2014", Value: "p0"}}
+		}
+		return &r, ept
+	}
+	cases := []struct {
+		desc string
+		epts [4]float64 // p0 v1, p0 v2, p1 v1, p1 v2
+		want []string
+	}{
+		{"aligned", [4]float64{0, 0, 60, 60}, nil},
+		{"EPT1 differs", [4]float64{0, 0.04, 60, 60}, []string{"SEG-DVB-CONTINUITY-EPT"}},
+		{"EPT2 differs", [4]float64{0, 0, 60, 60.5}, []string{"SEG-DVB-CONTINUITY-EPT"}},
+		{"unknown", [4]float64{0, math.NaN(), 60, math.NaN()}, nil},
+	}
+	for _, c := range cases {
+		var reps []*addressing.Rep
+		var epts []float64
+		for i, id := range []string{"v1", "v2", "v1", "v2"} {
+			r, e := mk(i/2, id, c.epts[i])
+			reps, epts = append(reps, r), append(epts, e)
+		}
+		if got := ruleIDs(CheckPresentation(reps, make([]*Init, 4), epts)); !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.desc, got, c.want)
+		}
 	}
 }

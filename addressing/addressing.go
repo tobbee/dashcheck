@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -72,6 +73,7 @@ type Rep struct {
 	PeriodID    string
 	PeriodIndex int
 	ASPath      string // element path of the AdaptationSet
+	ASID        string // AdaptationSet@id, "" if absent
 	ASCodecs    string // @codecs on the AdaptationSet itself
 
 	Profiles           []string // effective @profiles
@@ -237,6 +239,7 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 					PeriodID:             p.Id,
 					PeriodIndex:          pi,
 					ASPath:               asPath,
+					ASID:                 optUint(as.Id),
 					ASCodecs:             as.Codecs,
 					TargetLatency:        targetLatency(md),
 					HasContentProtection: len(rep.ContentProtections)+len(as.ContentProtections) > 0,
@@ -808,4 +811,12 @@ func mergeTemplates(levels ...*m.SegmentTemplateType) *m.SegmentTemplateType {
 		}
 	}
 	return out
+}
+
+// optUint formats an optional unsigned attribute, "" if absent.
+func optUint(v *uint32) string {
+	if v == nil {
+		return ""
+	}
+	return strconv.FormatUint(uint64(*v), 10)
 }

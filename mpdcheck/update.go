@@ -324,8 +324,7 @@ func hasReset(md *m.MPD) bool {
 }
 
 func isDVBMPD(md *m.MPD) bool {
-	p := profiles(splitProfiles(string(md.Profiles)))
-	return p.has("urn:dvb:dash:profile:dvb-dash:2014") || p.has("urn:dvb:dash:profile:dvb-dash:2017")
+	return isDVB(profiles(splitProfiles(string(md.Profiles))))
 }
 
 // periodStarts returns the start of each Period in seconds, NaN if unknown.

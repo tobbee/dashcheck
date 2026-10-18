@@ -3028,27 +3028,33 @@
    "source": "DVB/Segments/ContinuousPeriods.php",
    "context": "Section 10.5.2.3",
    "text": "Continous adaptation sets shall be signalled accordingly",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-DVB-CONTINUITY"
+   ],
+   "note": "also checks the association of 10.5.2.2 (AssetIdentifier, @lang, @contentType, @par, Role, Accessibility, Viewpoint, audio Table 4 values), which upstream leaves as a TODO, and accepts the MPEG period-continuity URN too"
   },
   {
    "id": "DVB-80",
    "source": "DVB/Segments/ContinuousPeriods.php",
    "context": "Section 10.5.2.3",
    "text": "All Representations in the Adaptation Set in the first Period shall share the same value EPT1",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-CONTINUITY-EPT"
+   ],
+   "note": "compares the first segment of each Representation, so only for static MPDs where the first segment of the Period is checked"
   },
   {
    "id": "DVB-81",
    "source": "DVB/Segments/ContinuousPeriods.php",
    "context": "Section 10.5.2.3",
    "text": "All Representations in the Adaptation Set in a subsequent Period shall share the same value EPT2",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-CONTINUITY-EPT"
+   ],
+   "note": "as DVB-80"
   },
   {
    "id": "DVB-82",
