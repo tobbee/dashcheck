@@ -9,6 +9,7 @@ import (
 	m "github.com/Eyevinn/dash-mpd/mpd"
 	"github.com/Eyevinn/mp4ff/hevc"
 	"github.com/Eyevinn/mp4ff/mp4"
+	"github.com/Eyevinn/mp4ff/vvc"
 	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/report"
 )
@@ -47,6 +48,12 @@ var (
 		Desc: "PQ10 video must be signalled with the 2017 profile and EssentialProperty ColourPrimaries 9, " +
 			"MatrixCoefficients 9 and TransferCharacteristics 16",
 		SpecRef: refDVB + " 5.2.7",
+	})
+	RuleDVBVVCSEI = report.Register(report.Rule{
+		ID: "SEG-DVB-VVC-SEI", Severity: report.Error,
+		Desc: "In VVC picture units, prefix SEI must follow DCI, VPS, SPS and PPS and precede the picture header " +
+			"or first VCL NAL unit, and suffix SEI must follow the last VCL NAL unit",
+		SpecRef: refDVB + " 5.3.4, ETSI TS 101 154 5.15.1.8.1",
 	})
 	RuleDVBSEI = report.Register(report.Rule{
 		ID: "SEG-DVB-SEI", Severity: report.Error,
@@ -273,4 +280,68 @@ func sampleHasHLGSEI(sample []byte) bool {
 		}
 	}
 	return false
+}
+
+// dvbVVCMediaRules checks SEI placement in VVC samples (DVB-97).
+func dvbVVCMediaRules(init *Init, mf *mp4.File, loc report.Location) []report.Finding {
+	sample := 0
+	for _, ms := range mf.Segments {
+		for _, frag := range ms.Fragments {
+			samples, err := frag.GetFullSamples(init.trex)
+			if err != nil {
+				continue
+			}
+			for _, s := range samples {
+				sample++
+				if problem := vvcSEIOrder(s.Data); problem != "" {
+					return []report.Finding{RuleDVBVVCSEI.New(loc, "sample %d: %s", sample, problem)}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// vvcSEIOrder checks the NAL unit order of a VVC picture unit against
+// ETSI TS 101 154 5.15.1.8.1: prefix SEI after DCI, VPS, SPS and PPS and
+// before the picture header or first VCL NAL unit, suffix SEI after the
+// last VCL NAL unit.
+func vvcSEIOrder(sample []byte) string {
+	var types []vvc.NaluType
+	for len(sample) >= 6 {
+		n := int(uint32(sample[0])<<24 | uint32(sample[1])<<16 | uint32(sample[2])<<8 | uint32(sample[3]))
+		if n < 2 || n > len(sample)-4 {
+			break
+		}
+		types = append(types, vvc.NaluType(sample[5]>>3))
+		sample = sample[4+n:]
+	}
+	isVCL := func(t vvc.NaluType) bool { return t <= vvc.NALU_RSV_IRAP }
+	lastVCL := -1
+	for i, t := range types {
+		if isVCL(t) {
+			lastVCL = i
+		}
+	}
+	seenPHorVCL, seenPrefix := false, false
+	for i, t := range types {
+		switch {
+		case isVCL(t) || t == vvc.NALU_PH:
+			seenPHorVCL = true
+		case t == vvc.NALU_SEI_PREFIX:
+			if seenPHorVCL {
+				return "prefix SEI after the picture header or a VCL NAL unit"
+			}
+			seenPrefix = true
+		case t == vvc.NALU_SEI_SUFFIX:
+			if i < lastVCL {
+				return "suffix SEI before the last VCL NAL unit"
+			}
+		case t == vvc.NALU_DCI || t == vvc.NALU_VPS || t == vvc.NALU_SPS || t == vvc.NALU_PPS:
+			if seenPrefix {
+				return fmt.Sprintf("%s after a prefix SEI", t)
+			}
+		}
+	}
+	return ""
 }

@@ -9,6 +9,7 @@ import (
 	m "github.com/Eyevinn/dash-mpd/mpd"
 	"github.com/Eyevinn/mp4ff/hevc"
 	"github.com/Eyevinn/mp4ff/mp4"
+	"github.com/Eyevinn/mp4ff/vvc"
 	"github.com/tobbee/dashcheck/addressing"
 )
 
@@ -327,5 +328,30 @@ func TestHbbTVAudioConfig(t *testing.T) {
 	// The HbbTV profile is checked as DVB-DASH, so the DVB codec list applies.
 	if got := ruleIDs(dvbInitRules(&audio, init, sampleEntryInfo{fourCC: "Opus"}, audio.Loc())); !slices.Equal(got, []string{"SEG-DVB-CODEC"}) {
 		t.Errorf("DVB rules for HbbTV: got %v", got)
+	}
+}
+
+func TestVVCSEIOrder(t *testing.T) {
+	sample := func(types ...vvc.NaluType) []byte {
+		var b []byte
+		for _, typ := range types {
+			b = append(b, 0, 0, 0, 3, 0, byte(typ)<<3|1, 0x80)
+		}
+		return b
+	}
+	const vcl = vvc.NALU_CRA
+	cases := []struct {
+		types []vvc.NaluType
+		bad   bool
+	}{
+		{[]vvc.NaluType{vvc.NALU_AUD, vvc.NALU_SPS, vvc.NALU_PPS, vvc.NALU_SEI_PREFIX, vvc.NALU_PH, vcl, vcl, vvc.NALU_SEI_SUFFIX}, false},
+		{[]vvc.NaluType{vvc.NALU_PH, vvc.NALU_SEI_PREFIX, vcl}, true},
+		{[]vvc.NaluType{vvc.NALU_SEI_PREFIX, vvc.NALU_PPS, vcl}, true},
+		{[]vvc.NaluType{vcl, vvc.NALU_SEI_SUFFIX, vcl}, true},
+	}
+	for i, c := range cases {
+		if got := vvcSEIOrder(sample(c.types...)); (got != "") != c.bad {
+			t.Errorf("case %d: got %q", i, got)
+		}
 	}
 }

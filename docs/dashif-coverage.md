@@ -13,12 +13,12 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
-| Module: DVB | 103 | 94 | 1 | 6 | 2 |
+| Module: DVB | 103 | 95 | 1 | 5 | 2 |
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 15 | 1 | 3 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **373** | **6** | **12** | **17** |
+| **Total** | **408** | **374** | **6** | **11** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -320,7 +320,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-9 | `Section 6.1.1`: AudioChannelConfiguration SHOULD be common for all audio Representations within an Adapation Set | done | MPD-DVB-AUDIO-SIMILAR |  |
 | DVB-10 | `Section 6.6.3`: An audio fallback set shall have @value equal to the @id of the base set | done | MPD-DVB-FALLBACK |  |
 | DVB-11 | `Section 11.3.0`: Audio should be 20% or less of the total stream bandwith | done | MPD-DVB-AUDIO-SHARE | dashcheck reports the combination with the largest audio share per Period, upstream every combination |
-| DVB-12 | `Codec Information`: The codec should be supported by the specification | done | MPD-DVB-CODEC |  |
+| DVB-12 | `Codec Information`: The codec should be supported by the specification | done | MPD-DVB-CODEC | the codecs of TS 103 285 V1.4.1, including VVC, AVS3, DTS-UHD and MPEG-H, which upstream lacks (bug 51) |
 | DVB-13 | `Section 8.3`: ContentProtection descriptor(s) shall be placed at the AdaptationSet level | done | MPD-DVB-CP |  |
 | DVB-14 | `Section 4.5`: The MPD size SHALL NOT exceed 256 Kbytes | done | MPD-DVB-LIMITS | dashcheck measures the MPD as received; upstream measures the XLink-resolved MPD |
 | DVB-15 | `Section 4.5`: The MPD has a maximum of 64 periods | done | MPD-DVB-LIMITS |  |
@@ -396,7 +396,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-85 | `5.x / 6.x`: For each representation, @codecs SHALL be match the codec derived from the segments | done | XCHK-CODECS, XCHK-CODECS-DETAIL |  |
 | DVB-86 | `4.5`: Each subsegment shall have a duration of not more than 15 seconds | done | SEG-DVB-DURATION |  |
 | DVB-87 | `4.5`: Each subsegment shall be at least 1 second | done | SEG-DVB-DURATION | the last segment of a Period may be shorter |
-| DVB-88 | The codec should be supported by the specification | done | SEG-DVB-CODEC |  |
+| DVB-88 | The codec should be supported by the specification | done | SEG-DVB-CODEC | as DVB-12 (bug 51) |
 | DVB-89 | Profile used for AVC must be suported by the specification | done | SEG-DVB-AVC | TS 103 285 5.1.1 asks each Period to include video for avc_hd_50_level40 or avc_hd_60_level40 (Main or High up to level 4.0, TS 101 154 table L.1); upstream requires every Representation to be High profile (bug 38). A warning, since the spec allows other device targets |
 | DVB-90 | Level used for AVC must be suported by the specification | done | SEG-DVB-AVC | checked per Period with DVB-89; upstream allows only levels 3.0, 3.2, 4.0 and 4.1 in every Representation (bug 38) |
 | DVB-91 | Tier used for HEVC must be suported by the specification | done | SEG-DVB-HEVC | TS 103 285 5.2.3: at least one Representation per Period fits an HEVC conformance point of TS 101 154 table L.1 (Main tier); upstream rejects high tier in every Representation (bug 41) |
@@ -405,7 +405,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-94 | Level used for HEVC must be suported by the specification | done | SEG-DVB-HEVC | checked per Period with DVB-91; levels 4.1 up to 1080p, 5.2 up to 2160p and 6.1 up to 4320p; upstream rejects 5.2 and 6.1 (bug 41) |
 | DVB-95 | `5.1.2`: Segments shall start with SAP types 1 or 2 | done | SEG-DVB-SAP, SEG-SAP |  |
 | DVB-96 | `5.2.4`: For HEVC streams, SEI messages are placed according to ETSI TS 101 154 - L.3.3.8 | done | SEG-DVB-SEI | all samples of the checked segments, and the hvcC array order of 5.2.4; upstream skips hvc1 (bug 46) |
-| DVB-97 | `5.2.4`: For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1 | todo |  | VVC: mp4ff does not parse VVC NAL units yet |
+| DVB-97 | `5.2.4`: For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1 | done | SEG-DVB-VVC-SEI | with the vvc package of mp4ff; upstream allows the wrong NAL unit types before prefix SEI and ignores the picture header (bug 46) |
 | DVB-98 | `Subtitles`: For subtitle media, handler SHALL be 'subt' | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |
 | DVB-99 | `Subtitles`: Sample entry shall be 'stpp' | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |
 | DVB-100 | `Subtitles`: Sample entry shall countain a namespace | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |

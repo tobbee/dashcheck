@@ -58,11 +58,12 @@ yet unless stated.
 | 43 | DVB ContentProtection | Outdated cenc-only scheme rule and a pssh SHOULD not in the spec | Verified in spec |
 | 44 | DVB UpdateConstraints | Several MPD update checks can never fail, others fail wrongly | Verified in code |
 | 45 | DVB BitStream | Colour checked against 'colr' instead of the VUI; HDR checks never fail; @codecs too strict | Verified in code and spec |
-| 46 | DVB SEILocations | hvc1 never checked; prefix SEI after VCL not found | Verified in code |
+| 46 | DVB SEILocations | hvc1 never checked; prefix SEI after VCL not found; wrong VVC NAL types | Verified in code and spec |
 | 47 | CTAWave | Outdated: required profiles per AdaptationSet, splice constraints always enforced | Verified in spec |
 | 48 | WaveHLSInterop | Valid cenc tracks fail; sidx required in every segment; key count wrong | Verified in code and spec |
 | 49 | HbbTV | Codec and AVC rules outdated and applied per Representation | Verified in spec |
 | 50 | Common XSDValidation | The DVB 2018 schema lacks UTCTiming | Verified in code |
+| 51 | DVB Codecs, LegacyCodecs | Codec lists lack VVC, AVS3, MPEG-H and DTS-UHD | Verified in spec |
 
 ## Manifest handling
 
@@ -710,8 +711,14 @@ sequence or filler data, while the rule is only about VCL NAL units.
 **Effect:** hvc1 streams are not checked, prefix SEI between VCL NAL units
 pass, and valid suffix SEI before end of sequence fail.
 
-**Fix:** Check `hvc1`, fail a prefix SEI after a VCL NAL unit, and compare
-suffix SEI positions only with VCL NAL units.
+The VVC check ([L116](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/SEILocations.php#L116)) allows only NAL
+unit types 16 and 17 (PPS and prefix APS) before prefix SEI, while TS 101 154
+5.15.1.8.1 names DCI, VPS, SPS and PPS (13 to 16), and it does not check that
+prefix SEI precede the picture header.
+
+**Fix:** Check `hvc1`, fail a prefix SEI after a VCL NAL unit (or, for VVC,
+after the picture header), compare suffix SEI positions only with VCL NAL
+units, and use the VVC parameter set types 13 to 16.
 
 ### 47. The CTA WAVE checks follow the 2018 edition and misread it
 
@@ -809,6 +816,20 @@ live MPDs (4.7.2), and UTCTiming is defined in ISO/IEC 23009-1:2014/Amd 1.
 
 **Fix:** Use the schema of the 2nd edition with Amd 1 (branch `2nd-Ed+AMD1` of
 MPEGGroup/DASHSchema).
+
+### 51. The DVB codec lists lack the codecs added since V1.3.1
+
+**Where:** [MPD/Codecs.php#L45](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/MPD/Codecs.php#L45) and
+[Segments/LegacyCodecs.php#L177](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/LegacyCodecs.php#L177)
+
+**Problem:** Both lists hold AVC, HEVC, AAC, E-AC-3, AC-4, DTS and stpp.
+ETSI TS 103 285 V1.4.1 also specifies VVC (`vvc1`, `vvi1`, clause 5.3), AVS3
+(`avs3`, 5.4), DTS-UHD (`dtsx`, `dtsy`, 6.4) and MPEG-H Audio (`mhm1`,
+`mhm2`, 6.8).
+
+**Effect:** DVB content with these codecs gets "codec not supported" warnings.
+
+**Fix:** Add the codecs of TS 103 285 V1.4.1 clauses 5 to 7.
 
 ## Other projects
 

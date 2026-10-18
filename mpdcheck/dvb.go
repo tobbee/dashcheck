@@ -142,7 +142,10 @@ var (
 	})
 )
 
-var dvbCodecPrefixes = []string{"avc", "hev1", "hvc1", "mp4a", "ec-3", "ac-4", "dtsc", "dtsh", "dtse", "dtsl", "stpp"}
+// dvbCodecPrefixes are the codecs of TS 103 285 V1.4.1 clauses 5 to 7.
+// Upstream lacks VVC, AVS3, MPEG-H and DTS-UHD, added in V1.3.1 and V1.4.1.
+var dvbCodecPrefixes = []string{"avc", "hev1", "hvc1", "vvc1", "vvi1", "avs3", "mp4a", "ec-3", "ac-4",
+	"dtsc", "dtsh", "dtse", "dtsl", "dtsx", "dtsy", "mhm1", "mhm2", "stpp"}
 
 var dvbProgressive = []string{"3840x2160", "3200x1800", "2560x1440", "1920x1080", "1600x900", "1280x720", "1024x576",
 	"960x540", "852x480", "768x432", "720x404", "704x396", "640x360", "512x288", "480x270", "384x216", "320x180", "192x108"}

@@ -2344,7 +2344,7 @@
    "rules": [
     "MPD-DVB-CODEC"
    ],
-   "note": ""
+   "note": "the codecs of TS 103 285 V1.4.1, including VVC, AVS3, DTS-UHD and MPEG-H, which upstream lacks (bug 51)"
   },
   {
    "id": "DVB-13",
@@ -3168,7 +3168,7 @@
    "rules": [
     "SEG-DVB-CODEC"
    ],
-   "note": ""
+   "note": "as DVB-12 (bug 51)"
   },
   {
    "id": "DVB-89",
@@ -3264,9 +3264,11 @@
    "source": "DVB/Segments/SEILocations.php",
    "context": "5.2.4",
    "text": "For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1",
-   "status": "todo",
-   "rules": [],
-   "note": "VVC: mp4ff does not parse VVC NAL units yet"
+   "status": "done",
+   "rules": [
+    "SEG-DVB-VVC-SEI"
+   ],
+   "note": "with the vvc package of mp4ff; upstream allows the wrong NAL unit types before prefix SEI and ignores the picture header (bug 46)"
   },
   {
    "id": "DVB-98",

@@ -113,7 +113,10 @@ var (
 	})
 )
 
-var dvbSampleEntries = []string{"avc", "hev1", "hvc1", "mp4a", "ec-3", "ac-4", "dtsc", "dtsh", "dtse", "dtsl", "stpp"}
+// dvbSampleEntries are the sample entries of TS 103 285 V1.4.1 clauses 5 to 7.
+// Upstream lacks VVC, AVS3, MPEG-H and DTS-UHD, added in V1.3.1 and V1.4.1.
+var dvbSampleEntries = []string{"avc", "hev1", "hvc1", "vvc1", "vvi1", "avs3", "mp4a", "ec-3", "ac-4",
+	"dtsc", "dtsh", "dtse", "dtsl", "dtsx", "dtsy", "mhm1", "mhm2", "stpp"}
 
 // isDVB reports whether the DVB-DASH rules apply. ETSI TS 102 796 V1.4.1
 // E.4.1 treats the HbbTV 2012 profile as the DVB-DASH 2014 live profile,
@@ -212,6 +215,9 @@ func dvbMediaRules(rep *addressing.Rep, init *Init, media *Media, mf *mp4.File, 
 	var f []report.Finding
 	if init.Video.codec == "hevc" {
 		f = append(f, dvbHEVCMediaRules(rep, init, mf, loc)...)
+	}
+	if init.SampleEntry == "vvc1" || init.SampleEntry == "vvi1" {
+		f = append(f, dvbVVCMediaRules(init, mf, loc)...)
 	}
 	// DVB-71
 	for _, ms := range mf.Segments {
