@@ -12,13 +12,13 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: Common | 5 | 4 | 0 | 0 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
-| Module: Low Latency | 54 | 48 | 4 | 1 | 1 |
+| Module: Low Latency | 54 | 49 | 4 | 0 | 1 |
 | Module: DVB | 103 | 95 | 1 | 5 | 2 |
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 16 | 1 | 2 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **377** | **6** | **8** | **17** |
+| **Total** | **408** | **378** | **6** | **7** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -289,7 +289,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-37 | `9.X.4.3`: A Low Latency Adaptation Set SHALL either be a Segment or a Chunked Set | done | MPD-LL-MODE |  |
 | LL-38 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The tolerance for the EPT relative to the first stegment SHALL NOT exceed 50% | done | SEG-EPT | for all number-based streams, not only low latency |
 | LL-39 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: If an 'S' elements and it predecessor share the same duration, they SHOULD be combined | done | MPD-LL-TIMELINE-REPEAT | S elements with @t start a new run and are not flagged |
-| LL-40 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: If each chunk is an addressable object, '@k SHALL be present in the SegmentTimeline | todo |  |  |
+| LL-40 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: If each chunk is an addressable object, '@k SHALL be present in the SegmentTimeline | done | MPD-LL-K | chunks are addressable when the SegmentTemplate@media has $SubNumber$; @k may be on S or SegmentTemplate |
 | LL-41 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 't' attribute SHALL correspond to the EPT of the corresponding segment | done | SEG-EPT, SEG-EPT-CTO | for all SegmentTimeline streams, not only low latency |
 | LL-42 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'd' attribute SHALL correspond to the duration of the corresponding segment | done | SEG-DURATION | for all SegmentTimeline streams, not only low latency |
 | LL-43 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: Exactly one 'sidx' box shall be used | done | SEG-LL-SIDX |  |

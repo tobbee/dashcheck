@@ -7,6 +7,7 @@ package dashcheck
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -84,6 +85,10 @@ var (
 	RuleUnsupported = report.Register(report.Rule{
 		ID: "SEG-UNSUPPORTED", Severity: report.Info,
 		Desc: "Segments in formats other than ISOBMFF are not checked",
+	})
+	RuleSegmentSequences = report.Register(report.Rule{
+		ID: "ADDR-UNSUPPORTED", Severity: report.Info,
+		Desc: "Segment Sequences (@k, $SubNumber$) are not supported yet, so their segments are not checked",
 	})
 	RuleSegmentList = report.Register(report.Rule{
 		ID: "ADDR-SEGMENTS", Severity: report.Error,
@@ -271,7 +276,11 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		}
 	}
 	if err != nil {
-		rc.add(RuleSegmentList.New(rep.Loc(), "%v", err))
+		if errors.Is(err, addressing.ErrSegmentSequences) {
+			rc.add(RuleSegmentSequences.New(rep.Loc(), "%v", err))
+		} else {
+			rc.add(RuleSegmentList.New(rep.Loc(), "%v", err))
+		}
 		return rc.findings, rc.checked
 	}
 	init := rc.checkInit(ctx)

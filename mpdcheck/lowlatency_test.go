@@ -64,6 +64,8 @@ func TestLowLatencyRules(t *testing.T) {
 		{"resync dT above half target", `dT="1000000"`, `dT="2000000"`, []string{"MPD-LL-RESYNC", "MPD-LL-RESYNC"}},
 		{"bad mimeType", `mimeType="video/mp4"`, `mimeType="video/mp2t"`, []string{"MPD-LL-MIMETYPE", "MPD-LL-MIMETYPE"}},
 		{"segment mode", ` availabilityTimeOffset="1.5" availabilityTimeComplete="false"`, "", nil},
+		{"addressable chunks without k", `media="$RepresentationID$/$Number$.m4s"`, `media="$RepresentationID$/$Number$_$SubNumber$.m4s"`, []string{"MPD-LL-K"}},
+		{"addressable chunks with k", `media="$RepresentationID$/$Number$.m4s"`, `k="8" media="$RepresentationID$/$Number$_$SubNumber$.m4s"`, nil},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

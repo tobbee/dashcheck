@@ -438,6 +438,9 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 // seconds relative to the Period start. to may be +Inf for a bounded Period. It is not used for SegmentBase,
 // whose segments come from the sidx box.
 func (r *Rep) Segments(from, to float64) ([]Segment, error) {
+	if r.segmentSequences() {
+		return nil, ErrSegmentSequences
+	}
 	switch r.Kind {
 	case KindNumber:
 		return r.numberSegments(from, to)
@@ -836,4 +839,25 @@ func containerProfiles(rep, as *m.ListOf4CCType) []string {
 		}
 	}
 	return nil
+}
+
+// segmentSequences reports whether the Representation uses Segment
+// Sequences, where one S element or @duration describes several Partial
+// Segments.
+func (r *Rep) segmentSequences() bool {
+	t := r.tmpl
+	if t == nil {
+		return false
+	}
+	if strings.Contains(t.Media, "$SubNumber$") || (t.K != nil && *t.K > 1) {
+		return true
+	}
+	if t.SegmentTimeline != nil {
+		for _, s := range t.SegmentTimeline.S {
+			if s.K != nil && *s.K > 1 {
+				return true
+			}
+		}
+	}
+	return false
 }

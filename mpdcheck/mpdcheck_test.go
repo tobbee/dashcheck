@@ -59,6 +59,7 @@ func TestRules(t *testing.T) {
 		{"timeline gap", `<S d="180000"/>`, `<S t="720000" d="180000"/>`, []string{"MPD-TIMELINE-GAP"}},
 		{"negative r", `r="2"`, `r="-1"`, []string{"MPD-TIMELINE-NEGR"}},
 		{"long segment", `<S d="180000"/>`, `<S d="270000"/>`, []string{"MPD-MAXSEGDUR"}},
+		{"segment sequence", `<S d="180000"/>`, `<S d="360000" k="2"/>`, nil},
 		{"duration in months", `timeShiftBufferDepth="PT1M"`, `timeShiftBufferDepth="P1M"`, []string{"MPD-DURATION-YM", "MPD-PARSE"}}, // dash-mpd rejects Y and M
 	}
 	for _, c := range cases {

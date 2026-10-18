@@ -88,6 +88,11 @@ var (
 		Desc:    "Resync elements need a valid @type, @marker true and @dT not above the target latency",
 		SpecRef: refLL + ".5",
 	})
+	RuleLLAddressableChunks = report.Register(report.Rule{
+		ID: "MPD-LL-K", Severity: report.Error,
+		Desc:    "When each chunk is addressable ($SubNumber$), the SegmentTimeline or SegmentTemplate must give @k",
+		SpecRef: refLL + ".5, ISO/IEC 23009-1 5.3.9.7",
+	})
 	RuleLLTimelineRepeat = report.Register(report.Rule{
 		ID: "MPD-LL-TIMELINE-REPEAT", Severity: report.Warning,
 		Desc:    "Consecutive S elements with the same duration should be combined with @r",
@@ -201,6 +206,8 @@ func lowLatencyRules(md *m.MPD) []report.Finding {
 			for _, rep := range as.Representations {
 				f = append(f, checkInbandEvents(as, rep, fmt.Sprintf("%s/Representation[%s]", asPath, rep.Id))...)
 			}
+			// LL-40
+			f = append(f, checkAddressableChunks(p, as, loc)...)
 			// LL-39
 			for _, t := range []*m.SegmentTemplateType{p.SegmentTemplate, as.SegmentTemplate} {
 				if t != nil && t.SegmentTimeline != nil {
@@ -365,6 +372,34 @@ func checkTimelineRepeats(stl *m.SegmentTimelineType, loc report.Location) []rep
 		if stl.S[i].D == stl.S[i-1].D && stl.S[i].T == nil {
 			return []report.Finding{RuleLLTimelineRepeat.New(loc, "S[%d] and S[%d] have the same @d and could be one S with @r", i-1, i)}
 		}
+	}
+	return nil
+}
+
+// checkAddressableChunks requires @k when a SegmentTemplate addresses each
+// chunk with $SubNumber$ (LL-40).
+func checkAddressableChunks(p *m.Period, as *m.AdaptationSetType, loc report.Location) []report.Finding {
+	tmpls := []*m.SegmentTemplateType{p.SegmentTemplate, as.SegmentTemplate}
+	for _, r := range as.Representations {
+		tmpls = append(tmpls, r.SegmentTemplate)
+	}
+	media, hasK := "", false
+	for _, t := range tmpls {
+		if t == nil {
+			continue
+		}
+		if t.Media != "" {
+			media = t.Media
+		}
+		if t.K != nil {
+			hasK = true
+		}
+		if t.SegmentTimeline != nil && slices.ContainsFunc(t.SegmentTimeline.S, func(s *m.S) bool { return s.K != nil }) {
+			hasK = true
+		}
+	}
+	if strings.Contains(media, "$SubNumber$") && !hasK {
+		return []report.Finding{RuleLLAddressableChunks.New(loc, "@media %q addresses chunks but no @k is given", media)}
 	}
 	return nil
 }

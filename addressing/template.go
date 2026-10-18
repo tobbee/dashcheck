@@ -1,10 +1,15 @@
 package addressing
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 )
+
+// ErrSegmentSequences reports Segment Sequences (ISO/IEC 23009-1 5.3.9.7:
+// @k and $SubNumber$), which dashcheck cannot address yet.
+var ErrSegmentSequences = errors.New("segment sequences (@k, $SubNumber$) are not supported yet")
 
 // Values are the substitutions for SegmentTemplate identifiers.
 type Values struct {
@@ -53,6 +58,8 @@ func Substitute(tmpl string, v Values) (string, error) {
 			val = v.Time
 		case "Bandwidth":
 			val = uint64(v.Bandwidth)
+		case "SubNumber":
+			return "", ErrSegmentSequences
 		default:
 			return "", fmt.Errorf("unknown identifier $%s$ in %q", ident, tmpl)
 		}

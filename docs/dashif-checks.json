@@ -4091,9 +4091,11 @@
    "source": "LowLatency/Segments/SegmentTiming.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "If each chunk is an addressable object, '@k SHALL be present in the SegmentTimeline",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-LL-K"
+   ],
+   "note": "chunks are addressable when the SegmentTemplate@media has $SubNumber$; @k may be on S or SegmentTemplate"
   },
   {
    "id": "LL-41",
