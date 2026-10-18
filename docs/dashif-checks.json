@@ -54,8 +54,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "For On-Demand profile, the MPD @type shall be \"static\".",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-TYPE"
+   ],
    "note": ""
   },
   {
@@ -74,17 +76,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "For ISO BMFF extended live profile, MPD@type shall be static.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-EXTLIVE-TYPE"
+   ],
+   "note": "dashcheck reports a warning: limiting the extended live profile to static MPDs is not yet verified against ISO/IEC 23009-1"
   },
   {
    "id": "SCH-8",
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "For ISO BMFF extended on-demand profile, MPD@type shall be static.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-TYPE"
+   ],
    "note": ""
   },
   {
@@ -158,8 +164,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "Neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SEGINFO"
+   ],
    "note": ""
   },
   {
@@ -167,17 +175,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For ISO BMFF extended live profile, Period.SegmentList shall not be present.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SEGINFO"
+   ],
+   "note": "Period@profiles is not in the 6th edition schema, so only MPD@profiles is used"
   },
   {
    "id": "SCH-17",
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For ISO BMFF extended live profile: \"If a Period contains multiple Adaptation Sets with value of the @contentType=\"video\" then at least one Adaptation Set shall contain a Role el-ement $<$Role scheme=\"urn:mpeg:dash:role:2011\" value=\"main\">\"",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-MAINROLE"
+   ],
    "note": ""
   },
   {
@@ -185,8 +197,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For ISO BMFF extended on-demand profile, neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SEGINFO"
+   ],
    "note": ""
   },
   {
@@ -194,8 +208,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "For ISO BMFF extended on-demand profile: \"If a Period contains multiple Adaptation Sets with value of the @contentType=\"video\" then at least one Adaptation Set shall contain a Role el-ement $<$Role scheme=\"urn:mpeg:dash:role:2011\" value=\"main\">\"",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-MAINROLE"
+   ],
    "note": ""
   },
   {
@@ -362,9 +378,11 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "For live profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SEGINFO"
+   ],
+   "note": "uses the effective @profiles of the Representation"
   },
   {
    "id": "SCH-36",
@@ -848,8 +866,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "If MPD is of type \"static\" and if the profile contains a DASH-IF IOP profile, then the timeShiftBufferDepth shall not be defined.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-STATIC"
+   ],
    "note": ""
   },
   {
@@ -857,8 +877,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "If MPD is of type \"static\" and if the profile contains a DASH-IF IOP profile, then the minimumUpdatePeriod shall not be defined.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-STATIC"
+   ],
    "note": ""
   },
   {
@@ -866,8 +888,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "DASH-IF IOP Section 3.2.2.2: For dynamic MPD, the @profile shall include urn:mpeg:dash:profile:isoff-live:2011.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-LIVE"
+   ],
    "note": ""
   },
   {
@@ -875,17 +899,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "DASH-IF IOP Section 3.10.2/3.10.3: \"MPD@minBufferTime shall be present\", not found.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-IOP-MINBUFFER"
+   ],
+   "note": "the schema also requires @minBufferTime"
   },
   {
    "id": "SCH-87",
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "DASH-IF IOP Section 3.2.2: \"the Period.SegmentList element shall not be present\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SEGINFO"
+   ],
    "note": ""
   },
   {
@@ -893,8 +921,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "DASH-IF IOP Section 3.2.2: \"If a Period contains multiple Adaptation Sets with value of the @contentType=\"video\" then at least one Adaptation Set shall contain a Role el-ement $<$Role scheme=\"urn:mpeg:dash:role:2011\" value=\"main\">\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-MAINROLE"
+   ],
    "note": ""
   },
   {
@@ -902,26 +932,30 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Period",
    "text": "DASH-IF IOP Section 3.10.4: \"All Representations in one Period shall either conform to a DASH Live profile or DASH On-Demand profile\", both Live and On-Demand profiles are signaled for the Period.",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "Period@profiles is not in the 6th edition schema, which rejects it"
   },
   {
    "id": "SCH-90",
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "If the content author signals the ability of Adaptation Set switching and as @segmentAlignment or @subsegmentAlignment are set to TRUE for one Adaptation Set, the (Sub)Segment alignment shall hold for all Representations in all Adaptation Sets for which the @id value is included in the @value attribute of the Supplemental descriptor.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-IOP-SWITCHING"
+   ],
+   "note": "dashcheck requires the adaptation-set-switching scheme; upstream matches any SupplementalProperty value"
   },
   {
    "id": "SCH-91",
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with value of the @contentType=\"video\" the following attributes shall be present: @par\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-VIDEO"
+   ],
    "note": ""
   },
   {
@@ -929,8 +963,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.4: \"For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType=\"video\" the attribute @scanType shall either not be present or shall be set to 'progressive' \", violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-SCANTYPE"
+   ],
    "note": ""
   },
   {
@@ -938,8 +974,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with value of the @contentType=\"audio\" the following attributes shall be present: @lang\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-AUDIO"
+   ],
    "note": ""
   },
   {
@@ -947,8 +985,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with @contentType=\"video\" the following attributes shall be present: @maxWidth or @width\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-VIDEO"
+   ],
    "note": ""
   },
   {
@@ -956,8 +996,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with @contentType=\"video\" the following attributes shall be present: @maxHeight or @height\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-VIDEO"
+   ],
    "note": ""
   },
   {
@@ -965,8 +1007,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with @contentType=\"video\" the following attributes shall be present: @maxFrameRate or @frameRate\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-VIDEO"
+   ],
    "note": ""
   },
   {
@@ -974,8 +1018,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.2.2: For Live Profile @segmentAlignment shall be set to true for all Adaptation Sets",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-LIVE"
+   ],
    "note": ""
   },
   {
@@ -983,17 +1029,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.2.2.2: For On-Demand Profile @subSegmentAlignment shall be set to true for all Adaptation Sets",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-IOP-ONDEMAND"
+   ],
+   "note": "upstream misspells the profile (isoff-ondemand) and the attribute (subSegmentAlignment), so its rule never fires"
   },
   {
    "id": "SCH-99",
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "If a DASH-IF profile identifier is present, for the Adaptation Sets the mimeType shall be one of the six following type: \"video/mp4\", \"audio/mp4\", \"application/mp4\", \"application/ttml+xml\", \"text/vtt\" or \"image/jpeg\"",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-MIMETYPE"
+   ],
    "note": ""
   },
   {
@@ -1001,17 +1051,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SUBSET"
+   ],
+   "note": "dashcheck compares individual profiles; upstream tests whether the whole value is a substring"
   },
   {
    "id": "SCH-101",
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.10.3: \"AdaptationSet@subsegmentAlignment SHALL be present and set to true\", not set appropriately.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-ONDEMAND"
+   ],
    "note": ""
   },
   {
@@ -1019,9 +1073,11 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AdaptationSet",
    "text": "DASH-IF IOP Section 3.10.3: \"AdaptationSet@subsegmentStartsWithSAP SHALL be present and set to 1 or 2\", not set appropriately.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-IOP-ONDEMAND"
+   ],
+   "note": "upstream tests a child element instead of the attribute, so it fails for every AdaptationSet"
   },
   {
    "id": "SCH-103",
@@ -1037,8 +1093,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "DASH-IF IOP (v3.3), Section 3.2.13 : \"In contrast to MPEG-DASH which does not prohibit the use of multiplexed Representations, in the DASH-IF IOPs one Adaptation Set always contains exactly a single media type.\".",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-MIMETYPE"
+   ],
    "note": ""
   },
   {
@@ -1046,8 +1104,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Adaptation Sets with value of the @contentType=\"video\" the following attributes shall be present: @maxWidth (or @width if all Representations have the same width), @maxHeight (or @height if all Representations have the same width), @maxFrameRate (or @frameRate if all Representations have the same width)\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-VIDEO"
+   ],
    "note": ""
   },
   {
@@ -1055,17 +1115,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Representation within an Adaptation Set with value of the @contentType=\"video\" the following attributes shall be present: @width, if not present in AdaptationSet element; @height, if not present in AdaptationSet element; @frameRate, if not present in AdaptationSet element; @sar\" violated here",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-IOP-VIDEO"
+   ],
+   "note": "dashcheck also accepts @sar on the AdaptationSet"
   },
   {
    "id": "SCH-107",
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "DASH-IF IOP Section 3.2.4: \"For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType=\"video\" the attribute @scanType shall either not be present or shall be set to 'progressive' \", violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-SCANTYPE"
+   ],
    "note": ""
   },
   {
@@ -1073,8 +1137,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "DASH-IF IOP Section 3.2.4: \"For any Representation within an Adaptation Set with value of the @contentType=\"audio\" the following elements and attributes shall be present: @audioSamplingRate, if not present in AdaptationSet element; AudioChannelConfiguration, if not present in AdaptationSet element\" violated here",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-AUDIO"
+   ],
    "note": ""
   },
   {
@@ -1082,8 +1148,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "If profiles contain dash-if profile identifier, \"codecs\" attribute on AdaptationSet level OR Representation level shall not contain more than one identifiers as a comma separated list",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-CODECS"
+   ],
    "note": ""
   },
   {
@@ -1091,8 +1159,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "The @dependencyId attribute on the Enhancement Layer Representation shall refer to the Base Layer Representation @id attribute.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-DEPENDENCY"
+   ],
    "note": ""
   },
   {
@@ -1100,17 +1170,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy.",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SUBSET"
+   ],
+   "note": "dashcheck compares individual profiles; upstream tests whether the whole value is a substring"
   },
   {
    "id": "SCH-112",
    "source": "schematron/schematron.sch",
    "context": "dash:Representation",
    "text": "DASH-IF IOP 4.3 Section 3.2.1 - \"For on-demand profiles, @indexRange attribute shall be present.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-ONDEMAND"
+   ],
    "note": ""
   },
   {
@@ -1118,17 +1192,21 @@
    "source": "schematron/schematron.sch",
    "context": "dash:SubRepresentation",
    "text": "The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "MPD-PROFILE-SUBSET"
+   ],
+   "note": "dashcheck compares individual profiles; upstream tests whether the whole value is a substring"
   },
   {
    "id": "SCH-114",
    "source": "schematron/schematron.sch",
    "context": "dash:SegmentBase",
    "text": "DASH-IF IOP 4.3 Section 3.2.1 - \"For on-demand profiles, @indexRange attribute shall be present.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-ONDEMAND"
+   ],
    "note": ""
   },
   {
@@ -1136,8 +1214,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:ContentProtection",
    "text": "The ContentProtection descriptors shall always be present in the AdaptationSet element and apply to all contained Representations.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-CP"
+   ],
    "note": ""
   },
   {
@@ -1145,8 +1225,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:ContentProtection",
    "text": "The ContentProtection descriptor for the mp4 protection scheme with @schemeIdUri 'urn:mpeg:dash:mp4protection:2011' and @value 'cenc' shall be present in the AdaptationSet element.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-CP"
+   ],
    "note": ""
   },
   {
@@ -1154,8 +1236,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:ContentProtection",
    "text": "The ContentProtection Descriptor for the mp4protection scheme shall contain the attribute @cenc:default_KID.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-CP"
+   ],
    "note": ""
   },
   {
@@ -1163,8 +1247,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AudioChannelConfiguration",
    "text": "If profile http://dashif.org/guidelines/dashif#ac-4 is used, then schemeIdUri attribute shall be tag:dolby.com,2014:dash:audio_channel_configuration:2011.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AUDIO-CHANNELCONFIG"
+   ],
    "note": ""
   },
   {
@@ -1172,8 +1258,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:AudioChannelConfiguration",
    "text": "If profile http://dashif.org/guidelines/dashif#mpeg-h-3da is used, then schemeIdUri attribute shall be urn:mpeg:mpegB:cicp:ChannelConfiguration.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-AUDIO-CHANNELCONFIG"
+   ],
    "note": ""
   },
   {
@@ -1181,8 +1269,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:EssentialProperty",
    "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then value shall provide horizontal and vertical number of tiles separated by an 'x'.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-THUMBNAIL"
+   ],
    "note": ""
   },
   {
@@ -1190,8 +1280,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:EssentialProperty",
    "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then bandwidth shall be used to describe the tiling.'.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-THUMBNAIL"
+   ],
    "note": ""
   },
   {
@@ -1199,8 +1291,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:EssentialProperty",
    "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then height shall be used to describe the tiling.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-THUMBNAIL"
+   ],
    "note": ""
   },
   {
@@ -1208,8 +1302,10 @@
    "source": "schematron/schematron.sch",
    "context": "dash:EssentialProperty",
    "text": "If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then width shall be used to describe the tiling.",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-THUMBNAIL"
+   ],
    "note": ""
   },
   {
@@ -3031,17 +3127,19 @@
    "source": "IOP/MPD/MixedOnDemand.php",
    "context": "3.10.4",
    "text": "@profiles signalling SHALL be present in each Period",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "Period@profiles is not in the 6th edition schema, which rejects it"
   },
   {
    "id": "IOP-4",
    "source": "IOP/MPD/OnDemand.php",
    "context": "3.10.3",
    "text": "SegmentTemplate@indexRange attribute SHALL be present",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-IOP-ONDEMAND"
+   ],
    "note": ""
   },
   {

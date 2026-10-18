@@ -58,7 +58,7 @@ func TestStructureRules(t *testing.T) {
 			[]string{"MPD-EVENTSTREAM"}},
 		{"fallback not on MPD", `<Role schemeIdUri`, `<SupplementalProperty schemeIdUri="urn:mpeg:dash:fallback:2016" value="https://b/m.mpd"/><Role schemeIdUri`,
 			[]string{"MPD-CHAINING"}},
-		{"zero duration period", `<Period id="p0">`, `<Period id="p0" duration="PT0S"><AdaptationSet id="9" mimeType="audio/mp4" codecs="mp4a.40.2"><Representation id="a" bandwidth="1"/></AdaptationSet>`,
+		{"zero duration period", `<Period id="p0">`, `<Period id="p0" duration="PT0S"><AdaptationSet id="9" mimeType="audio/mp4" codecs="mp4a.40.2"><SegmentTemplate duration="2" media="a/$Number$.m4s"/><Representation id="a" bandwidth="1"/></AdaptationSet>`,
 			[]string{"MPD-PERIOD-ZERO"}},
 		{"subrep without bandwidth", `frameRate="30"/>
     </AdaptationSet>`, `frameRate="30"><SubRepresentation level="1"/></Representation>

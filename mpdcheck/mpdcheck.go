@@ -118,6 +118,7 @@ func Check(data []byte, mpdURL string) (*m.MPD, []report.Finding) {
 	}
 	findings = append(findings, Rules(md)...)
 	findings = append(findings, structureRules(md)...)
+	findings = append(findings, profileRules(md)...)
 	return md, findings
 }
 

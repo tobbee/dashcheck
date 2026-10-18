@@ -6,11 +6,11 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | Group | Checks | Done | Partial | Todo | n/a |
 |---|---:|---:|---:|---:|---:|
-| Schematron: schematron.sch | 123 | 47 | 3 | 73 | 0 |
+| Schematron: schematron.sch | 123 | 95 | 3 | 24 | 1 |
 | Schematron: dvb-dash.sch | 13 | 0 | 0 | 13 | 0 |
 | Schematron: ac4-generic.sch | 17 | 0 | 0 | 17 | 0 |
 | Module: Common | 5 | 2 | 0 | 2 | 1 |
-| Module: IOP | 15 | 2 | 0 | 13 | 0 |
+| Module: IOP | 15 | 3 | 0 | 11 | 1 |
 | Module: CMAF | 23 | 1 | 0 | 22 | 0 |
 | Module: Low Latency | 54 | 5 | 3 | 46 | 0 |
 | Module: DVB | 103 | 2 | 3 | 98 | 0 |
@@ -18,7 +18,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **59** | **9** | **334** | **6** |
+| **Total** | **408** | **108** | **9** | **283** | **8** |
 
 ## Schematron: schematron.sch
 
@@ -28,21 +28,21 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | SCH-2 | `dash:MPD`: If MPD is of type "dynamic" publishTime shall be defined. | done | MPD-DYN-PUBLISHTIME |  |
 | SCH-3 | `dash:MPD`: If mediaPresentationDuration is not defined for the MPD minimumUpdatePeriod shall be defined or vice versa. | done | MPD-DURATION-MISSING | upstream ignores the last Period@duration; dashcheck uses the condition of SCH-6 |
 | SCH-4 | `dash:MPD`: At least one unknown profile string found. Known list in schematron file. | done | MPD-PROFILE-UNKNOWN | dashcheck reports info, upstream an error; dashcheck also knows DVB interop, CMAF, low-latency and newer MPEG profiles |
-| SCH-5 | `dash:MPD`: For On-Demand profile, the MPD @type shall be "static". | todo |  |  |
+| SCH-5 | `dash:MPD`: For On-Demand profile, the MPD @type shall be "static". | done | MPD-PROFILE-TYPE |  |
 | SCH-6 | `dash:MPD`: If minimumUpdatePeriod is not present and the last period does not include the duration attribute the mediaPresentationDuration must be present. | done | MPD-DURATION-MISSING |  |
-| SCH-7 | `dash:MPD`: For ISO BMFF extended live profile, MPD@type shall be static. | todo |  |  |
-| SCH-8 | `dash:MPD`: For ISO BMFF extended on-demand profile, MPD@type shall be static. | todo |  |  |
+| SCH-7 | `dash:MPD`: For ISO BMFF extended live profile, MPD@type shall be static. | done | MPD-PROFILE-EXTLIVE-TYPE | dashcheck reports a warning: limiting the extended live profile to static MPDs is not yet verified against ISO/IEC 23009-1 |
+| SCH-8 | `dash:MPD`: For ISO BMFF extended on-demand profile, MPD@type shall be static. | done | MPD-PROFILE-TYPE |  |
 | SCH-9 | `dash:Period`: If bitstreamSwitching is set to true all bitstreamSwitching declarations for AdaptationSet within this Period shall not be set to false. | done | MPD-BITSTREAMSWITCHING |  |
 | SCH-10 | `dash:Period`: The id of each Period shall be unique. | done | MPD-PERIOD-ID |  |
 | SCH-11 | `dash:Period`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Period. | done | MPD-SEGINFO-MULTIPLE |  |
 | SCH-12 | `dash:Period`: If the MPD is dynamic the Period element shall have an id. | done | MPD-PERIOD-ID |  |
 | SCH-13 | `dash:Period`: At least one BaseURL, SegmentTemplate or SegmentList shall be defined in Period, AdaptationSet or Representation. | done | MPD-SEGINFO-NONE |  |
 | SCH-14 | `dash:Period`: If the duration attribute is set to zero, there should only be a single AdaptationSet present. | done | MPD-PERIOD-ZERO | upstream fails for any Period with @duration 0 and an AdaptationSet; dashcheck follows the message and warns when there is more than one |
-| SCH-15 | `dash:Period`: Neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here. | todo |  |  |
-| SCH-16 | `dash:Period`: For ISO BMFF extended live profile, Period.SegmentList shall not be present. | todo |  |  |
-| SCH-17 | `dash:Period`: For ISO BMFF extended live profile: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" | todo |  |  |
-| SCH-18 | `dash:Period`: For ISO BMFF extended on-demand profile, neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here. | todo |  |  |
-| SCH-19 | `dash:Period`: For ISO BMFF extended on-demand profile: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" | todo |  |  |
+| SCH-15 | `dash:Period`: Neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here. | done | MPD-PROFILE-SEGINFO |  |
+| SCH-16 | `dash:Period`: For ISO BMFF extended live profile, Period.SegmentList shall not be present. | done | MPD-PROFILE-SEGINFO | Period@profiles is not in the 6th edition schema, so only MPD@profiles is used |
+| SCH-17 | `dash:Period`: For ISO BMFF extended live profile: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" | done | MPD-PROFILE-MAINROLE |  |
+| SCH-18 | `dash:Period`: For ISO BMFF extended on-demand profile, neither the Period.SegmentList element nor the Period.SegmentTemplate element shall be present for On-Demand profile, violated here. | done | MPD-PROFILE-SEGINFO |  |
+| SCH-19 | `dash:Period`: For ISO BMFF extended on-demand profile: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" | done | MPD-PROFILE-MAINROLE |  |
 | SCH-20 | `dash:AdaptationSet`: The id of each AdaptationSet within a Period shall be unique. | done | MPD-AS-ID |  |
 | SCH-21 | `dash:AdaptationSet`: Attributes from the AdaptationSet shall not be repeated in the descendanding ContentComponent elements. | done | MPD-CONTENTCOMPONENT |  |
 | SCH-22 | `dash:AdaptationSet`: Common attributes for AdaptationSet and Representation shall either be in one of the elements but not in both. | done | MPD-COMMON-BOTH | dashcheck reports a warning, upstream an error |
@@ -58,7 +58,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | SCH-32 | `dash:AdaptationSet`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 while not containing more than one Representation | todo |  |  |
 | SCH-33 | `dash:ContentComponent`: The id of each ContentComponent within an AdaptationSet shall be unique. | done | MPD-CONTENTCOMPONENT |  |
 | SCH-34 | `dash:Representation`: Either the Representation or the containing AdaptationSet shall have the mimeType attribute. | done | MPD-MIMETYPE |  |
-| SCH-35 | `dash:Representation`: For live profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself. | todo |  |  |
+| SCH-35 | `dash:Representation`: For live profile, the SegmentTemplate element shall be present on at least one of the three levels, the Period level containing the Representation, the Adaptation Set containing the Representation, or on Representation level itself. | done | MPD-PROFILE-SEGINFO | uses the effective @profiles of the Representation |
 | SCH-36 | `dash:Representation`: At most one of SegmentBase, SegmentTemplate and SegmentList shall be defined in Representation. | done | MPD-SEGINFO-MULTIPLE |  |
 | SCH-37 | `dash:Representation`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an element that is not part of the HbbTV profile', i.e., found 'BaseURL' element | todo |  |  |
 | SCH-38 | `dash:Representation`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - The MPD contains an attribute that is not part of the HbbTV profile', i.e., found 'subsegmentStartsWithSAP' as 3 with same value of mediaStreamStructureId in more than one Representation | todo |  |  |
@@ -106,47 +106,47 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | SCH-80 | `dash:SupplementalProperty \| dash:EssentialProperty`: If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then the @value attribute must contain at least the mandatory comma separated parameters, i.e. source_id, x, y, w, h. | todo |  |  |
 | SCH-81 | `dash:SupplementalProperty \| dash:EssentialProperty`: If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present, then each parameter value has to match the expected type format i.e. non-negative integer in decimal representation. | todo |  |  |
 | SCH-82 | `dash:SupplementalProperty \| dash:EssentialProperty`: If an EssentialProperty or a SupplementalProperty descriptor with @schemeIdUri equal to “urn:mpeg:dash:srd:2014” is present and the @value attribute contains the optional parameter W then the optional parameter H shall be present too. In addition, if the optional parameter spatial_set_id is present, then the optional parameters W and H shall be present. | todo |  |  |
-| SCH-83 | `dash:MPD`: If MPD is of type "static" and if the profile contains a DASH-IF IOP profile, then the timeShiftBufferDepth shall not be defined. | todo |  |  |
-| SCH-84 | `dash:MPD`: If MPD is of type "static" and if the profile contains a DASH-IF IOP profile, then the minimumUpdatePeriod shall not be defined. | todo |  |  |
-| SCH-85 | `dash:MPD`: DASH-IF IOP Section 3.2.2.2: For dynamic MPD, the @profile shall include urn:mpeg:dash:profile:isoff-live:2011. | todo |  |  |
-| SCH-86 | `dash:MPD`: DASH-IF IOP Section 3.10.2/3.10.3: "MPD@minBufferTime shall be present", not found. | todo |  |  |
-| SCH-87 | `dash:Period`: DASH-IF IOP Section 3.2.2: "the Period.SegmentList element shall not be present" violated here | todo |  |  |
-| SCH-88 | `dash:Period`: DASH-IF IOP Section 3.2.2: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" violated here | todo |  |  |
-| SCH-89 | `dash:Period`: DASH-IF IOP Section 3.10.4: "All Representations in one Period shall either conform to a DASH Live profile or DASH On-Demand profile", both Live and On-Demand profiles are signaled for the Period. | todo |  |  |
-| SCH-90 | `dash:AdaptationSet`: If the content author signals the ability of Adaptation Set switching and as @segmentAlignment or @subsegmentAlignment are set to TRUE for one Adaptation Set, the (Sub)Segment alignment shall hold for all Representations in all Adaptation Sets for which the @id value is included in the @value attribute of the Supplemental descriptor. | todo |  |  |
-| SCH-91 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with value of the @contentType="video" the following attributes shall be present: @par" violated here | todo |  |  |
-| SCH-92 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType="video" the attribute @scanType shall either not be present or shall be set to 'progressive' ", violated here | todo |  |  |
-| SCH-93 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with value of the @contentType="audio" the following attributes shall be present: @lang" violated here | todo |  |  |
-| SCH-94 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with @contentType="video" the following attributes shall be present: @maxWidth or @width" violated here | todo |  |  |
-| SCH-95 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with @contentType="video" the following attributes shall be present: @maxHeight or @height" violated here | todo |  |  |
-| SCH-96 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with @contentType="video" the following attributes shall be present: @maxFrameRate or @frameRate" violated here | todo |  |  |
-| SCH-97 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.2.2: For Live Profile @segmentAlignment shall be set to true for all Adaptation Sets | todo |  |  |
-| SCH-98 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.2.2: For On-Demand Profile @subSegmentAlignment shall be set to true for all Adaptation Sets | todo |  |  |
-| SCH-99 | `dash:AdaptationSet`: If a DASH-IF profile identifier is present, for the Adaptation Sets the mimeType shall be one of the six following type: "video/mp4", "audio/mp4", "application/mp4", "application/ttml+xml", "text/vtt" or "image/jpeg" | todo |  |  |
-| SCH-100 | `dash:AdaptationSet`: The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy | todo |  |  |
-| SCH-101 | `dash:AdaptationSet`: DASH-IF IOP Section 3.10.3: "AdaptationSet@subsegmentAlignment SHALL be present and set to true", not set appropriately. | todo |  |  |
-| SCH-102 | `dash:AdaptationSet`: DASH-IF IOP Section 3.10.3: "AdaptationSet@subsegmentStartsWithSAP SHALL be present and set to 1 or 2", not set appropriately. | todo |  |  |
+| SCH-83 | `dash:MPD`: If MPD is of type "static" and if the profile contains a DASH-IF IOP profile, then the timeShiftBufferDepth shall not be defined. | done | MPD-IOP-STATIC |  |
+| SCH-84 | `dash:MPD`: If MPD is of type "static" and if the profile contains a DASH-IF IOP profile, then the minimumUpdatePeriod shall not be defined. | done | MPD-IOP-STATIC |  |
+| SCH-85 | `dash:MPD`: DASH-IF IOP Section 3.2.2.2: For dynamic MPD, the @profile shall include urn:mpeg:dash:profile:isoff-live:2011. | done | MPD-IOP-LIVE |  |
+| SCH-86 | `dash:MPD`: DASH-IF IOP Section 3.10.2/3.10.3: "MPD@minBufferTime shall be present", not found. | done | MPD-IOP-MINBUFFER | the schema also requires @minBufferTime |
+| SCH-87 | `dash:Period`: DASH-IF IOP Section 3.2.2: "the Period.SegmentList element shall not be present" violated here | done | MPD-PROFILE-SEGINFO |  |
+| SCH-88 | `dash:Period`: DASH-IF IOP Section 3.2.2: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" violated here | done | MPD-PROFILE-MAINROLE |  |
+| SCH-89 | `dash:Period`: DASH-IF IOP Section 3.10.4: "All Representations in one Period shall either conform to a DASH Live profile or DASH On-Demand profile", both Live and On-Demand profiles are signaled for the Period. | n/a |  | Period@profiles is not in the 6th edition schema, which rejects it |
+| SCH-90 | `dash:AdaptationSet`: If the content author signals the ability of Adaptation Set switching and as @segmentAlignment or @subsegmentAlignment are set to TRUE for one Adaptation Set, the (Sub)Segment alignment shall hold for all Representations in all Adaptation Sets for which the @id value is included in the @value attribute of the Supplemental descriptor. | done | MPD-IOP-SWITCHING | dashcheck requires the adaptation-set-switching scheme; upstream matches any SupplementalProperty value |
+| SCH-91 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with value of the @contentType="video" the following attributes shall be present: @par" violated here | done | MPD-IOP-VIDEO |  |
+| SCH-92 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType="video" the attribute @scanType shall either not be present or shall be set to 'progressive' ", violated here | done | MPD-IOP-SCANTYPE |  |
+| SCH-93 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with value of the @contentType="audio" the following attributes shall be present: @lang" violated here | done | MPD-IOP-AUDIO |  |
+| SCH-94 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with @contentType="video" the following attributes shall be present: @maxWidth or @width" violated here | done | MPD-IOP-VIDEO |  |
+| SCH-95 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with @contentType="video" the following attributes shall be present: @maxHeight or @height" violated here | done | MPD-IOP-VIDEO |  |
+| SCH-96 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with @contentType="video" the following attributes shall be present: @maxFrameRate or @frameRate" violated here | done | MPD-IOP-VIDEO |  |
+| SCH-97 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.2.2: For Live Profile @segmentAlignment shall be set to true for all Adaptation Sets | done | MPD-IOP-LIVE |  |
+| SCH-98 | `dash:AdaptationSet`: DASH-IF IOP Section 3.2.2.2: For On-Demand Profile @subSegmentAlignment shall be set to true for all Adaptation Sets | done | MPD-IOP-ONDEMAND | upstream misspells the profile (isoff-ondemand) and the attribute (subSegmentAlignment), so its rule never fires |
+| SCH-99 | `dash:AdaptationSet`: If a DASH-IF profile identifier is present, for the Adaptation Sets the mimeType shall be one of the six following type: "video/mp4", "audio/mp4", "application/mp4", "application/ttml+xml", "text/vtt" or "image/jpeg" | done | MPD-IOP-MIMETYPE |  |
+| SCH-100 | `dash:AdaptationSet`: The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy | done | MPD-PROFILE-SUBSET | dashcheck compares individual profiles; upstream tests whether the whole value is a substring |
+| SCH-101 | `dash:AdaptationSet`: DASH-IF IOP Section 3.10.3: "AdaptationSet@subsegmentAlignment SHALL be present and set to true", not set appropriately. | done | MPD-IOP-ONDEMAND |  |
+| SCH-102 | `dash:AdaptationSet`: DASH-IF IOP Section 3.10.3: "AdaptationSet@subsegmentStartsWithSAP SHALL be present and set to 1 or 2", not set appropriately. | done | MPD-IOP-ONDEMAND | upstream tests a child element instead of the attribute, so it fails for every AdaptationSet |
 | SCH-103 | `dash:AdaptationSet`: HbbTV-DVB DASH Validation Requirements check violated for HbbTV: Section 'MPD' - For HbbTV profile, @segmentAlignment shall be set to true for all Adaptation Sets as it is based on live profile | todo |  |  |
-| SCH-104 | `dash:Representation`: DASH-IF IOP (v3.3), Section 3.2.13 : "In contrast to MPEG-DASH which does not prohibit the use of multiplexed Representations, in the DASH-IF IOPs one Adaptation Set always contains exactly a single media type.". | todo |  |  |
-| SCH-105 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with value of the @contentType="video" the following attributes shall be present: @maxWidth (or @width if all Representations have the same width), @maxHeight (or @height if all Representations have the same width), @maxFrameRate (or @frameRate if all Representations have the same width)" violated here | todo |  |  |
-| SCH-106 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For any Representation within an Adaptation Set with value of the @contentType="video" the following attributes shall be present: @width, if not present in AdaptationSet element; @height, if not present in AdaptationSet element; @frameRate, if not present in AdaptationSet element; @sar" violated here | todo |  |  |
-| SCH-107 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType="video" the attribute @scanType shall either not be present or shall be set to 'progressive' ", violated here | todo |  |  |
-| SCH-108 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For any Representation within an Adaptation Set with value of the @contentType="audio" the following elements and attributes shall be present: @audioSamplingRate, if not present in AdaptationSet element; AudioChannelConfiguration, if not present in AdaptationSet element" violated here | todo |  |  |
-| SCH-109 | `dash:Representation`: If profiles contain dash-if profile identifier, "codecs" attribute on AdaptationSet level OR Representation level shall not contain more than one identifiers as a comma separated list | todo |  |  |
-| SCH-110 | `dash:Representation`: The @dependencyId attribute on the Enhancement Layer Representation shall refer to the Base Layer Representation @id attribute. | todo |  |  |
-| SCH-111 | `dash:Representation`: The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy. | todo |  |  |
-| SCH-112 | `dash:Representation`: DASH-IF IOP 4.3 Section 3.2.1 - "For on-demand profiles, @indexRange attribute shall be present. | todo |  |  |
-| SCH-113 | `dash:SubRepresentation`: The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy | todo |  |  |
-| SCH-114 | `dash:SegmentBase`: DASH-IF IOP 4.3 Section 3.2.1 - "For on-demand profiles, @indexRange attribute shall be present. | todo |  |  |
-| SCH-115 | `dash:ContentProtection`: The ContentProtection descriptors shall always be present in the AdaptationSet element and apply to all contained Representations. | todo |  |  |
-| SCH-116 | `dash:ContentProtection`: The ContentProtection descriptor for the mp4 protection scheme with @schemeIdUri 'urn:mpeg:dash:mp4protection:2011' and @value 'cenc' shall be present in the AdaptationSet element. | todo |  |  |
-| SCH-117 | `dash:ContentProtection`: The ContentProtection Descriptor for the mp4protection scheme shall contain the attribute @cenc:default_KID. | todo |  |  |
-| SCH-118 | `dash:AudioChannelConfiguration`: If profile http://dashif.org/guidelines/dashif#ac-4 is used, then schemeIdUri attribute shall be tag:dolby.com,2014:dash:audio_channel_configuration:2011. | todo |  |  |
-| SCH-119 | `dash:AudioChannelConfiguration`: If profile http://dashif.org/guidelines/dashif#mpeg-h-3da is used, then schemeIdUri attribute shall be urn:mpeg:mpegB:cicp:ChannelConfiguration. | todo |  |  |
-| SCH-120 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then value shall provide horizontal and vertical number of tiles separated by an 'x'. | todo |  |  |
-| SCH-121 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then bandwidth shall be used to describe the tiling.'. | todo |  |  |
-| SCH-122 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then height shall be used to describe the tiling. | todo |  |  |
-| SCH-123 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then width shall be used to describe the tiling. | todo |  |  |
+| SCH-104 | `dash:Representation`: DASH-IF IOP (v3.3), Section 3.2.13 : "In contrast to MPEG-DASH which does not prohibit the use of multiplexed Representations, in the DASH-IF IOPs one Adaptation Set always contains exactly a single media type.". | done | MPD-IOP-MIMETYPE |  |
+| SCH-105 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For any Adaptation Sets with value of the @contentType="video" the following attributes shall be present: @maxWidth (or @width if all Representations have the same width), @maxHeight (or @height if all Representations have the same width), @maxFrameRate (or @frameRate if all Representations have the same width)" violated here | done | MPD-IOP-VIDEO |  |
+| SCH-106 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For any Representation within an Adaptation Set with value of the @contentType="video" the following attributes shall be present: @width, if not present in AdaptationSet element; @height, if not present in AdaptationSet element; @frameRate, if not present in AdaptationSet element; @sar" violated here | done | MPD-IOP-VIDEO | dashcheck also accepts @sar on the AdaptationSet |
+| SCH-107 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For Adaptation Set or for any Representation within an Adaptation Set with value of the @contentType="video" the attribute @scanType shall either not be present or shall be set to 'progressive' ", violated here | done | MPD-IOP-SCANTYPE |  |
+| SCH-108 | `dash:Representation`: DASH-IF IOP Section 3.2.4: "For any Representation within an Adaptation Set with value of the @contentType="audio" the following elements and attributes shall be present: @audioSamplingRate, if not present in AdaptationSet element; AudioChannelConfiguration, if not present in AdaptationSet element" violated here | done | MPD-IOP-AUDIO |  |
+| SCH-109 | `dash:Representation`: If profiles contain dash-if profile identifier, "codecs" attribute on AdaptationSet level OR Representation level shall not contain more than one identifiers as a comma separated list | done | MPD-IOP-CODECS |  |
+| SCH-110 | `dash:Representation`: The @dependencyId attribute on the Enhancement Layer Representation shall refer to the Base Layer Representation @id attribute. | done | MPD-IOP-DEPENDENCY |  |
+| SCH-111 | `dash:Representation`: The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy. | done | MPD-PROFILE-SUBSET | dashcheck compares individual profiles; upstream tests whether the whole value is a substring |
+| SCH-112 | `dash:Representation`: DASH-IF IOP 4.3 Section 3.2.1 - "For on-demand profiles, @indexRange attribute shall be present. | done | MPD-IOP-ONDEMAND |  |
+| SCH-113 | `dash:SubRepresentation`: The value of @profiles shall be a subset of the respective value in any higher level of the document hierarchy | done | MPD-PROFILE-SUBSET | dashcheck compares individual profiles; upstream tests whether the whole value is a substring |
+| SCH-114 | `dash:SegmentBase`: DASH-IF IOP 4.3 Section 3.2.1 - "For on-demand profiles, @indexRange attribute shall be present. | done | MPD-IOP-ONDEMAND |  |
+| SCH-115 | `dash:ContentProtection`: The ContentProtection descriptors shall always be present in the AdaptationSet element and apply to all contained Representations. | done | MPD-IOP-CP |  |
+| SCH-116 | `dash:ContentProtection`: The ContentProtection descriptor for the mp4 protection scheme with @schemeIdUri 'urn:mpeg:dash:mp4protection:2011' and @value 'cenc' shall be present in the AdaptationSet element. | done | MPD-IOP-CP |  |
+| SCH-117 | `dash:ContentProtection`: The ContentProtection Descriptor for the mp4protection scheme shall contain the attribute @cenc:default_KID. | done | MPD-IOP-CP |  |
+| SCH-118 | `dash:AudioChannelConfiguration`: If profile http://dashif.org/guidelines/dashif#ac-4 is used, then schemeIdUri attribute shall be tag:dolby.com,2014:dash:audio_channel_configuration:2011. | done | MPD-AUDIO-CHANNELCONFIG |  |
+| SCH-119 | `dash:AudioChannelConfiguration`: If profile http://dashif.org/guidelines/dashif#mpeg-h-3da is used, then schemeIdUri attribute shall be urn:mpeg:mpegB:cicp:ChannelConfiguration. | done | MPD-AUDIO-CHANNELCONFIG |  |
+| SCH-120 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then value shall provide horizontal and vertical number of tiles separated by an 'x'. | done | MPD-THUMBNAIL |  |
+| SCH-121 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then bandwidth shall be used to describe the tiling.'. | done | MPD-THUMBNAIL |  |
+| SCH-122 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then height shall be used to describe the tiling. | done | MPD-THUMBNAIL |  |
+| SCH-123 | `dash:EssentialProperty`: If EssentialProperty descriptor with @schemeIdUri set to http://dashif.org/guidelines/thumbnail_tile is present, then width shall be used to describe the tiling. | done | MPD-THUMBNAIL |  |
 
 ## Schematron: dvb-dash.sch
 
@@ -204,8 +204,8 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 |---|---|---|---|---|
 | IOP-1 | `3.2.7.4`: MPD fields having datatype xs:duration shall not use year or month units | done | MPD-DURATION-YM |  |
 | IOP-2 | `3.10.3`: SegmentTemplate@media attribute SHALL be present | done | ADDR-TEMPLATE |  |
-| IOP-3 | `3.10.4`: @profiles signalling SHALL be present in each Period | todo |  |  |
-| IOP-4 | `3.10.3`: SegmentTemplate@indexRange attribute SHALL be present | todo |  |  |
+| IOP-3 | `3.10.4`: @profiles signalling SHALL be present in each Period | n/a |  | Period@profiles is not in the 6th edition schema, which rejects it |
+| IOP-4 | `3.10.3`: SegmentTemplate@indexRange attribute SHALL be present | done | MPD-IOP-ONDEMAND |  |
 | IOP-5 | `6.2.5.2`: All AVC representations SHALL be encoded using avc3 | todo |  |  |
 | IOP-6 | `6.2.5.2`: All AVC representations SHALL include an 'avcC' box containing SPS and PPS NALs | todo |  |  |
 | IOP-7 | `6.2.5.2`: The level of the adaptation set SHALL match the maximum of the corresponding representations | todo |  |  |
