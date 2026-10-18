@@ -47,6 +47,14 @@ func TestLowLatencyRules(t *testing.T) {
   <Leap`, []string{"MPD-LL-UTCTIMING"}},
 		{"inband value", `value="1"/>`, `value="2"/>`, []string{"MPD-LL-INBAND-VALUE", "MPD-LL-INBAND-VALUE"}},
 		{"bad prt type", `type="encoder"`, `type="application"`, []string{"MPD-LL-PRT", "MPD-LL-PRT"}},
+		{"same prt id, same reference", `</ProducerReferenceTime>`, `</ProducerReferenceTime>
+      <ProducerReferenceTime id="0" wallClockTime="1970-01-01T00:00:00Z" presentationTime="0">
+        <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-iso:2014" value="https://time.akamai.com/?iso&amp;ms"/>
+      </ProducerReferenceTime>`, nil},
+		{"same prt id, other reference", `</ProducerReferenceTime>`, `</ProducerReferenceTime>
+      <ProducerReferenceTime id="0" type="encoder" wallClockTime="1970-01-01T00:00:01Z" presentationTime="0">
+        <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-iso:2014" value="https://time.akamai.com/?iso&amp;ms"/>
+      </ProducerReferenceTime>`, []string{"MPD-LL-PRT"}},
 		{"chunked without ato", ` availabilityTimeOffset="1.5"`, "", []string{"MPD-LL-CHUNKED", "MPD-LL-CHUNKED"}},
 		{"ato without atc", ` availabilityTimeComplete="false"`, "", []string{"MPD-LL-CHUNKED", "MPD-LL-CHUNKED"}},
 		{"no alignment", ` segmentAlignment="true"`, "", []string{"MPD-LL-ALIGNMENT"}},

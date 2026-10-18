@@ -6,7 +6,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 
 | Group | Checks | Done | Partial | Todo | n/a |
 |---|---:|---:|---:|---:|---:|
-| Schematron: schematron.sch | 123 | 122 | 0 | 0 | 1 |
+| Schematron: schematron.sch | 123 | 121 | 0 | 0 | 2 |
 | Schematron: dvb-dash.sch | 13 | 13 | 0 | 0 | 0 |
 | Schematron: ac4-generic.sch | 17 | 17 | 0 | 0 | 0 |
 | Module: Common | 5 | 2 | 0 | 2 | 1 |
@@ -18,7 +18,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **308** | **5** | **84** | **11** |
+| **Total** | **408** | **307** | **5** | **84** | **12** |
 
 ## Schematron: schematron.sch
 
@@ -30,7 +30,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | SCH-4 | `dash:MPD`: At least one unknown profile string found. Known list in schematron file. | done | MPD-PROFILE-UNKNOWN | dashcheck reports info, upstream an error; dashcheck also knows DVB interop, CMAF, low-latency and newer MPEG profiles |
 | SCH-5 | `dash:MPD`: For On-Demand profile, the MPD @type shall be "static". | done | MPD-PROFILE-TYPE |  |
 | SCH-6 | `dash:MPD`: If minimumUpdatePeriod is not present and the last period does not include the duration attribute the mediaPresentationDuration must be present. | done | MPD-DURATION-MISSING |  |
-| SCH-7 | `dash:MPD`: For ISO BMFF extended live profile, MPD@type shall be static. | done | MPD-PROFILE-EXTLIVE-TYPE | dashcheck reports a warning: limiting the extended live profile to static MPDs is not yet verified against ISO/IEC 23009-1 |
+| SCH-7 | `dash:MPD`: For ISO BMFF extended live profile, MPD@type shall be static. | n/a |  | not a requirement: ISO/IEC 23009-1 8.8 does not restrict the extended live profile to static MPDs, and its own extended live example is dynamic (bug 42) |
 | SCH-8 | `dash:MPD`: For ISO BMFF extended on-demand profile, MPD@type shall be static. | done | MPD-PROFILE-TYPE |  |
 | SCH-9 | `dash:Period`: If bitstreamSwitching is set to true all bitstreamSwitching declarations for AdaptationSet within this Period shall not be set to false. | done | MPD-BITSTREAMSWITCHING |  |
 | SCH-10 | `dash:Period`: The id of each Period shall be unique. | done | MPD-PERIOD-ID |  |
@@ -255,7 +255,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-3 | `9.X.4.2`: If Inband Event streams carrying MPD validity expiration events are used, @value SHALL be set to 1 | done | MPD-LL-INBAND-VALUE |  |
 | LL-4 | `9.X.4.2`: LeapSecondInformation SHOULD be provided | done | MPD-LL-LEAPSECOND | upstream looks up a misspelled element name and always fails |
 | LL-5 | `9.X.4.3`: At least one ProducerTimeReference SHALL be present | done | MPD-LL-PRT | an absent @type means encoder; dash-mpd cannot tell an absent @presentationTime from 0 |
-| LL-6 | `9.X.4.3`: Each ProducerTimeReference SHALL have a unique @id | done | MPD-LL-PRT | dashcheck requires unique ids within an AdaptationSet, upstream across the MPD |
+| LL-6 | `9.X.4.3`: Each ProducerTimeReference SHALL have a unique @id | done | MPD-LL-PRT | an @id identifies one reference in the whole MPD (CR r8 9.X.6.2.3), so dashcheck allows it to repeat only for an identical reference (livesim2 copies the PRT into each AdaptationSet); upstream fails every repeated @id |
 | LL-7 | `9.X.4.3`: Either (constrained) SegmentTemplate or SegmentTimeline shall be present | done | MPD-LL-ADDRESSING |  |
 | LL-8 | `9.X.4.3`: SegmentTemplate will have @duration set and have @media containing $Number$ | done | MPD-LL-ADDRESSING |  |
 | LL-9 | `9.X.4.3`: SegmentTimeline will have @media containing $Number$ and $Time$ | done | MPD-LL-ADDRESSING | upstream reads @media from SegmentTimeline and requires both $Number$ and $Time$, so it never passes |
@@ -384,9 +384,9 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-73 | `5.1.2`: Content SHOULD be offered using 'avc3' or 'avc4' | done | SEG-DVB-AVC3 |  |
 | DVB-74 | `5.1.2`: All information necessary to decode any Segment shall be provided in the init segment | done | SEG-DVB-PARAMSETS |  |
 | DVB-75 | `DRM`: Content Protection SHALL contain a ContentProtectionDescriptor | done | MPD-DVB-CP |  |
-| DVB-76 | `DRM`: PSSH Boxes SHOULD exist in either the MPD or the Initialization Segment | done | SEG-DVB-PSSH |  |
+| DVB-76 | `DRM`: PSSH Boxes SHOULD exist in either the MPD or the Initialization Segment | done | SEG-DVB-PSSH | reported as info: TS 103 285 V1.4.1 8.5.0 lets the initialization and/or media segments carry pssh and has no SHOULD for the MPD or initialization segment (bug 43) |
 | DVB-77 | `DRM`: MPD DRM System information | n/a |  | an informational listing of the DRM systems; upstream always passes |
-| DVB-78 | `DRM`: The scheme SHOULD be set to 'cenc' | done | SEG-DVB-CENC |  |
+| DVB-78 | `DRM`: The scheme SHOULD be set to 'cenc' | done | SEG-DVB-CENC, SEG-DVB-CENC-FALLBACK | TS 103 285 V1.3.1 and V1.4.1 8.6.0 allow cenc or cbcs (cbcs not with the 2014 profile) and require a clear or cenc fallback per media type when AVC is used; upstream asks for cenc only (bug 43) |
 | DVB-79 | `Section 10.5.2.3`: Continous adaptation sets shall be signalled accordingly | todo |  |  |
 | DVB-80 | `Section 10.5.2.3`: All Representations in the Adaptation Set in the first Period shall share the same value EPT1 | todo |  |  |
 | DVB-81 | `Section 10.5.2.3`: All Representations in the Adaptation Set in a subsequent Period shall share the same value EPT2 | todo |  |  |

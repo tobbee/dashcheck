@@ -1,6 +1,7 @@
 package mpdcheck
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"strings"
@@ -149,6 +150,7 @@ func lowLatencyRules(md *m.MPD) []report.Finding {
 		f = append(f, RuleLLUTCTiming.New(mpdLoc, "no UTCTiming with http-xsdate, http-iso or http-ntp"))
 	}
 	target, hasTarget := targetLatency(md)
+	prtIDs := map[uint32]prtRef{}
 	byAS := map[string][]*addressing.Rep{}
 	for _, r := range reps {
 		byAS[r.ASPath] = append(byAS[r.ASPath], r)
@@ -159,7 +161,7 @@ func lowLatencyRules(md *m.MPD) []report.Finding {
 			loc := report.Location{Path: asPath}
 			asReps := byAS[asPath]
 			// LL-5, LL-6
-			f = append(f, checkProducerReferenceTimes(as, asPath)...)
+			f = append(f, checkProducerReferenceTimes(as, asPath, prtIDs)...)
 			// LL-7 to LL-9
 			f = append(f, checkLLAddressing(asReps, loc)...)
 			// LL-26
@@ -232,15 +234,21 @@ func checkServiceDescription(md *m.MPD, loc report.Location) []report.Finding {
 	return []report.Finding{RuleLLServiceDescription.New(loc, "no ServiceDescription has a Latency with @target")}
 }
 
-// checkProducerReferenceTimes requires a valid ProducerReferenceTime with an
-// @id that is unique within the AdaptationSet. Upstream requires unique ids
-// across the whole MPD.
-func checkProducerReferenceTimes(as *m.AdaptationSetType, asPath string) []report.Finding {
+// prtRef is the first ProducerReferenceTime seen with an @id.
+type prtRef struct {
+	path, value string
+}
+
+// checkProducerReferenceTimes requires a valid ProducerReferenceTime. An @id
+// identifies one reference in the whole MPD (9.X.6.2.3), so it may repeat
+// only for the same reference, as when each AdaptationSet carries a copy.
+// Upstream fails every repeated @id.
+func checkProducerReferenceTimes(as *m.AdaptationSetType, asPath string, ids map[uint32]prtRef) []report.Finding {
 	var f []report.Finding
 	valid := false
-	ids := map[uint32]int{}
 	for i, prt := range as.ProducerReferenceTimes {
-		loc := report.Location{Path: fmt.Sprintf("%s/ProducerReferenceTime[%d]", asPath, i)}
+		path := fmt.Sprintf("%s/ProducerReferenceTime[%d]", asPath, i)
+		loc := report.Location{Path: path}
 		var problems []string
 		if prt.Type != "" && prt.Type != "encoder" && prt.Type != "captured" {
 			problems = append(problems, fmt.Sprintf("@type %q", prt.Type))
@@ -256,10 +264,14 @@ func checkProducerReferenceTimes(as *m.AdaptationSetType, asPath string) []repor
 			continue
 		}
 		valid = true
-		if prev, ok := ids[prt.Id]; ok {
-			f = append(f, RuleLLProducerReferenceTime.New(loc, "ProducerReferenceTime@id %d also used by ProducerReferenceTime[%d]", prt.Id, prev))
+		typ := cmp.Or(string(prt.Type), "encoder")
+		value := fmt.Sprintf("@type %s, @wallClockTime %s, @presentationTime %d", typ, prt.WallClockTime, prt.PresentationTime)
+		if prev, ok := ids[prt.Id]; !ok {
+			ids[prt.Id] = prtRef{path, value}
+		} else if prev.value != value {
+			f = append(f, RuleLLProducerReferenceTime.New(loc, "ProducerReferenceTime@id %d is also used by %s for another reference (%s, not %s)",
+				prt.Id, prev.path, prev.value, value))
 		}
-		ids[prt.Id] = i
 	}
 	if !valid {
 		f = append(f, RuleLLProducerReferenceTime.New(report.Location{Path: asPath}, "no valid ProducerReferenceTime"))

@@ -34,10 +34,6 @@ var (
 		ID: "MPD-PROFILE-TYPE", Severity: report.Error,
 		Desc: "On-demand profiles require a static MPD", SpecRef: refProfiles,
 	})
-	RuleProfileExtLiveType = report.Register(report.Rule{
-		ID: "MPD-PROFILE-EXTLIVE-TYPE", Severity: report.Warning,
-		Desc: "The DASH-IF rules require a static MPD for the extended live profile", SpecRef: refProfiles,
-	})
 	RuleProfileSegInfo = report.Register(report.Rule{
 		ID: "MPD-PROFILE-SEGINFO", Severity: report.Error,
 		Desc: "Segment information must be allowed by the profile", SpecRef: refProfiles,
@@ -150,16 +146,13 @@ func profileRules(md *m.MPD) []report.Finding {
 	dynamic := md.GetType() == "dynamic"
 	iop := mpdP.iop()
 
-	// SCH-5, SCH-7, SCH-8
+	// SCH-5, SCH-8. SCH-7 (extended live requires static) is not in ISO/IEC 23009-1 8.8.
 	if dynamic {
 		if mpdP.has(profileOnDemand) {
 			f = append(f, RuleProfileType.New(mpdLoc, "on-demand profile in a dynamic MPD"))
 		}
 		if mpdP.has(profileExtOnDemand) || mpdP.has(profileIOPOnDemand) {
 			f = append(f, RuleProfileType.New(mpdLoc, "extended or IOP on-demand profile in a dynamic MPD"))
-		}
-		if mpdP.has(profileExtLive) {
-			f = append(f, RuleProfileExtLiveType.New(mpdLoc, "extended live profile in a dynamic MPD"))
 		}
 	}
 	if iop {

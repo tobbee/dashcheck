@@ -54,6 +54,8 @@ yet unless stated.
 | 39 | DVB Subtitle | Skips stpp with codecs parameters | Verified in code |
 | 40 | DVB CrossAudio | Channel count fails with other schemes | Verified in code |
 | 41 | DVB LegacyCodecs | HEVC tier, profile, level and bit depth rules do not match the spec | Verified in code and spec |
+| 42 | SCH-7 | Requires a static MPD for the extended live profile | Verified in spec |
+| 43 | DVB ContentProtection | Outdated cenc-only scheme rule and a pssh SHOULD not in the spec | Verified in spec |
 
 ## Manifest handling
 
@@ -583,6 +585,43 @@ general_frame_only_constraint_flag 1), which is not checked.
 
 **Fix:** Check the conformance points once per Period (warning, as for AVC),
 and check bit depth by profile and the progressive flags per Representation.
+
+### 42. SCH-7 requires a static MPD for the extended live profile
+
+**Where:** [schematron.sch#L86](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/schematron/schematron.sch#L86)
+
+**Problem:** The rule fails every dynamic MPD with
+`urn:mpeg:dash:profile:isoff-ext-live:2014`. ISO/IEC 23009-1 clause 8.8 has
+no such constraint (unlike the extended on-demand profile in clause 8.9.2.1,
+which SCH-8 checks), and the standard's own extended live example MPD with
+UTCTiming and MPD update events is dynamic.
+
+**Effect:** False errors for live services using the extended live profile,
+which is the profile meant for them.
+
+**Fix:** Remove the assertion.
+
+### 43. The DVB scheme and pssh checks do not match TS 103 285
+
+**Where:** [ContentProtection.php#L62-L66](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/ContentProtection.php#L62-L66)
+and [#L135-L143](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/ContentProtection.php#L135-L143)
+
+**Problem:** The scheme check warns unless the 'schm' scheme is `cenc`. ETSI
+TS 103 285 V1.3.1 and V1.4.1, clause 8.6.0, say that media data *shall* use `cenc` or `cbcs`, that AdaptationSets using `cbcs` shall not carry the
+2014 profile, and that presentations with AVC shall keep an AVC video
+AdaptationSet and one AdaptationSet of each other media type that is clear or
+`cenc`. None of these is checked. The check "PSSH Boxes SHOULD exist in either
+the MPD or the Initialization Segment" has no counterpart in the spec: clause
+8.5.0 says the initialization segment and/or media segments may carry 'pssh'.
+
+**Effect:** Valid `cbcs` content gets warnings, while `cbcs` with the 2014
+profile, other schemes such as `cens`, and missing `cenc` fallbacks are only
+warnings or not reported. Content that delivers 'pssh' in media segments gets
+a warning.
+
+**Fix:** Fail schemes other than `cenc` and `cbcs`, fail `cbcs` with the 2014
+profile, add the fallback check per Period, and report the pssh case as
+information.
 
 ## Other projects
 

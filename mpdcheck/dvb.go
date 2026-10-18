@@ -73,7 +73,7 @@ var (
 	})
 	RuleDVBContentProtection = report.Register(report.Rule{
 		ID: "MPD-DVB-CP", Severity: report.Error,
-		Desc: "DVB ContentProtection descriptors must be on the AdaptationSet and include the mp4protection descriptor", SpecRef: refDVB + " 8.3",
+		Desc: "DVB ContentProtection descriptors must be on the AdaptationSet and include the mp4protection descriptor", SpecRef: refDVB + " 8.3, 8.4",
 	})
 	RuleDVBEvent = report.Register(report.Rule{
 		ID: "MPD-DVB-EVENT", Severity: report.Error,

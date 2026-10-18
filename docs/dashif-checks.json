@@ -76,11 +76,9 @@
    "source": "schematron/schematron.sch",
    "context": "dash:MPD",
    "text": "For ISO BMFF extended live profile, MPD@type shall be static.",
-   "status": "done",
-   "rules": [
-    "MPD-PROFILE-EXTLIVE-TYPE"
-   ],
-   "note": "dashcheck reports a warning: limiting the extended live profile to static MPDs is not yet verified against ISO/IEC 23009-1"
+   "status": "n/a",
+   "rules": [],
+   "note": "not a requirement: ISO/IEC 23009-1 8.8 does not restrict the extended live profile to static MPDs, and its own extended live example is dynamic (bug 42)"
   },
   {
    "id": "SCH-8",
@@ -2964,7 +2962,7 @@
    "rules": [
     "SEG-DVB-PSSH"
    ],
-   "note": ""
+   "note": "reported as info: TS 103 285 V1.4.1 8.5.0 lets the initialization and/or media segments carry pssh and has no SHOULD for the MPD or initialization segment (bug 43)"
   },
   {
    "id": "DVB-77",
@@ -2982,9 +2980,10 @@
    "text": "The scheme SHOULD be set to 'cenc'",
    "status": "done",
    "rules": [
-    "SEG-DVB-CENC"
+    "SEG-DVB-CENC",
+    "SEG-DVB-CENC-FALLBACK"
    ],
-   "note": ""
+   "note": "TS 103 285 V1.3.1 and V1.4.1 8.6.0 allow cenc or cbcs (cbcs not with the 2014 profile) and require a clear or cenc fallback per media type when AVC is used; upstream asks for cenc only (bug 43)"
   },
   {
    "id": "DVB-79",
@@ -3615,7 +3614,7 @@
    "rules": [
     "MPD-LL-PRT"
    ],
-   "note": "dashcheck requires unique ids within an AdaptationSet, upstream across the MPD"
+   "note": "an @id identifies one reference in the whole MPD (CR r8 9.X.6.2.3), so dashcheck allows it to repeat only for an identical reference (livesim2 copies the PRT into each AdaptationSet); upstream fails every repeated @id"
   },
   {
    "id": "LL-7",

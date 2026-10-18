@@ -1,6 +1,7 @@
 package segcheck
 
 import (
+	"fmt"
 	"slices"
 	"testing"
 
@@ -33,6 +34,20 @@ func TestDVBInit(t *testing.T) {
 	_, f = CheckInit(read(t, "A48/init.mp4"), &audio, audio.Loc())
 	if got := ruleIDs(f); !slices.Equal(got, []string{"SEG-DVB-CHANNELS"}) {
 		t.Errorf("audio channels: got %v", f)
+	}
+	schemes := []struct {
+		scheme  string
+		profile string
+		want    int
+	}{
+		{"cenc", profileDVB2014, 0}, {"cbcs", profileDVB2017, 0}, {"cbcs", profileDVB2014, 1}, {"cens", profileDVB2017, 1},
+	}
+	for _, c := range schemes {
+		r := video
+		r.Profiles = []string{c.profile}
+		if f := dvbInitRules(&r, &Init{Encrypted: true, Scheme: c.scheme}, sampleEntryInfo{fourCC: "avc3"}, r.Loc()); len(f) != c.want {
+			t.Errorf("scheme %s with %s: got %v", c.scheme, c.profile, f)
+		}
 	}
 	// Main 10, 10 bits, progressive frames.
 	const flags = 1<<47 | 1<<44
@@ -96,6 +111,34 @@ func TestDVBConformancePoints(t *testing.T) {
 			if c.inits[0].Video.codec == "hevc" {
 				r.Codecs = "hvc1.2.4.L123.B0"
 			}
+			reps[i] = &r
+		}
+		if got := ruleIDs(CheckPresentation(reps, c.inits)); !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.desc, got, c.want)
+		}
+	}
+	// Players without cbcs support need AVC video and audio that are clear or cenc.
+	enc := func(handler, codec, scheme string) *Init {
+		return &Init{Handler: handler, Encrypted: scheme != "", Scheme: scheme,
+			Video: videoConfig{codec: codec, hasConfig: codec != "", profile: 100, level: 40, width: 1920, height: 1080}}
+	}
+	fallback := []struct {
+		desc  string
+		inits []*Init
+		want  []string
+	}{
+		{"clear", []*Init{enc("vide", "avc", ""), enc("soun", "", "")}, nil},
+		{"cenc", []*Init{enc("vide", "avc", "cenc"), enc("soun", "", "cenc")}, nil},
+		{"cbcs with cenc copies", []*Init{enc("vide", "avc", "cbcs"), enc("vide", "avc", "cenc"), enc("soun", "", "cbcs"), enc("soun", "", "")}, nil},
+		{"cbcs audio only", []*Init{enc("vide", "avc", "cenc"), enc("soun", "", "cbcs")}, []string{"SEG-DVB-CENC-FALLBACK"}},
+		{"cbcs everywhere", []*Init{enc("vide", "avc", "cbcs"), enc("soun", "", "cbcs")}, []string{"SEG-DVB-CENC-FALLBACK", "SEG-DVB-CENC-FALLBACK"}},
+		{"unchecked set", []*Init{enc("vide", "avc", "cenc"), enc("soun", "", "cbcs"), nil}, nil},
+	}
+	for _, c := range fallback {
+		reps := make([]*addressing.Rep, len(c.inits))
+		for i := range reps {
+			r := video
+			r.ASPath = fmt.Sprintf("Period[0]/AdaptationSet[%d]", i)
 			reps[i] = &r
 		}
 		if got := ruleIDs(CheckPresentation(reps, c.inits)); !slices.Equal(got, c.want) {

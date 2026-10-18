@@ -2,6 +2,7 @@ package segcheck
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -78,13 +79,20 @@ var (
 		Desc: "DVB stpp subtitles need a subt handler and an stpp sample entry with a namespace", SpecRef: refDVB + " 7.1",
 	})
 	RuleDVBPssh = report.Register(report.Rule{
-		ID: "SEG-DVB-PSSH", Severity: report.Warning,
-		Desc:    "Each DRM system in the MPD should have its pssh in the MPD or the initialization segment",
-		SpecRef: refDVB + " 8.4",
+		ID: "SEG-DVB-PSSH", Severity: report.Info,
+		Desc:    "A DRM system in the MPD has no pssh in the MPD or the initialization segment, so it must come from the media segments or elsewhere",
+		SpecRef: refDVB + " 8.5.0",
 	})
 	RuleDVBCenc = report.Register(report.Rule{
-		ID: "SEG-DVB-CENC", Severity: report.Warning,
-		Desc: "DVB encrypted content should use the cenc scheme", SpecRef: refDVB + " 8.2",
+		ID: "SEG-DVB-CENC", Severity: report.Error,
+		Desc:    "DVB encrypted content must use the cenc or cbcs scheme, and cbcs not with the 2014 DVB profile",
+		SpecRef: refDVB + " 8.6.0",
+	})
+	RuleDVBCencFallback = report.Register(report.Rule{
+		ID: "SEG-DVB-CENC-FALLBACK", Severity: report.Error,
+		Desc: "A DVB Period with AVC video must have an AVC video AdaptationSet and an AdaptationSet of each other " +
+			"media type that is unencrypted or uses the cenc scheme",
+		SpecRef: refDVB + " 8.6.0",
 	})
 	RuleDVBSwitchable = report.Register(report.Rule{
 		ID: "SEG-DVB-SWITCHABLE", Severity: report.Error,
@@ -158,11 +166,14 @@ func dvbInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, loc rep
 		}
 	}
 	if init.Encrypted {
-		// DVB-78
-		if init.Scheme != "cenc" {
+		// DVB-78 (upstream asks for cenc, as before TS 103 285 V1.3.1 allowed cbcs)
+		switch {
+		case init.Scheme != "cenc" && init.Scheme != "cbcs":
 			f = append(f, RuleDVBCenc.New(loc, "scheme %q", init.Scheme))
+		case init.Scheme == "cbcs" && rep.HasProfile(profileDVB2014):
+			f = append(f, RuleDVBCenc.New(loc, "cbcs scheme with the profile %s", profileDVB2014))
 		}
-		// DVB-76
+		// DVB-76 (upstream: a SHOULD that TS 103 285 V1.4.1 does not have)
 		for _, cp := range rep.ContentProtections {
 			id, isSystem := strings.CutPrefix(strings.ToLower(string(cp.SchemeIdUri)), "urn:uuid:")
 			if !isSystem || cp.Pssh != nil || slices.Contains(init.PsshSystems, id) {
@@ -335,6 +346,9 @@ func dvbPeriodRules(reps []*addressing.Rep, inits []*Init) []report.Finding {
 			}
 		}
 		loc := report.Location{Path: fmt.Sprintf("Period[%d]", reps[start].PeriodIndex)}
+		if avc.any {
+			f = append(f, dvbClearFallback(reps[start:end], inits[start:end], loc)...)
+		}
 		if avc.any && !avc.found && !avc.unknown {
 			f = append(f, RuleDVBAVC.New(loc, "no AVC Representation is Main or High profile up to level 4.0 and 1920x1080"))
 		}
@@ -344,4 +358,78 @@ func dvbPeriodRules(reps []*addressing.Rep, inits []*Init) []report.Finding {
 		start = end
 	}
 	return f
+}
+
+// dvbClearFallback checks that a Period with AVC video can be played by
+// players without cbcs support: it needs an AVC video AdaptationSet and an
+// AdaptationSet of each other media type that is unencrypted or uses cenc.
+func dvbClearFallback(reps []*addressing.Rep, inits []*Init, loc report.Location) []report.Finding {
+	type set struct {
+		media        string
+		avc, clear   bool
+		unknown, dvb bool
+	}
+	var sets []*set
+	byPath := map[string]*set{}
+	for i, rep := range reps {
+		s := byPath[rep.ASPath]
+		if s == nil {
+			s = &set{clear: true}
+			byPath[rep.ASPath] = s
+			sets = append(sets, s)
+		}
+		s.dvb = s.dvb || isDVB(rep)
+		init := inits[i]
+		if init == nil {
+			s.unknown = true
+			continue
+		}
+		s.media = init.Handler
+		if init.Video.codec == "avc" {
+			s.avc = true
+		}
+		if init.Encrypted && init.Scheme != "cenc" {
+			s.clear = false
+		}
+	}
+	need := map[string]bool{} // media types without a playable AdaptationSet
+	for _, s := range sets {
+		if s.unknown {
+			return nil // an unchecked AdaptationSet may be the playable one
+		}
+		if !s.dvb || s.media == "" {
+			continue
+		}
+		key := s.media
+		if s.media == "vide" {
+			if !s.avc {
+				continue
+			}
+			key = "AVC video"
+		}
+		if _, seen := need[key]; !seen {
+			need[key] = true
+		}
+		if s.clear {
+			need[key] = false
+		}
+	}
+	var f []report.Finding
+	for _, key := range slices.Sorted(maps.Keys(need)) {
+		if need[key] {
+			f = append(f, RuleDVBCencFallback.New(loc, "every %s AdaptationSet uses the cbcs scheme", mediaName(key)))
+		}
+	}
+	return f
+}
+
+// mediaName turns a handler type into words for messages.
+func mediaName(handler string) string {
+	switch handler {
+	case "soun":
+		return "audio"
+	case "subt", "text":
+		return "subtitle"
+	}
+	return handler
 }
