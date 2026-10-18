@@ -110,7 +110,14 @@ func CheckAdaptationSet(reps []*addressing.Rep, inits []*Init) []report.Finding 
 	}
 	f := iopAdaptationSetRules(reps, inits)
 	f = append(f, cmafAdaptationSetRules(reps, inits)...)
-	return append(f, cmafMediaProfileSetRules(reps, inits)...)
+	f = append(f, cmafMediaProfileSetRules(reps, inits)...)
+	return append(f, dvbAdaptationSetRules(reps, inits)...)
+}
+
+// CheckPresentation runs the checks that need the initialization segments of
+// all Representations of the MPD, in MPD order (nil where unavailable).
+func CheckPresentation(reps []*addressing.Rep, inits []*Init) []report.Finding {
+	return dvbPeriodRules(reps, inits)
 }
 
 func iopAdaptationSetRules(reps []*addressing.Rep, inits []*Init) []report.Finding {

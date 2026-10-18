@@ -104,10 +104,12 @@ type Rep struct {
 	ATC         *bool     // effective availabilityTimeComplete, nil if absent
 	Media       string    // effective SegmentTemplate@media
 
-	LowLatency           bool    // the MPD uses low-latency profile or chunked delivery
-	TargetLatency        float64 // ServiceDescription target latency in seconds, 0 if absent
-	HasContentProtection bool    // ContentProtection on the Representation or AdaptationSet
-	SegmentProfiles      string  // effective @segmentProfiles
+	LowLatency           bool                       // the MPD uses low-latency profile or chunked delivery
+	TargetLatency        float64                    // ServiceDescription target latency in seconds, 0 if absent
+	HasContentProtection bool                       // ContentProtection on the Representation or AdaptationSet
+	ContentProtections   []*m.ContentProtectionType // effective ContentProtection elements
+	AudioChannelConfigs  []*m.DescriptorType        // effective AudioChannelConfiguration elements
+	SegmentProfiles      string                     // effective @segmentProfiles
 
 	tmpl  *m.SegmentTemplateType
 	list  *m.SegmentListType
@@ -236,6 +238,8 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 					ASCodecs:             as.Codecs,
 					TargetLatency:        targetLatency(md),
 					HasContentProtection: len(rep.ContentProtections)+len(as.ContentProtections) > 0,
+					ContentProtections:   firstCPs(rep.ContentProtections, as.ContentProtections),
+					AudioChannelConfigs:  firstDescs(rep.AudioChannelConfigurations, as.AudioChannelConfigurations),
 					SegmentProfiles:      first(listOf4CC(rep.SegmentProfiles), listOf4CC(as.SegmentProfiles)),
 					Profiles:             splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
 					BitstreamSwitching:   boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),
@@ -285,6 +289,24 @@ func targetLatency(md *m.MPD) float64 {
 		}
 	}
 	return 0
+}
+
+func firstCPs(levels ...[]*m.ContentProtectionType) []*m.ContentProtectionType {
+	for _, l := range levels {
+		if len(l) > 0 {
+			return l
+		}
+	}
+	return nil
+}
+
+func firstDescs(levels ...[]*m.DescriptorType) []*m.DescriptorType {
+	for _, l := range levels {
+		if len(l) > 0 {
+			return l
+		}
+	}
+	return nil
 }
 
 func listOf4CC(v *m.ListOf4CCType) string {

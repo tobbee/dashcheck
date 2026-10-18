@@ -208,6 +208,7 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 		asInits = append(asInits, inits[i])
 	}
 	rpt.Findings = append(rpt.Findings, segcheck.CheckAdaptationSet(asReps, asInits)...)
+	rpt.Findings = append(rpt.Findings, segcheck.CheckPresentation(reps, inits)...)
 }
 
 // repChecker checks the segments of one Representation.
@@ -278,6 +279,7 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 	if rc.sidx != nil {
 		// The index range precedes the media by construction of the sidx offsets.
 		rc.add(segcheck.CheckSelfInitSidx(rep, init, rc.sidx, rc.nSidx, true, first)...)
+		rc.add(segcheck.CheckDVBSidx(rep, rc.sidx, rc.nSidx)...)
 	}
 	if rc.dynamic && len(segs) > 0 {
 		rc.probeEarly(ctx, segs[len(segs)-1])

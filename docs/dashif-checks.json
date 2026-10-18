@@ -2905,8 +2905,10 @@
    "source": "DVB/Segments/BoxCount.php",
    "context": "Section 4.3",
    "text": "The 'moof' box shall contain only one 'traf' box",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-TRAF"
+   ],
    "note": ""
   },
   {
@@ -2914,17 +2916,21 @@
    "source": "DVB/Segments/BoxCount.php",
    "context": "Section 4.3",
    "text": "The segment shall contain only one 'sidx' box",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SIDX"
+   ],
+   "note": "checked on the sidx boxes in @indexRange"
   },
   {
    "id": "DVB-73",
    "source": "DVB/Segments/Codecs.php",
    "context": "5.1.2",
    "text": "Content SHOULD be offered using 'avc3' or 'avc4'",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-AVC3"
+   ],
    "note": ""
   },
   {
@@ -2932,8 +2938,10 @@
    "source": "DVB/Segments/Codecs.php",
    "context": "5.1.2",
    "text": "All information necessary to decode any Segment shall be provided in the init segment",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-PARAMSETS"
+   ],
    "note": ""
   },
   {
@@ -2941,8 +2949,10 @@
    "source": "DVB/Segments/ContentProtection.php",
    "context": "DRM",
    "text": "Content Protection SHALL contain a ContentProtectionDescriptor",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "MPD-DVB-CP"
+   ],
    "note": ""
   },
   {
@@ -2950,8 +2960,10 @@
    "source": "DVB/Segments/ContentProtection.php",
    "context": "DRM",
    "text": "PSSH Boxes SHOULD exist in either the MPD or the Initialization Segment",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-PSSH"
+   ],
    "note": ""
   },
   {
@@ -2959,17 +2971,19 @@
    "source": "DVB/Segments/ContentProtection.php",
    "context": "DRM",
    "text": "MPD DRM System information",
-   "status": "todo",
+   "status": "n/a",
    "rules": [],
-   "note": ""
+   "note": "an informational listing of the DRM systems; upstream always passes"
   },
   {
    "id": "DVB-78",
    "source": "DVB/Segments/ContentProtection.php",
    "context": "DRM",
    "text": "The scheme SHOULD be set to 'cenc'",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-CENC"
+   ],
    "note": ""
   },
   {
@@ -3004,11 +3018,11 @@
    "source": "DVB/Segments/CrossAudio.php",
    "context": "6.1.1",
    "text": "@mimeType SHALL match the mimetype derived from the segments",
-   "status": "partial",
+   "status": "done",
    "rules": [
     "XCHK-HANDLER"
    ],
-   "note": "dashcheck compares the track handler with @mimeType"
+   "note": "dashcheck compares the track handler with @contentType or @mimeType"
   },
   {
    "id": "DVB-83",
@@ -3026,9 +3040,11 @@
    "source": "DVB/Segments/CrossAudio.php",
    "context": "6.1.1",
    "text": "AudioChannelConfiguration SHALL match the configuration derived from the segments",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-CHANNELS"
+   ],
+   "note": "only with the 23003:3 scheme; upstream fails with other schemes"
   },
   {
    "id": "DVB-85",
@@ -3047,8 +3063,10 @@
    "source": "DVB/Segments/Durations.php",
    "context": "4.5",
    "text": "Each subsegment shall have a duration of not more than 15 seconds",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-DURATION"
+   ],
    "note": ""
   },
   {
@@ -3056,17 +3074,21 @@
    "source": "DVB/Segments/Durations.php",
    "context": "4.5",
    "text": "Each subsegment shall be at least 1 second",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-DURATION"
+   ],
+   "note": "the last segment of a Period may be shorter"
   },
   {
    "id": "DVB-88",
    "source": "DVB/Segments/LegacyCodecs.php",
    "context": "",
    "text": "The codec should be supported by the specification",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-CODEC"
+   ],
    "note": ""
   },
   {
@@ -3074,65 +3096,78 @@
    "source": "DVB/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Profile used for AVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-AVC"
+   ],
+   "note": "TS 103 285 5.1.1 asks each Period to include video for avc_hd_50_level40 or avc_hd_60_level40 (Main or High up to level 4.0, TS 101 154 table L.1); upstream requires every Representation to be High profile (bug 38). A warning, since the spec allows other device targets"
   },
   {
    "id": "DVB-90",
    "source": "DVB/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Level used for AVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-AVC"
+   ],
+   "note": "checked per Period with DVB-89; upstream allows only levels 3.0, 3.2, 4.0 and 4.1 in every Representation (bug 38)"
   },
   {
    "id": "DVB-91",
    "source": "DVB/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Tier used for HEVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-HEVC"
+   ],
+   "note": "TS 103 285 5.2.3: at least one Representation per Period fits an HEVC conformance point of TS 101 154 table L.1 (Main tier); upstream rejects high tier in every Representation (bug 41)"
   },
   {
    "id": "DVB-92",
    "source": "DVB/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Bit depth used for HEVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-HEVC-SPS"
+   ],
+   "note": "per TS 101 154 L.3.3.2: Main profile 8-bit, Main 10 8 or 10 bits with equal chroma depth, progressive frames; upstream accepts 8 or 10 bits for any profile (bug 41)"
   },
   {
    "id": "DVB-93",
    "source": "DVB/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Profile used for HEVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-HEVC"
+   ],
+   "note": "checked per Period with DVB-91; upstream rejects Main profile above 1080p although hevc_uhd allows it (bug 41)"
   },
   {
    "id": "DVB-94",
    "source": "DVB/Segments/LegacyCodecs.php",
    "context": "",
    "text": "Level used for HEVC must be suported by the specification",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-HEVC"
+   ],
+   "note": "checked per Period with DVB-91; levels 4.1 up to 1080p, 5.2 up to 2160p and 6.1 up to 4320p; upstream rejects 5.2 and 6.1 (bug 41)"
   },
   {
    "id": "DVB-95",
    "source": "DVB/Segments/SAPTypes.php",
    "context": "5.1.2",
    "text": "Segments shall start with SAP types 1 or 2",
-   "status": "partial",
+   "status": "done",
    "rules": [
+    "SEG-DVB-SAP",
     "SEG-SAP"
    ],
-   "note": "dashcheck requires a sync sample only when @startWithSAP is 1 or 2"
+   "note": ""
   },
   {
    "id": "DVB-96",
@@ -3157,35 +3192,43 @@
    "source": "DVB/Segments/Subtitle.php",
    "context": "Subtitles",
    "text": "For subtitle media, handler SHALL be 'subt'",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SUBTITLE"
+   ],
+   "note": "upstream only checks @codecs equal to stpp"
   },
   {
    "id": "DVB-99",
    "source": "DVB/Segments/Subtitle.php",
    "context": "Subtitles",
    "text": "Sample entry shall be 'stpp'",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SUBTITLE"
+   ],
+   "note": "upstream only checks @codecs equal to stpp"
   },
   {
    "id": "DVB-100",
    "source": "DVB/Segments/Subtitle.php",
    "context": "Subtitles",
    "text": "Sample entry shall countain a namespace",
-   "status": "todo",
-   "rules": [],
-   "note": ""
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SUBTITLE"
+   ],
+   "note": "upstream only checks @codecs equal to stpp"
   },
   {
    "id": "DVB-101",
    "source": "DVB/Segments/SwitchableRepresentation.php",
    "context": "4.3",
    "text": "Initialization segment for Representations with an Adaptation Set SHALL have the same …",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SWITCHABLE"
+   ],
    "note": ""
   },
   {
@@ -3193,8 +3236,10 @@
    "source": "DVB/Segments/SwitchableRepresentation.php",
    "context": "4.3",
    "text": "Initialization segment for Representations with an Adaptation Set SHALL have the same …",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SWITCHABLE"
+   ],
    "note": ""
   },
   {
@@ -3202,8 +3247,10 @@
    "source": "DVB/Segments/SwitchableRepresentation.php",
    "context": "8.3",
    "text": "Initialization segment for Representations with an Adaptation Set SHALL have the same …",
-   "status": "todo",
-   "rules": [],
+   "status": "done",
+   "rules": [
+    "SEG-DVB-SWITCHABLE"
+   ],
    "note": ""
   },
   {

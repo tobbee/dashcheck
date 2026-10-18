@@ -104,9 +104,12 @@ type Init struct {
 	Video       videoConfig
 	Brands      []string // ftyp major and compatible brands
 	Encrypted   bool
-	Scheme      string // protection scheme type
-	CMAF        bool   // the track is declared as CMAF
-	cmafBrand   string // the highest CMAF media profile brand of the track
+	Scheme      string   // protection scheme type
+	CMAF        bool     // the track is declared as CMAF
+	DefaultKID  string   // tenc default KID of encrypted content
+	PsshSystems []string // system IDs of pssh boxes in moov
+	Channels    int      // audio channel count in the sample entry
+	cmafBrand   string   // the highest CMAF media profile brand of the track
 	trex        *mp4.TrexBox
 }
 
@@ -179,9 +182,15 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 		init.Brands = append([]string{ftyp.MajorBrand()}, ftyp.CompatibleBrands()...)
 	}
 	init.CMAF = isCMAF(rep, init.Brands)
+	init.DefaultKID = info.defaultKID
+	init.Channels = int(info.channels)
+	for _, p := range moov.Psshs {
+		init.PsshSystems = append(init.PsshSystems, p.SystemID.String())
+	}
 	f = append(f, crossCheckInit(rep, init, info, loc)...)
 	f = append(f, iopInitRules(rep, init, loc)...)
 	f = append(f, llInitRules(rep, init, loc)...)
+	f = append(f, dvbInitRules(rep, init, info, loc)...)
 	f = append(f, cmafInitRules(rep, init, info, mf.Init.Children, loc)...)
 	init.cmafBrand = mediaProfileBrand(init.Brands, init.Handler, info.fourCC)
 	if init.CMAF {
@@ -238,6 +247,7 @@ type Media struct {
 	EPT        float64 // earliest presentation time in seconds, before presentationTimeOffset
 	Samples    int
 	FirstCTO   int32 // composition time offset of the first sample
+	FirstSync  bool  // the first sample is a sync sample
 }
 
 // End returns the decode time after the last sample.
@@ -296,6 +306,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 				if firstSample {
 					firstSample = false
 					media.FirstCTO = s.CompositionTimeOffset
+					media.FirstSync = isSync(s.Flags)
 					sapRequired := rep.StartWithSAP == 1 || rep.StartWithSAP == 2
 					if sapRequired && init.Handler == "vide" && !isSync(s.Flags) {
 						f = append(f, RuleSegSAP.New(loc, "first sample is not a sync sample (startWithSAP=%d)", rep.StartWithSAP))
@@ -319,6 +330,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	f = append(f, iopMediaRules(rep, init, media, loc)...)
 	f = append(f, cmafMediaRules(rep, init, mf, loc)...)
 	f = append(f, llMediaRules(rep, media, mf, mediaTS, last, loc)...)
+	f = append(f, dvbMediaRules(rep, init, media, mf, mediaTS, last, loc)...)
 	return media, f
 }
 

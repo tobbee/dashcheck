@@ -13,12 +13,12 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
 | Module: Low Latency | 54 | 46 | 4 | 3 | 1 |
-| Module: DVB | 103 | 46 | 3 | 53 | 1 |
+| Module: DVB | 103 | 71 | 1 | 29 | 2 |
 | Module: HbbTV | 10 | 0 | 0 | 5 | 5 |
 | Module: CTA WAVE | 21 | 0 | 0 | 21 | 0 |
 | Module: WAVE HLS interop | 19 | 0 | 0 | 19 | 0 |
 | Module: Dolby | 5 | 0 | 0 | 5 | 0 |
-| **Total** | **408** | **283** | **7** | **108** | **10** |
+| **Total** | **408** | **308** | **5** | **84** | **11** |
 
 ## Schematron: schematron.sch
 
@@ -379,39 +379,39 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-68 | `5.2.2`: The value of the signalled TransferCharacteristics Property in the MPD SHALL match … | todo |  |  |
 | DVB-69 | `5.2.6`: Use of HLG10 within in an AdapationSet shall be signalled according to this section | todo |  |  |
 | DVB-70 | `5.2.7`: Use of PQ10 within in an AdapationSet shall be signalled according to this section | todo |  |  |
-| DVB-71 | `Section 4.3`: The 'moof' box shall contain only one 'traf' box | todo |  |  |
-| DVB-72 | `Section 4.3`: The segment shall contain only one 'sidx' box | todo |  |  |
-| DVB-73 | `5.1.2`: Content SHOULD be offered using 'avc3' or 'avc4' | todo |  |  |
-| DVB-74 | `5.1.2`: All information necessary to decode any Segment shall be provided in the init segment | todo |  |  |
-| DVB-75 | `DRM`: Content Protection SHALL contain a ContentProtectionDescriptor | todo |  |  |
-| DVB-76 | `DRM`: PSSH Boxes SHOULD exist in either the MPD or the Initialization Segment | todo |  |  |
-| DVB-77 | `DRM`: MPD DRM System information | todo |  |  |
-| DVB-78 | `DRM`: The scheme SHOULD be set to 'cenc' | todo |  |  |
+| DVB-71 | `Section 4.3`: The 'moof' box shall contain only one 'traf' box | done | SEG-DVB-TRAF |  |
+| DVB-72 | `Section 4.3`: The segment shall contain only one 'sidx' box | done | SEG-DVB-SIDX | checked on the sidx boxes in @indexRange |
+| DVB-73 | `5.1.2`: Content SHOULD be offered using 'avc3' or 'avc4' | done | SEG-DVB-AVC3 |  |
+| DVB-74 | `5.1.2`: All information necessary to decode any Segment shall be provided in the init segment | done | SEG-DVB-PARAMSETS |  |
+| DVB-75 | `DRM`: Content Protection SHALL contain a ContentProtectionDescriptor | done | MPD-DVB-CP |  |
+| DVB-76 | `DRM`: PSSH Boxes SHOULD exist in either the MPD or the Initialization Segment | done | SEG-DVB-PSSH |  |
+| DVB-77 | `DRM`: MPD DRM System information | n/a |  | an informational listing of the DRM systems; upstream always passes |
+| DVB-78 | `DRM`: The scheme SHOULD be set to 'cenc' | done | SEG-DVB-CENC |  |
 | DVB-79 | `Section 10.5.2.3`: Continous adaptation sets shall be signalled accordingly | todo |  |  |
 | DVB-80 | `Section 10.5.2.3`: All Representations in the Adaptation Set in the first Period shall share the same value EPT1 | todo |  |  |
 | DVB-81 | `Section 10.5.2.3`: All Representations in the Adaptation Set in a subsequent Period shall share the same value EPT2 | todo |  |  |
-| DVB-82 | `6.1.1`: @mimeType SHALL match the mimetype derived from the segments | partial | XCHK-HANDLER | dashcheck compares the track handler with @mimeType |
+| DVB-82 | `6.1.1`: @mimeType SHALL match the mimetype derived from the segments | done | XCHK-HANDLER | dashcheck compares the track handler with @contentType or @mimeType |
 | DVB-83 | `6.1.1`: @audioSamplingRate SHALL match the sample rate derived from the segments | done | XCHK-SAMPLERATE | dashcheck reports a warning |
-| DVB-84 | `6.1.1`: AudioChannelConfiguration SHALL match the configuration derived from the segments | todo |  |  |
+| DVB-84 | `6.1.1`: AudioChannelConfiguration SHALL match the configuration derived from the segments | done | SEG-DVB-CHANNELS | only with the 23003:3 scheme; upstream fails with other schemes |
 | DVB-85 | `5.x / 6.x`: For each representation, @codecs SHALL be match the codec derived from the segments | done | XCHK-CODECS, XCHK-CODECS-DETAIL |  |
-| DVB-86 | `4.5`: Each subsegment shall have a duration of not more than 15 seconds | todo |  |  |
-| DVB-87 | `4.5`: Each subsegment shall be at least 1 second | todo |  |  |
-| DVB-88 | The codec should be supported by the specification | todo |  |  |
-| DVB-89 | Profile used for AVC must be suported by the specification | todo |  |  |
-| DVB-90 | Level used for AVC must be suported by the specification | todo |  |  |
-| DVB-91 | Tier used for HEVC must be suported by the specification | todo |  |  |
-| DVB-92 | Bit depth used for HEVC must be suported by the specification | todo |  |  |
-| DVB-93 | Profile used for HEVC must be suported by the specification | todo |  |  |
-| DVB-94 | Level used for HEVC must be suported by the specification | todo |  |  |
-| DVB-95 | `5.1.2`: Segments shall start with SAP types 1 or 2 | partial | SEG-SAP | dashcheck requires a sync sample only when @startWithSAP is 1 or 2 |
+| DVB-86 | `4.5`: Each subsegment shall have a duration of not more than 15 seconds | done | SEG-DVB-DURATION |  |
+| DVB-87 | `4.5`: Each subsegment shall be at least 1 second | done | SEG-DVB-DURATION | the last segment of a Period may be shorter |
+| DVB-88 | The codec should be supported by the specification | done | SEG-DVB-CODEC |  |
+| DVB-89 | Profile used for AVC must be suported by the specification | done | SEG-DVB-AVC | TS 103 285 5.1.1 asks each Period to include video for avc_hd_50_level40 or avc_hd_60_level40 (Main or High up to level 4.0, TS 101 154 table L.1); upstream requires every Representation to be High profile (bug 38). A warning, since the spec allows other device targets |
+| DVB-90 | Level used for AVC must be suported by the specification | done | SEG-DVB-AVC | checked per Period with DVB-89; upstream allows only levels 3.0, 3.2, 4.0 and 4.1 in every Representation (bug 38) |
+| DVB-91 | Tier used for HEVC must be suported by the specification | done | SEG-DVB-HEVC | TS 103 285 5.2.3: at least one Representation per Period fits an HEVC conformance point of TS 101 154 table L.1 (Main tier); upstream rejects high tier in every Representation (bug 41) |
+| DVB-92 | Bit depth used for HEVC must be suported by the specification | done | SEG-DVB-HEVC-SPS | per TS 101 154 L.3.3.2: Main profile 8-bit, Main 10 8 or 10 bits with equal chroma depth, progressive frames; upstream accepts 8 or 10 bits for any profile (bug 41) |
+| DVB-93 | Profile used for HEVC must be suported by the specification | done | SEG-DVB-HEVC | checked per Period with DVB-91; upstream rejects Main profile above 1080p although hevc_uhd allows it (bug 41) |
+| DVB-94 | Level used for HEVC must be suported by the specification | done | SEG-DVB-HEVC | checked per Period with DVB-91; levels 4.1 up to 1080p, 5.2 up to 2160p and 6.1 up to 4320p; upstream rejects 5.2 and 6.1 (bug 41) |
+| DVB-95 | `5.1.2`: Segments shall start with SAP types 1 or 2 | done | SEG-DVB-SAP, SEG-SAP |  |
 | DVB-96 | `5.2.4`: For HEVC streams, SEI messages are placed according to ETSI TS 101 154 - L.3.3.8 | todo |  |  |
 | DVB-97 | `5.2.4`: For VVC streams, SEI messages are placed according to ETSI TS 101 154 - 5.15.1 | todo |  |  |
-| DVB-98 | `Subtitles`: For subtitle media, handler SHALL be 'subt' | todo |  |  |
-| DVB-99 | `Subtitles`: Sample entry shall be 'stpp' | todo |  |  |
-| DVB-100 | `Subtitles`: Sample entry shall countain a namespace | todo |  |  |
-| DVB-101 | `4.3`: Initialization segment for Representations with an Adaptation Set SHALL have the same … | todo |  |  |
-| DVB-102 | `4.3`: Initialization segment for Representations with an Adaptation Set SHALL have the same … | todo |  |  |
-| DVB-103 | `8.3`: Initialization segment for Representations with an Adaptation Set SHALL have the same … | todo |  |  |
+| DVB-98 | `Subtitles`: For subtitle media, handler SHALL be 'subt' | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |
+| DVB-99 | `Subtitles`: Sample entry shall be 'stpp' | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |
+| DVB-100 | `Subtitles`: Sample entry shall countain a namespace | done | SEG-DVB-SUBTITLE | upstream only checks @codecs equal to stpp |
+| DVB-101 | `4.3`: Initialization segment for Representations with an Adaptation Set SHALL have the same … | done | SEG-DVB-SWITCHABLE |  |
+| DVB-102 | `4.3`: Initialization segment for Representations with an Adaptation Set SHALL have the same … | done | SEG-DVB-SWITCHABLE |  |
+| DVB-103 | `8.3`: Initialization segment for Representations with an Adaptation Set SHALL have the same … | done | SEG-DVB-SWITCHABLE |  |
 
 ## Module: HbbTV
 

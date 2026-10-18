@@ -47,6 +47,9 @@ func TestDVBRules(t *testing.T) {
 		{"e-ac-3 mpeg scheme", `codecs="mp4a.40.2"`, `codecs="ec-3"`, []string{"MPD-DVB-AUDIO"}},
 		{"high audio share", `bandwidth="128000"`, `bandwidth="512000"`, []string{"MPD-DVB-AUDIO-SHARE"}},
 		{"unsupported codec", `codecs="mp4a.40.2"`, `codecs="opus"`, []string{"MPD-DVB-CODEC"}},
+		{"drm without generic cp", `<Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			`<ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"/><Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			[]string{"MPD-DVB-CP"}},
 		{"font on video", `<SegmentTemplate timescale="1000" duration="2000" media="$RepresentationID$/$Number$.m4s" initialization="$RepresentationID$/init.mp4"/>
       <Representation id="v1"`, `<SupplementalProperty schemeIdUri="urn:dvb:dash:fontdownload:2014" value="1"/>
       <SegmentTemplate timescale="1000" duration="2000" media="$RepresentationID$/$Number$.m4s" initialization="$RepresentationID$/init.mp4"/>

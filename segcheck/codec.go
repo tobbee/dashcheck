@@ -17,6 +17,8 @@ type sampleEntryInfo struct {
 	encrypted  bool
 	scheme     string // protection scheme type, e.g. cenc or cbcs
 	colrNclx   bool   // a colr box of type nclx is present
+	defaultKID string // tenc default KID of encrypted content
+	stppNS     string // namespace of an stpp sample entry
 	codec      string // full codecs string if it can be derived, else the 4CC
 	derived    bool   // codec is a full derived string
 	width      uint16
@@ -34,7 +36,12 @@ type videoConfig struct {
 	hasSPS, hasPPS bool
 	hasVPS         bool // HEVC only
 	profile, level int
-	highTier       bool // HEVC general_tier_flag
+	constraints    uint64 // AVC constraint_set flags or HEVC general_constraint_indicator_flags
+	compatibility  uint32 // HEVC general_profile_compatibility_flags
+	highTier       bool   // HEVC general_tier_flag
+	bitDepth       int    // HEVC luma bit depth
+	chromaBitDepth int    // HEVC chroma bit depth
+	width, height  int    // from the sample entry
 
 	// From the SPS video usability information.
 	colourDescribed             bool
@@ -64,6 +71,9 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 			if se.Sinf.Schm != nil {
 				info.scheme = se.Sinf.Schm.SchemeType
 			}
+			if se.Sinf.Schi != nil && se.Sinf.Schi.Tenc != nil {
+				info.defaultKID = se.Sinf.Schi.Tenc.DefaultKID.String()
+			}
 		}
 		for _, c := range se.Children {
 			if colr, ok := c.(*mp4.ColrBox); ok && colr.ColorType == "nclx" {
@@ -82,9 +92,16 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 			if se.Sinf.Schm != nil {
 				info.scheme = se.Sinf.Schm.SchemeType
 			}
+			if se.Sinf.Schi != nil && se.Sinf.Schi.Tenc != nil {
+				info.defaultKID = se.Sinf.Schi.Tenc.DefaultKID.String()
+			}
 		}
 		info.codec, info.derived = audioCodec(info.fourCC, se)
 		info.aac = describeAAC(se)
+	case *mp4.StppBox:
+		info.fourCC = se.Type()
+		info.codec = info.fourCC
+		info.stppNS = se.Namespace
 	default:
 		info.fourCC = stsd.Children[0].Type()
 		info.codec = info.fourCC
@@ -118,7 +135,8 @@ func describeVideoConfig(se *mp4.VisualSampleEntryBox) videoConfig {
 	switch {
 	case se.AvcC != nil:
 		vc = videoConfig{codec: "avc", hasConfig: true, hasSPS: len(se.AvcC.SPSnalus) > 0, hasPPS: len(se.AvcC.PPSnalus) > 0,
-			profile: int(se.AvcC.AVCProfileIndication), level: int(se.AvcC.AVCLevelIndication)}
+			profile: int(se.AvcC.AVCProfileIndication), level: int(se.AvcC.AVCLevelIndication),
+			constraints: uint64(se.AvcC.ProfileCompatibility)}
 		if vc.hasSPS {
 			if sps, err := avc.ParseSPSNALUnit(se.AvcC.SPSnalus[0], true); err == nil && sps.VUI != nil {
 				v := sps.VUI
@@ -133,12 +151,16 @@ func describeVideoConfig(se *mp4.VisualSampleEntryBox) videoConfig {
 		}
 	case se.HvcC != nil:
 		vc = videoConfig{codec: "hevc", hasConfig: true,
-			hasVPS:   len(se.HvcC.GetNalusForType(hevc.NALU_VPS)) > 0,
-			hasSPS:   len(se.HvcC.GetNalusForType(hevc.NALU_SPS)) > 0,
-			hasPPS:   len(se.HvcC.GetNalusForType(hevc.NALU_PPS)) > 0,
-			profile:  int(se.HvcC.GeneralProfileIDC),
-			level:    int(se.HvcC.GeneralLevelIDC),
-			highTier: se.HvcC.GeneralTierFlag,
+			hasVPS:         len(se.HvcC.GetNalusForType(hevc.NALU_VPS)) > 0,
+			hasSPS:         len(se.HvcC.GetNalusForType(hevc.NALU_SPS)) > 0,
+			hasPPS:         len(se.HvcC.GetNalusForType(hevc.NALU_PPS)) > 0,
+			profile:        int(se.HvcC.GeneralProfileIDC),
+			level:          int(se.HvcC.GeneralLevelIDC),
+			highTier:       se.HvcC.GeneralTierFlag,
+			bitDepth:       int(se.HvcC.BitDepthLumaMinus8) + 8,
+			chromaBitDepth: int(se.HvcC.BitDepthChromaMinus8) + 8,
+			constraints:    se.HvcC.GeneralConstraintIndicatorFlags,
+			compatibility:  se.HvcC.GeneralProfileCompatibilityFlags,
 		}
 		var sei []string
 		for _, n := range append(se.HvcC.GetNalusForType(hevc.NALU_SEI_PREFIX), se.HvcC.GetNalusForType(hevc.NALU_SEI_SUFFIX)...) {
@@ -160,6 +182,7 @@ func describeVideoConfig(se *mp4.VisualSampleEntryBox) videoConfig {
 			}
 		}
 	}
+	vc.width, vc.height = int(se.Width), int(se.Height)
 	return vc
 }
 

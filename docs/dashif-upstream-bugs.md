@@ -50,6 +50,10 @@ yet unless stated.
 | 35 | DVB SCTEChecks | Optional @presentationTimeOffset required | Verified in code |
 | 36 | DVB SCTEChecks | Indefinite @duration never detected | Verified in code |
 | 37 | DVB SCTEChecks | Fractional frame rates truncated | Verified in code |
+| 38 | DVB LegacyCodecs | AVC profile and level required of every Representation | Found by testing, verified in spec |
+| 39 | DVB Subtitle | Skips stpp with codecs parameters | Verified in code |
+| 40 | DVB CrossAudio | Channel count fails with other schemes | Verified in code |
+| 41 | DVB LegacyCodecs | HEVC tier, profile, level and bit depth rules do not match the spec | Verified in code and spec |
 
 ## Manifest handling
 
@@ -515,6 +519,70 @@ attribute is an unsigned integer, written `4294967295`.
 **Effect:** The "@timescale is a multiple of the frame rate" check is wrong for fractional frame rates.
 
 **Fix:** Evaluate the fraction.
+
+### 38. AVC profile and level are required of every Representation
+
+**Where:** [LegacyCodecs.php#L107](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/LegacyCodecs.php#L107) and [#L116](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/LegacyCodecs.php#L116)
+
+**Problem:** Every AVC Representation must be exactly High profile (100) at
+level 3.0, 3.2, 4.0 or 4.1. ETSI TS 103 285 V1.4.1 clause 5.1.1 instead
+requires that an MPD with AVC video *includes* content compatible with the
+avc_hd_50_level40 or avc_hd_60_level40 player conformance points, which
+ETSI TS 101 154 table L.1 defines as Main and High profile up to level 4.0,
+"unless targeting devices that are known to support other capabilities".
+Other Representations are not restricted.
+
+**Effect:** The BBC DVB-DASH test card
+(`https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-full.mpd`) fails for its
+Main and Constrained Baseline Representations, levels 2.1 and 3.1, and level 4.2
+for 1080p50, although it also offers High profile level 4.0.
+
+**Fix:** Per Period, check that at least one AVC Representation is Main or High
+profile (or sets constraint_set1_flag, as Constrained Baseline does) at level
+4.0 or lower, and report a warning otherwise because of the device exception.
+
+### 39. The stpp subtitle checks skip @codecs with parameters
+
+**Where:** [Subtitle.php#L60](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/Subtitle.php#L60)
+
+**Problem:** The checks run only when @codecs equals `stpp`.
+
+**Effect:** `stpp.ttml.im1t` and similar values are not checked.
+
+**Fix:** Use `str_starts_with($codecs, 'stpp')`.
+
+### 40. The channel count check fails with other channel configuration schemes
+
+**Where:** [CrossAudio.php](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/CrossAudio.php)
+
+**Problem:** The MPD channel count is read only from the
+`urn:mpeg:dash:23003:3:audio_channel_configuration:2011` scheme and is empty otherwise.
+
+**Effect:** Audio with another scheme (for example Dolby or MPEG cicp) fails.
+
+**Fix:** Compare only when that scheme is used, or map the other schemes to channel counts.
+
+### 41. The HEVC tier, profile, level and bit depth rules do not match the spec
+
+**Where:** [LegacyCodecs.php#L124-L172](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/DVB/Segments/LegacyCodecs.php#L124-L172)
+
+**Problem:** Every HEVC Representation must be Main tier, 8 or 10 bits, Main 10
+profile (Main only up to 1920x1080) and level 4.1 up to 1080p or 5.1 above.
+ETSI TS 103 285 V1.4.1 clause 5.2.3 only requires that the MPD *includes*
+content for at least one HEVC player conformance point of ETSI TS 101 154
+table L.1, and those allow Main profile up to level 5.1 at 2160p (hevc_uhd),
+level 5.2 for high frame rates and level 6.1 at 4320p. The bit depth rule of
+TS 101 154 clause L.3.3.2, which applies to every Representation, depends on the
+profile: Main profile must be 8-bit, and Main 10 must have equal luma and
+chroma bit depths of 8 or 10. The same clause requires progressive frames
+(general_progressive_source_flag 1, general_interlaced_source_flag 0,
+general_frame_only_constraint_flag 1), which is not checked.
+
+**Effect:** Valid UHD Main profile, HFR and 8K content fails; Main profile
+10-bit content and interlaced content pass.
+
+**Fix:** Check the conformance points once per Period (warning, as for AVC),
+and check bit depth by profile and the progressive flags per Representation.
 
 ## Other projects
 

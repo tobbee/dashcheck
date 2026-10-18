@@ -73,7 +73,7 @@ var (
 	})
 	RuleDVBContentProtection = report.Register(report.Rule{
 		ID: "MPD-DVB-CP", Severity: report.Error,
-		Desc: "DVB ContentProtection descriptors must be on the AdaptationSet", SpecRef: refDVB + " 8.3",
+		Desc: "DVB ContentProtection descriptors must be on the AdaptationSet and include the mp4protection descriptor", SpecRef: refDVB + " 8.3",
 	})
 	RuleDVBEvent = report.Register(report.Rule{
 		ID: "MPD-DVB-EVENT", Severity: report.Error,
@@ -199,6 +199,12 @@ func dvbRules(md *m.MPD, raw *rawElem, size int, mpdURL string) []report.Finding
 						f = append(f, RuleDVBFont.New(loc, "downloadable font descriptor on a %s AdaptationSet", ct))
 					}
 				}
+			}
+			// DVB-75
+			if len(as.ContentProtections) > 0 && !slices.ContainsFunc(as.ContentProtections, func(cp *m.ContentProtectionType) bool {
+				return cp.SchemeIdUri == "urn:mpeg:dash:mp4protection:2011"
+			}) {
+				f = append(f, RuleDVBContentProtection.New(loc, "ContentProtection without the generic urn:mpeg:dash:mp4protection:2011 descriptor"))
 			}
 			switch ct {
 			case "audio":
