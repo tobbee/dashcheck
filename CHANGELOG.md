@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sequence_number per segment, shared by its chunks and increasing (SEG-SEQUENCE-NUMBER).
 - MPD-DVB-SCTE-BINARY: an SCTE-35 event must carry a base64 splice_info_section in its
   Signal/Binary element.
+- SEG-CMAF-CHUNK (one traf with one trun per moof) and SEG-CMAF-SAP (video CMAF fragments start
+  with a sync sample). The CMAF rules now also apply to low-latency chunked Representations.
 
 ## [0.1.2] - 2026-10-19
 

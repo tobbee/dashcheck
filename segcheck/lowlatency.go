@@ -52,6 +52,12 @@ var (
 	})
 )
 
+// llChunked reports whether a Representation is low-latency chunked: with
+// @availabilityTimeOffset or @availabilityTimeComplete false (9.X.4.5).
+func llChunked(rep *addressing.Rep) bool {
+	return rep.LowLatency && (rep.ATO > 0 || (rep.ATC != nil && !*rep.ATC))
+}
+
 func llInitRules(rep *addressing.Rep, init *Init, loc report.Location) []report.Finding {
 	if !rep.LowLatency {
 		return nil
@@ -84,10 +90,9 @@ func llMediaRules(rep *addressing.Rep, media *Media, mf *mp4.File, mediaTS float
 			brands = append([]string{ms.Styp.MajorBrand()}, ms.Styp.CompatibleBrands()...)
 		}
 	}
-	chunked := rep.ATO > 0 || (rep.ATC != nil && !*rep.ATC)
 	dur := float64(media.Duration) / mediaTS
 	target := rep.TargetLatency
-	if chunked {
+	if llChunked(rep) {
 		// LL-14
 		if moofs < 2 && !last {
 			f = append(f, RuleLLChunks.New(loc, "chunked segment with %d chunk", moofs))

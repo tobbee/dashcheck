@@ -861,6 +861,7 @@ Found during the same work in projects that dashcheck builds on or tests with.
 | dash-mpd | An absent `@indexRangeExact` cannot be told from `false`. |
 | [livesim2](https://github.com/Dash-Industry-Forum/livesim2) | In SegmentTimeline mode, audio segments of up to 2.005333 s exceed `maxSegmentDuration="PT2S"`. |
 | livesim2 | The test asset `cmd/livesim2/app/testdata/assets/testpic_2s/Manifest.mpd` has `DASH-MPD.xsd"bprofiles=` (malformed XML) since commit d6fd0a2. |
+| livesim2 | The low-latency `testpic4_8s` video has trun version 1 and an offset edit list (media_time 1024). ISO/IEC 23000-19 9.2.5 forbids both together, and DASH-IF low-latency 9.X.4.5 requires CMAF fragments. |
 | livesim2 | With `continuous_1`, the period-continuity descriptors have `value="1"` instead of the @id of the earlier Period, and the AdaptationSets have no @id (ISO/IEC 23009-1 5.3.2.4 needs both). The first Period also carries the descriptor. |
 | CTA WAVE test content | The cenc vectors (for example `clg1_sets/12.5_25_50/t41-cenc/2025-01-15`) use 16-byte IVs; ISO/IEC 23000-19 8.2.3.1 (DIS text) limits cenc IVs to 8 bytes. |
 | BBC test card | The live test card's subtitle initialization segments (`testcard2020/*-subs/IS.mp4`) have an 8-byte 'sthd' box without the FullBox version and flags, so mp4ff cannot parse them. |

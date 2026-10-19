@@ -12,13 +12,13 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: Common | 5 | 4 | 0 | 0 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
-| Module: Low Latency | 54 | 49 | 4 | 0 | 1 |
+| Module: Low Latency | 54 | 50 | 3 | 0 | 1 |
 | Module: DVB | 103 | 95 | 1 | 5 | 2 |
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 18 | 1 | 0 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **380** | **6** | **5** | **17** |
+| **Total** | **408** | **381** | **5** | **5** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -261,7 +261,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-9 | `9.X.4.3`: SegmentTimeline will have @media containing $Number$ and $Time$ | done | MPD-LL-ADDRESSING | upstream reads @media from SegmentTimeline and requires both $Number$ and $Time$, so it never passes |
 | LL-10 | `9.X.4.2`: At least one valid ServiceDescription element SHALL be present | done | MPD-LL-SERVICEDESC, MPD-LL-SERVICEDESC-OPTIONAL |  |
 | LL-11 | `9.X.4.2`: At least one UTC timing description element SHALL be present with a correct @schemIdUri | done | MPD-LL-UTCTIMING |  |
-| LL-12 | `9.X.4.5`: Each Segment SHALL Conform to a CMAF Fragment | partial | SEG-STRUCTURE, SEG-CMAF-DATAOFFSET | upstream always passes; dashcheck applies the CMAF fragment rules to tracks declared as CMAF |
+| LL-12 | `9.X.4.5`: Each Segment SHALL Conform to a CMAF Fragment | done | SEG-STRUCTURE, SEG-CMAF-CHUNK, SEG-CMAF-SAP, SEG-CMAF-DATAOFFSET, SEG-CONTINUITY-FRAGMENT | dashcheck applies the CMAF chunk and fragment rules to the segments of low-latency chunked Representations whatever their brands: one traf with one trun per moof, data offsets, decode time continuity, and a sync sample first in video; upstream always passes (bug 32) |
 | LL-13 | `9.X.4.5`: EMSG box constraints | done | SEG-EMSG-REPEAT | item 6 of 9.X.4.5: an emsg between moof and mdat fails parsing (SEG-PARSE); an emsg after the first moof must be repeated before the first moof of the next segment; upstream always passes |
 | LL-14 | `9.X.4.5`: Each Segment MAY (and typically SHOULD) contain more than one CMAF chunk | done | SEG-LL-CHUNKS |  |
 | LL-15 | `9.X.4.5`: A Resync element SHOULD be assigned to each Representation | done | MPD-LL-RESYNC |  |

@@ -382,7 +382,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	media.EPT = float64(minCT-init.EditOffset) / mediaTS
 	f = append(f, checkTiming(rep, seg, media, mediaTS, last, loc)...)
 	f = append(f, iopMediaRules(rep, init, media, loc)...)
-	f = append(f, cmafMediaRules(rep, init, mf, loc)...)
+	f = append(f, cmafMediaRules(rep, init, media, mf, loc)...)
 	f = append(f, cmafBrandMediaRules(rep, init, mf, loc)...)
 	f = append(f, llMediaRules(rep, media, mf, mediaTS, last, loc)...)
 	f = append(f, dvbMediaRules(rep, init, media, mf, mediaTS, last, loc)...)

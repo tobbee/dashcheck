@@ -3783,12 +3783,15 @@
    "source": "LowLatency/Segments/ChunkedAdaptation.php",
    "context": "9.X.4.5",
    "text": "Each Segment SHALL Conform to a CMAF Fragment",
-   "status": "partial",
+   "status": "done",
    "rules": [
     "SEG-STRUCTURE",
-    "SEG-CMAF-DATAOFFSET"
+    "SEG-CMAF-CHUNK",
+    "SEG-CMAF-SAP",
+    "SEG-CMAF-DATAOFFSET",
+    "SEG-CONTINUITY-FRAGMENT"
    ],
-   "note": "upstream always passes; dashcheck applies the CMAF fragment rules to tracks declared as CMAF"
+   "note": "dashcheck applies the CMAF chunk and fragment rules to the segments of low-latency chunked Representations whatever their brands: one traf with one trun per moof, data offsets, decode time continuity, and a sync sample first in video; upstream always passes (bug 32)"
   },
   {
    "id": "LL-13",

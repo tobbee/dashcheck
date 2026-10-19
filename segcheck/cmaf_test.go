@@ -1,9 +1,11 @@
 package segcheck
 
 import (
+	"bytes"
 	"slices"
 	"testing"
 
+	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/addressing"
 )
 
@@ -49,6 +51,45 @@ func TestCMAFRules(t *testing.T) {
 	}
 }
 
+// TestCMAFFragment mutates a decoded video segment: a CMAF chunk has one
+// traf with one trun, and a video CMAF fragment starts with a sync sample.
+func TestCMAFFragment(t *testing.T) {
+	video := *reps(t)[1]
+	init := &Init{CMAF: true, Handler: "vide", HasEditList: true}
+	cases := []struct {
+		name         string
+		startWithSAP uint32
+		modify       func(frag *mp4.Fragment, media *Media)
+		want         []string
+	}{
+		{"clean", 0, func(*mp4.Fragment, *Media) {}, nil},
+		{"two trun boxes", 0, func(frag *mp4.Fragment, _ *Media) {
+			_ = frag.Moof.Traf.AddChild(frag.Moof.Traf.Trun)
+		}, []string{"SEG-CMAF-CHUNK"}},
+		{"two traf boxes", 0, func(frag *mp4.Fragment, _ *Media) {
+			_ = frag.Moof.AddChild(frag.Moof.Traf)
+		}, []string{"SEG-CMAF-CHUNK"}},
+		{"starts with a non-sync sample", 0, func(_ *mp4.Fragment, media *Media) { media.FirstSync = false },
+			[]string{"SEG-CMAF-SAP"}},
+		{"non-sync start reported by SEG-SAP", 1, func(_ *mp4.Fragment, media *Media) { media.FirstSync = false }, nil},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mf, err := mp4.DecodeFile(bytes.NewReader(read(t, "V300/1.m4s")))
+			if err != nil {
+				t.Fatal(err)
+			}
+			rep := video
+			rep.StartWithSAP = c.startWithSAP
+			media := &Media{FirstSync: true}
+			c.modify(mf.Segments[0].Fragments[0], media)
+			if got := ruleIDs(cmafMediaRules(&rep, init, media, mf, rep.Loc())); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", got, c.want)
+			}
+		})
+	}
+}
+
 func TestIsCMAF(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -68,5 +109,12 @@ func TestIsCMAF(t *testing.T) {
 		if got := isCMAF(rep, c.brands); got != c.want {
 			t.Errorf("%s: isCMAF = %v, want %v", c.name, got, c.want)
 		}
+	}
+	// Low-latency chunked segments must be CMAF fragments; segment mode need not.
+	if !isCMAF(&addressing.Rep{LowLatency: true, ATO: 1.5}, nil) {
+		t.Error("low-latency chunked: not CMAF")
+	}
+	if isCMAF(&addressing.Rep{LowLatency: true}, nil) {
+		t.Error("low-latency segment mode: CMAF")
 	}
 }

@@ -53,6 +53,14 @@ var (
 		Desc:    "Each subsegment referenced by a CMAF sidx box must be a single media fragment",
 		SpecRef: refCMAF + " 7.3.3.3",
 	})
+	RuleCMAFChunk = report.Register(report.Rule{
+		ID: "SEG-CMAF-CHUNK", Severity: report.Error,
+		Desc: "Each moof of a CMAF track must contain one traf with one trun", SpecRef: refCMAF + " 7.3.2.3",
+	})
+	RuleCMAFSAP = report.Register(report.Rule{
+		ID: "SEG-CMAF-SAP", Severity: report.Error,
+		Desc: "Each video CMAF fragment must start with a sync sample (SAP type 1 or 2)", SpecRef: refCMAF + " 9.2.8",
+	})
 	RuleCMAFSubs = report.Register(report.Rule{
 		ID: "SEG-CMAF-SUBS", Severity: report.Error,
 		Desc: "Each fragment of an im1i subtitle track must contain a subs box", SpecRef: refCMAF + " 7.5.20",
@@ -64,9 +72,11 @@ var (
 )
 
 // isCMAF reports whether a track is declared as CMAF, by the CMAF profile
-// or, unless the user chose the profiles, by a CMAF brand.
+// or, unless the user chose the profiles, by a CMAF brand. The segments of
+// low-latency chunked Representations must also be CMAF fragments (DASH-IF
+// low-latency 9.X.4.5).
 func isCMAF(rep *addressing.Rep, brands []string) bool {
-	if rep.HasProfile(profileCMAF) {
+	if rep.HasProfile(profileCMAF) || llChunked(rep) {
 		return true
 	}
 	return !rep.OnlyProfiles && (slices.Contains(brands, "cmfc") || slices.Contains(brands, "cmf2"))
@@ -119,13 +129,17 @@ func checkTopLevel(boxes []mp4.Box, loc report.Location) []report.Finding {
 	return f
 }
 
-func cmafMediaRules(rep *addressing.Rep, init *Init, mf *mp4.File, loc report.Location) []report.Finding {
+func cmafMediaRules(rep *addressing.Rep, init *Init, media *Media, mf *mp4.File, loc report.Location) []report.Finding {
 	if !init.CMAF {
 		return nil
 	}
 	var f []report.Finding
 	f = append(f, checkTopLevel(mf.Children, loc)...)
 	video := init.Handler == "vide"
+	// A segment starts with a CMAF fragment. SEG-SAP reports it with @startWithSAP 1 or 2.
+	if video && !media.FirstSync && rep.StartWithSAP != 1 && rep.StartWithSAP != 2 {
+		f = append(f, RuleCMAFSAP.New(loc, "the first sample is not a sync sample"))
+	}
 	versions := map[byte]bool{}
 	hasCTO := false
 	fragments := 0
@@ -144,7 +158,13 @@ func cmafMediaRules(rep *addressing.Rep, init *Init, mf *mp4.File, loc report.Lo
 			if frag.Moof == nil {
 				continue
 			}
+			if n := len(frag.Moof.Trafs); n > 1 {
+				f = append(f, RuleCMAFChunk.New(loc, "moof %d has %d traf boxes", fi, n))
+			}
 			for _, traf := range frag.Moof.Trafs {
+				if n := len(traf.Truns); n > 1 {
+					f = append(f, RuleCMAFChunk.New(loc, "traf in moof %d has %d trun boxes", fi, n))
+				}
 				for _, trun := range traf.Truns {
 					versions[trun.Version] = true
 					// CMAF-4
