@@ -64,6 +64,7 @@ yet unless stated.
 | 49 | HbbTV | Codec and AVC rules outdated and applied per Representation | Verified in spec |
 | 50 | Common XSDValidation | The DVB 2018 schema lacks UTCTiming | Verified in code |
 | 51 | DVB Codecs, LegacyCodecs | Codec lists lack VVC, AVS3, MPEG-H and DTS-UHD | Verified in spec |
+| 52 | CMAF Durations | First tfdt of a segment compared with every fragment | Verified in code |
 
 ## Manifest handling
 

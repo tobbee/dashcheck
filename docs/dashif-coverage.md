@@ -342,7 +342,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | DVB-31 | `Section 9.1.9`: The @value attribute SHOULD be absent | done | MPD-DVB-SCTE-VALUE |  |
 | DVB-32 | `Section 9.1.9`: The @presentationTimeOffset attribute MAY be present | n/a |  | a permissive (MAY) statement; upstream wrongly fails when the attribute is absent |
 | DVB-33 | `Section 9.1.9`: The @timeScale attribute shall be set to an integer multiple of the video framerate | done | MPD-DVB-SCTE | upstream truncates fractional frame rates |
-| DVB-34 | `Section 9.1.9`: The @presentationTime of an event SHALL be set to the splice time of the enclosed marker | partial | MPD-DVB-SCTE | like upstream, dashcheck checks that @presentationTime is present, not that it equals the splice time |
+| DVB-34 | `Section 9.1.9`: The @presentationTime of an event SHALL be set to the splice time of the enclosed marker | partial | MPD-DVB-SCTE, MPD-DVB-SCTE-BINARY | like upstream, dashcheck checks that @presentationTime is present, and that the event carries a base64 splice_info_section in Signal/Binary; the splice time is an MPEG-2 TS PTS that wraps every 26.5 hours, and the MPD does not give its relation to the media timeline, so it cannot be compared with @presentationTime |
 | DVB-35 | `Section 9.1.9`: The @duration of an event SHALL be defined [..] and SHALL NOT be 0xFFFFFFFF | done | MPD-DVB-SCTE | upstream compares with the string 0xFFFFFFFF and never detects 4294967295 |
 | DVB-36 | `Section 9.1.9`: The @messageData of an event SHALL be absent | done | MPD-DVB-SCTE |  |
 | DVB-37 | `Section 9.1.9`: The @contentEncoding of an event is absent | done | MPD-DVB-SCTE |  |

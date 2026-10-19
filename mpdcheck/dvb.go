@@ -113,6 +113,11 @@ var (
 		Desc:    "SCTE-35 event streams need a frame-rate multiple @timescale, and events a @presentationTime and a finite @duration without @messageData or @contentEncoding",
 		SpecRef: refDVB + " 9.1.9",
 	})
+	RuleDVBSCTEBinary = report.Register(report.Rule{
+		ID: "MPD-DVB-SCTE-BINARY", Severity: report.Error,
+		Desc:    "An SCTE-35 event must carry a base64 splice_info_section in Signal/Binary",
+		SpecRef: refDVB + " 9.1.9",
+	})
 	RuleDVBSCTEValue = report.Register(report.Rule{
 		ID: "MPD-DVB-SCTE-VALUE", Severity: report.Warning,
 		Desc: "SCTE-35 event streams should not have @value", SpecRef: refDVB + " 9.1.9",
@@ -565,6 +570,7 @@ func dvbRawRules(raw *rawElem, md *m.MPD) []report.Finding {
 					if ev.has("contentEncoding") {
 						f = append(f, RuleDVBSCTE.New(evLoc, "SCTE-35 event with @contentEncoding"))
 					}
+					f = append(f, scteBinaryRules(ev, evLoc)...)
 				}
 			}
 		}

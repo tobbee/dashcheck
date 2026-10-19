@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and SEG-CMF2-DEFAULTS (each chunk sets sample durations, sizes and flags, not only trex).
 - `-sequence-numbers`, also in the browser tool's options: checks the convention of one mfhd
   sequence_number per segment, shared by its chunks and increasing (SEG-SEQUENCE-NUMBER).
+- MPD-DVB-SCTE-BINARY: an SCTE-35 event must carry a base64 splice_info_section in its
+  Signal/Binary element.
 
 ## [0.1.2] - 2026-10-19
 

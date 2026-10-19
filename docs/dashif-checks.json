@@ -2583,9 +2583,10 @@
    "text": "The @presentationTime of an event SHALL be set to the splice time of the enclosed marker",
    "status": "partial",
    "rules": [
-    "MPD-DVB-SCTE"
+    "MPD-DVB-SCTE",
+    "MPD-DVB-SCTE-BINARY"
    ],
-   "note": "like upstream, dashcheck checks that @presentationTime is present, not that it equals the splice time"
+   "note": "like upstream, dashcheck checks that @presentationTime is present, and that the event carries a base64 splice_info_section in Signal/Binary; the splice time is an MPEG-2 TS PTS that wraps every 26.5 hours, and the MPD does not give its relation to the media timeline, so it cannot be compared with @presentationTime"
   },
   {
    "id": "DVB-35",

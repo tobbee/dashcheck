@@ -62,7 +62,13 @@ func TestDVBRules(t *testing.T) {
 		{"frame rates not multiples", `<Representation id="v2" bandwidth="3000000" width="1280" height="720"/>`,
 			`<Representation id="v2" bandwidth="3000000" width="1280" height="720" frameRate="30"/>`, []string{"MPD-COMMON-BOTH", "MPD-DVB-FRAMERATES"}},
 		{"scte35 stream", `<AdaptationSet id="1"`, `<EventStream schemeIdUri="urn:scte:scte35:2014:xml+bin" value="1" timescale="90000"><Event presentationTime="0" duration="4294967295" messageData="x"/></EventStream>
-    <AdaptationSet id="1"`, []string{"MPD-DVB-SCTE", "MPD-DVB-SCTE", "MPD-DVB-SCTE-VALUE"}},
+    <AdaptationSet id="1"`, []string{"MPD-DVB-SCTE", "MPD-DVB-SCTE", "MPD-DVB-SCTE-BINARY", "MPD-DVB-SCTE-VALUE"}},
+		{"scte35 binary", `<AdaptationSet id="1"`, scteStream(sampleTimeSignal) + `
+    <AdaptationSet id="1"`, nil},
+		{"scte35 binary not base64", `<AdaptationSet id="1"`, scteStream("not base64!") + `
+    <AdaptationSet id="1"`, []string{"MPD-DVB-SCTE-BINARY"}},
+		{"scte35 binary not a splice_info_section", `<AdaptationSet id="1"`, scteStream("AAAA") + `
+    <AdaptationSet id="1"`, []string{"MPD-DVB-SCTE-BINARY"}},
 		{"tv-anytime event", `<AdaptationSet id="1"`, `<EventStream schemeIdUri="urn:dvb:iptv:cpm:2014" value="1"><Event>&lt;BroadcastEvent&gt;</Event></EventStream>
     <AdaptationSet id="1"`, []string{"MPD-DVB-EVENT", "MPD-DVB-EVENT"}},
 		{"metric reporting", `<UTCTiming`, `<Metrics metrics="DVBErrors"><Reporting schemeIdUri="urn:dvb:dash:reporting:2014" value="1" reportingUrl="/report" probability="0"/></Metrics>
@@ -93,6 +99,17 @@ func TestDVBRules(t *testing.T) {
 			}
 		})
 	}
+}
+
+// sampleTimeSignal is a time_signal splice_info_section from ANSI/SCTE 35 14.
+const sampleTimeSignal = "/DA0AAAAAAAA///wBQb+cr0AUAAeAhxDVUVJSAAAjn/PAAGlmbAICAAAAAAsoKGKNAIAmsnRfg=="
+
+func scteStream(binary string) string {
+	return `<EventStream schemeIdUri="urn:scte:scte35:2014:xml+bin" timescale="90000">
+      <Event presentationTime="180000" duration="0" id="1">
+        <Signal xmlns="http://www.scte.org/schemas/35/2016"><Binary>` + binary + `</Binary></Signal>
+      </Event>
+    </EventStream>`
 }
 
 func TestDVBContinuity(t *testing.T) {
