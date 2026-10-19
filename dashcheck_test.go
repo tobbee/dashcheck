@@ -25,7 +25,7 @@ func server(t *testing.T, mpd string, override map[string]string) *httptest.Serv
 	files := http.FileServer(http.Dir(testDir))
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if mpd != "" && r.URL.Path == "/Manifest.mpd" {
-			w.Write([]byte(mpd))
+			_, _ = w.Write([]byte(mpd))
 			return
 		}
 		if target, ok := override[r.URL.Path]; ok {
@@ -142,9 +142,9 @@ func TestLiveUpdate(t *testing.T) {
 					files.ServeHTTP(w, r)
 				case fetches == 0:
 					fetches++
-					w.Write([]byte(v1))
+					_, _ = w.Write([]byte(v1))
 				default:
-					w.Write([]byte(c.v2))
+					_, _ = w.Write([]byte(c.v2))
 				}
 			}))
 			t.Cleanup(ts.Close)

@@ -49,14 +49,14 @@ func TestSync(t *testing.T) {
 	if source != "https://skewed" {
 		t.Errorf("source %s", source)
 	}
-	if d := clk.Now().Sub(time.Now()); d < 4900*time.Millisecond || d > 5100*time.Millisecond {
+	if d := time.Until(clk.Now()); d < 4900*time.Millisecond || d > 5100*time.Millisecond {
 		t.Errorf("clock offset %v", d)
 	}
 
 	// No MPD sources: follow the reference.
 	clk, source, _ = Sync(context.Background(), ff, nil, "https://ref", nil)
-	if source != "https://ref" || clk.Now().Sub(time.Now()) < 2900*time.Millisecond {
-		t.Errorf("fallback: %s %v", source, clk.Now().Sub(time.Now()))
+	if source != "https://ref" || time.Until(clk.Now()) < 2900*time.Millisecond {
+		t.Errorf("fallback: %s %v", source, time.Until(clk.Now()))
 	}
 }
 

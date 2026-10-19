@@ -120,7 +120,7 @@ func Measure(ctx context.Context, f fetch.Fetcher, scheme, value string, mpdResp
 		}
 		t, err := time.Parse(time.RFC1123, date)
 		if err != nil {
-			return nil, fmt.Errorf("Date header %q: %v", date, err)
+			return nil, fmt.Errorf("bad Date header %q from %s: %v", date, value, err)
 		}
 		// The Date header has one-second resolution; assume the middle of that second.
 		meas.Offset = t.Add(500 * time.Millisecond).Sub(midpoint(resp))

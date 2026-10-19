@@ -114,7 +114,7 @@ func CheckHLSInteropInit(rep *addressing.Rep, init *Init, loc report.Location) [
 			}
 		case "soun":
 			// 0:0 is the whole-block full-sample encryption of ISO/IEC 23001-7 10.4.1, which is the same.
-			if !(crypt == 10 && skip == 0) && !(crypt == 0 && skip == 0) {
+			if skip != 0 || (crypt != 10 && crypt != 0) {
 				f = append(f, RuleHLSEncryption.New(loc, "audio encrypt:skip pattern %d:%d, not 10:0", crypt, skip))
 			}
 		}

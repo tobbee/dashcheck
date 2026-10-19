@@ -522,7 +522,7 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 			t = *s.T
 		}
 		if s.D == 0 {
-			return nil, fmt.Errorf("S[%d] has d=0", i)
+			return nil, fmt.Errorf("SegmentTimeline S[%d] has d=0", i)
 		}
 		repeat := uint64(s.R) + 1
 		if s.R < 0 {
@@ -533,12 +533,12 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 			}
 			if limit == math.MaxUint64 {
 				if math.IsInf(to, 1) {
-					return nil, fmt.Errorf("S[%d] has negative @r in an open-ended Period", i)
+					return nil, fmt.Errorf("SegmentTimeline S[%d] has negative @r in an open-ended Period", i)
 				}
 				limit = uint64(math.Ceil(toTicks))
 			}
 			if limit <= t {
-				return nil, fmt.Errorf("S[%d] has negative @r but no room until %d", i, limit)
+				return nil, fmt.Errorf("SegmentTimeline S[%d] has negative @r but no room until %d", i, limit)
 			}
 			repeat = (limit - t + s.D - 1) / s.D
 		}
