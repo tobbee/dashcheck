@@ -74,6 +74,9 @@ self.onmessage = async (ev) => {
       case 'rules':
         reply('rules', { rules: JSON.parse(self.dashcheck.rules()) });
         break;
+      case 'version':
+        reply('version', { version: self.dashcheck.version() });
+        break;
     }
   } catch (e) {
     reply('error', { message: String(e && e.message ? e.message : e) });

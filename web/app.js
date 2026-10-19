@@ -305,6 +305,7 @@ $('rulesDialog').addEventListener('click', (ev) => {
 });
 
 updateButtons();
+call({ type: 'version' }).then((msg) => { $('version').textContent = msg.version; }, () => {});
 const initial = new URL(location.href).searchParams.get('url');
 if (initial) {
   $('url').value = initial;

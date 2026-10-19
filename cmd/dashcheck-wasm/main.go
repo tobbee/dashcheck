@@ -6,6 +6,7 @@
 //	dashcheck.check(mpdURL, optionsJSON, onProgress) -> Promise<reportJSON>
 //	dashcheck.checkData(mpdBytes, mpdURL, optionsJSON, onProgress) -> Promise<reportJSON>
 //	dashcheck.rules() -> rulesJSON
+//	dashcheck.version() -> "v0.1.0, date: 2026-10-19"
 //
 // where onProgress receives progress objects as JSON strings.
 package main
@@ -19,6 +20,7 @@ import (
 
 	"github.com/tobbee/dashcheck"
 	"github.com/tobbee/dashcheck/fetch"
+	"github.com/tobbee/dashcheck/internal"
 	"github.com/tobbee/dashcheck/report"
 )
 
@@ -37,6 +39,7 @@ func main() {
 		"check":     js.FuncOf(check),
 		"checkData": js.FuncOf(checkData),
 		"rules":     js.FuncOf(rules),
+		"version":   js.FuncOf(version),
 	}))
 	select {}
 }
@@ -103,6 +106,10 @@ func checkData(this js.Value, args []js.Value) any {
 func rules(this js.Value, args []js.Value) any {
 	b, _ := json.Marshal(report.Rules())
 	return string(b)
+}
+
+func version(this js.Value, args []js.Value) any {
+	return internal.Version()
 }
 
 func optArgs(args []js.Value, i int) (string, js.Value) {

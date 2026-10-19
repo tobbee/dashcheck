@@ -17,6 +17,7 @@ import (
 	"github.com/tobbee/dashcheck"
 	"github.com/tobbee/dashcheck/clock"
 	"github.com/tobbee/dashcheck/fetch"
+	"github.com/tobbee/dashcheck/internal"
 	"github.com/tobbee/dashcheck/report"
 )
 
@@ -54,8 +55,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 	timeout := fs.Duration("timeout", 20*time.Second, "timeout per HTTP request")
 	verbose := fs.Bool("v", false, "show progress on stderr")
 	listRules := fs.Bool("rules", false, "list all rules and exit")
+	version := fs.Bool("version", false, "print the version and exit")
 	if err := fs.Parse(args); err != nil {
 		return 2
+	}
+	if *version {
+		fmt.Fprintf(stdout, "dashcheck %s\n", internal.Version())
+		return 0
 	}
 	if *listRules {
 		printRules(stdout)
