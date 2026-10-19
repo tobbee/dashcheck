@@ -31,8 +31,8 @@ jobs:
         with:
           go-version: "1.27"
 
-      - name: Build wasm
-        run: make wasm
+      - name: Build the page
+        run: make web
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

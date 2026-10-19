@@ -1,6 +1,9 @@
 out/
 web/dashcheck.wasm
 web/wasm_exec.js
+web/logo.svg
+web/favicon.svg
+web/social-preview.png
 references/
 *.test
 

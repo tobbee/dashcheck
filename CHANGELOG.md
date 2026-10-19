@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- The browser tool shows the dashcheck logo, has a favicon, and an image for link previews.
+
 ## [0.1.0] - 2026-10-19
 
 ### Added

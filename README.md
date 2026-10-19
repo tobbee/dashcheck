@@ -1,4 +1,4 @@
-# dashcheck
+<img src="images/dashcheck-logo.svg" alt="dashcheck – MPEG-DASH conformance checker in Go" width="400">
 
 ![Test](https://github.com/tobbee/dashcheck/workflows/Go/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/tobbee/dashcheck/badge.svg?branch=main)](https://coveralls.io/github/tobbee/dashcheck?branch=main)

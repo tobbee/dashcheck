@@ -1,4 +1,4 @@
-.PHONY: all build test wasm serve coverage check pre-commit pre-commit-install codespell clean install
+.PHONY: all build test wasm web serve coverage check pre-commit pre-commit-install codespell clean install
 
 CMDS = dashcheck
 BINARIES = $(addprefix out/,$(CMDS))
@@ -25,7 +25,20 @@ wasm:
 	GOOS=js GOARCH=wasm go build -trimpath -ldflags='-s -w' -o web/dashcheck.wasm ./cmd/dashcheck-wasm
 	cp $(GOROOT)/lib/wasm/wasm_exec.js web/
 
-serve: wasm
+# web builds everything the browser tool needs in web/: the wasm, and copies
+# of wasm_exec.js and the images, which are gitignored there.
+web: wasm
+	cp images/dashcheck-logo.svg web/logo.svg
+	cp images/favico.svg web/favicon.svg
+	cp images/social-preview.png web/social-preview.png
+
+# The social preview image for link previews of the repository (upload it in
+# the GitHub settings) and of the page: the logo on its background color, in
+# the 1280x640 that GitHub asks for. Needs rsvg-convert and ImageMagick.
+images/social-preview.png: images/dashcheck-logo.svg
+	rsvg-convert -w 1200 $< | magick - -background '#0f172a' -gravity center -extent 1280x640 -strip $@
+
+serve: web
 	python3 tools/serve.py web $(PORT)
 
 coverage:
@@ -56,7 +69,7 @@ codespell: .venv/bin/codespell
 		-L repid,trun,truns,hask,anc,guidlines
 
 clean:
-	rm -rf out/ web/dashcheck.wasm web/wasm_exec.js coverage.out coverage.html coverage.txt .venv/
+	rm -rf out/ web/dashcheck.wasm web/wasm_exec.js web/logo.svg web/favicon.svg web/social-preview.png coverage.out coverage.html coverage.txt .venv/
 
 install:
 	go install $(addprefix ./cmd/,$(CMDS))
