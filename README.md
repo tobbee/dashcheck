@@ -9,6 +9,8 @@ dashcheck checks MPEG-DASH streams: the MPD, its segments, and for live
 streams the timing against a synchronized clock. The same Go code runs as a
 command-line tool and in the browser as WebAssembly.
 
+**Try it in the browser: https://tobbee.github.io/dashcheck/**
+
 It checks:
 
 * **MPD syntax:** well-formed XML and the MPEG-DASH 6th edition XML schema,
@@ -69,6 +71,9 @@ With `-json`, `-short` writes an array of reports, each with its counts.
 commit at build time.
 
 ## Browser
+
+The latest release runs at https://tobbee.github.io/dashcheck/. To run the
+browser tool locally:
 
 ```sh
 make serve   # builds web/dashcheck.wasm and serves web/ on http://localhost:8080 (localhost only)
