@@ -69,6 +69,8 @@ and must not be committed or quoted at length:
   conformance points and bitstream rules; `DVB/`)
 - `dashif-cr-low-latency-live-r8.txt` (DASH-IF low latency, clauses 9.X; `DASH-IF/`)
 - `cta-5001-f.txt` (CTA WAVE; `CTA/WAVE/`), `iso-23000-19-2024-amd1.txt` (CMAF amendment)
+- `iso-23000-19-2023-fdis.txt` (CMAF 3rd edition FDIS; `MPEG/23000-19 CMAF/`) and
+  `iso-14496-12-2022.txt` (ISO BMFF; `SIS/.../SS-ISO_IEC 14496-12_2022.pdf`)
 
 Find a clause with `grep -n` and read around it with `sed -n`. Extract more
 documents the same way when a rule needs them.
