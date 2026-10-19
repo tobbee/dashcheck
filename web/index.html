@@ -70,11 +70,13 @@
     </section>
   </main>
 
-  <dialog id="rulesDialog">
+  <dialog id="rulesDialog" aria-labelledby="rulesTitle">
     <div class="dialog-head">
-      <h2>Rules</h2>
+      <h2 id="rulesTitle">Rules</h2>
+      <input id="rulesFilter" type="search" placeholder="Filter, e.g. sidx or DVB" aria-label="Filter rules">
       <button id="closeRules" type="button" aria-label="Close">×</button>
     </div>
+    <nav id="rulesGroups" class="rules-groups" aria-label="Rule groups"></nav>
     <div id="rulesList"></div>
   </dialog>
 

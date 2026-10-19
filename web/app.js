@@ -5,6 +5,7 @@ const worker = new Worker('worker.js');
 let nextID = 1;
 let current = 0; // id of the running check
 let rules = null; // rule ID -> rule
+let ruleList = []; // rules in display order, grouped
 const pending = new Map(); // id -> {resolve, reject}
 
 worker.onmessage = (ev) => {
@@ -41,6 +42,7 @@ function options() {
 async function loadRules() {
   if (!rules) {
     const msg = await call({ type: 'rules' });
+    ruleList = msg.rules;
     rules = Object.fromEntries(msg.rules.map((r) => [r.id, r]));
   }
   return rules;
@@ -241,16 +243,66 @@ for (const a of document.querySelectorAll('[data-url]')) {
   });
 }
 
+// renderRules lists the rules under a heading per group, with links to the
+// groups at the top.
+function renderRules() {
+  const groups = [];
+  for (const r of ruleList) {
+    if (!groups.length || groups[groups.length - 1].name !== r.group) groups.push({ name: r.group, rules: [] });
+    groups[groups.length - 1].rules.push(r);
+  }
+  const bodies = groups.map((g, i) => el('tbody', { id: `rules-group-${i}` },
+    el('tr', { class: 'group' }, el('th', { colspan: '3' }, g.name, el('span', { class: 'count' }, String(g.rules.length)))),
+    ...g.rules.map((x) => el('tr', { class: 'rule-row', 'data-text': `${x.id} ${x.desc} ${x.specRef || ''}`.toLowerCase() },
+      el('td', {}, x.id),
+      el('td', {}, el('span', { class: `sev ${x.severity}` }, x.severity)),
+      el('td', {}, x.desc, x.specRef ? el('div', { class: 'ref' }, x.specRef) : null)))));
+  $('rulesList').replaceChildren(el('table', {}, ...bodies));
+  $('rulesGroups').replaceChildren(...groups.map((g, i) => {
+    const a = el('a', { href: `#rules-group-${i}` }, g.name);
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      $(`rules-group-${i}`).scrollIntoView({ block: 'start' });
+    });
+    return a;
+  }));
+}
+
+// filterRules hides the rules that do not contain the filter text, and the
+// groups and group links that have none left.
+function filterRules() {
+  const q = $('rulesFilter').value.trim().toLowerCase();
+  document.querySelectorAll('#rulesList tbody').forEach((body, i) => {
+    let n = 0;
+    for (const row of body.querySelectorAll('.rule-row')) {
+      const hit = !q || row.dataset.text.includes(q);
+      row.hidden = !hit;
+      if (hit) n++;
+    }
+    body.hidden = n === 0;
+    body.querySelector('.count').textContent = String(n);
+    $('rulesGroups').children[i].hidden = n === 0;
+  });
+}
+
 $('showRules').addEventListener('click', async () => {
-  const r = await loadRules();
-  const rows = Object.values(r).map((x) => el('tr', {},
-    el('td', {}, x.id), el('td', {}, x.severity), el('td', {}, x.desc, x.specRef ? el('div', { class: 'ref' }, x.specRef) : null)));
-  $('rulesList').replaceChildren(el('table', {},
-    el('thead', {}, el('tr', {}, el('th', {}, 'Rule'), el('th', {}, 'Severity'), el('th', {}, 'Description'))),
-    el('tbody', {}, ...rows)));
+  await loadRules();
+  if (!$('rulesList').firstChild) renderRules();
+  $('rulesFilter').value = '';
+  filterRules();
   $('rulesDialog').showModal();
+  $('rulesList').scrollTop = 0;
 });
+$('rulesFilter').addEventListener('input', filterRules);
 $('closeRules').addEventListener('click', () => $('rulesDialog').close());
+// A click on the backdrop closes the dialog. Clicks inside it, also on its
+// padding, and keyboard activation of its buttons do not.
+$('rulesDialog').addEventListener('click', (ev) => {
+  const d = ev.currentTarget;
+  if (ev.target !== d) return;
+  const r = d.getBoundingClientRect();
+  if (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom) d.close();
+});
 
 updateButtons();
 const initial = new URL(location.href).searchParams.get('url');

@@ -66,6 +66,45 @@ type Rule struct {
 	Severity Severity `json:"severity"`
 	Desc     string   `json:"desc"`
 	SpecRef  string   `json:"specRef,omitempty"`
+	Group    string   `json:"group"` // set by Register from the ID, one of Groups
+}
+
+// Groups are the rule groups in display order.
+var Groups = []string{
+	"MPD syntax", "MPD", "MPD updates", "Segment addressing", "Segments", "Live timing and HTTP",
+	"DASH-IF IOP", "CMAF", "Low latency", "DVB-DASH", "HbbTV", "Dolby AC-4", "CTA WAVE",
+	"DASH-HLS interoperability (CTA-5005)",
+}
+
+// profileGroups maps the second part of an ID such as SEG-DVB-SAP to a group.
+var profileGroups = map[string]string{
+	"IOP": "DASH-IF IOP", "CMAF": "CMAF", "LL": "Low latency", "EMSG": "Low latency", "DVB": "DVB-DASH",
+	"HBBTV": "HbbTV", "AC4": "Dolby AC-4", "WAVE": "CTA WAVE", "HLS": "DASH-HLS interoperability (CTA-5005)",
+	"UPDATE": "MPD updates",
+}
+
+// groupOf derives the group of a rule from its ID.
+func groupOf(id string) string {
+	parts := strings.Split(id, "-")
+	if len(parts) > 1 {
+		if g, ok := profileGroups[parts[1]]; ok {
+			return g
+		}
+	}
+	switch parts[0] {
+	case "MPD":
+		if len(parts) > 1 && (parts[1] == "XML" || parts[1] == "XSD" || parts[1] == "PARSE") {
+			return "MPD syntax"
+		}
+		return "MPD"
+	case "ADDR":
+		return "Segment addressing"
+	case "INIT", "SEG", "XCHK":
+		return "Segments"
+	case "LIVE", "HTTP", "CLOCK":
+		return "Live timing and HTTP"
+	}
+	return "Other"
 }
 
 // Location points at where a finding applies.
@@ -169,11 +208,15 @@ func Register(r Rule) *Rule {
 	if _, ok := registry[r.ID]; ok {
 		panic("duplicate rule ID " + r.ID)
 	}
+	if r.Group == "" {
+		r.Group = groupOf(r.ID)
+	}
 	registry[r.ID] = &r
 	return &r
 }
 
-// Rules returns all registered rules sorted by ID.
+// Rules returns all registered rules sorted by group, in the order of
+// Groups, and then by ID.
 func Rules() []Rule {
 	registryMu.Lock()
 	defer registryMu.Unlock()
@@ -181,8 +224,25 @@ func Rules() []Rule {
 	for _, r := range registry {
 		rules = append(rules, *r)
 	}
-	slices.SortFunc(rules, func(a, b Rule) int { return strings.Compare(a.ID, b.ID) })
+	slices.SortFunc(rules, func(a, b Rule) int {
+		if c := cmpGroup(a.Group, b.Group); c != 0 {
+			return c
+		}
+		return strings.Compare(a.ID, b.ID)
+	})
 	return rules
+}
+
+// cmpGroup orders groups as in Groups, with unknown groups last.
+func cmpGroup(a, b string) int {
+	ia, ib := slices.Index(Groups, a), slices.Index(Groups, b)
+	if ia < 0 {
+		ia = len(Groups)
+	}
+	if ib < 0 {
+		ib = len(Groups)
+	}
+	return ia - ib
 }
 
 // Report is the result of checking one MPD.

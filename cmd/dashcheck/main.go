@@ -170,7 +170,15 @@ func printReport(w io.Writer, rpt *report.Report, shown []report.Finding) {
 }
 
 func printRules(w io.Writer) {
+	group := ""
 	for _, r := range report.Rules() {
+		if r.Group != group {
+			if group != "" {
+				fmt.Fprintln(w)
+			}
+			group = r.Group
+			fmt.Fprintf(w, "%s\n", group)
+		}
 		ref := ""
 		if r.SpecRef != "" {
 			ref = " (" + r.SpecRef + ")"

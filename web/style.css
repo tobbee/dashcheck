@@ -139,14 +139,50 @@ dialog {
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 16px;
+  padding: 0;
 }
+dialog[open] { display: flex; flex-direction: column; overflow: hidden; }
 dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
-.dialog-head { display: flex; justify-content: space-between; align-items: center; }
+.dialog-head { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .dialog-head h2 { margin: 0; }
+#rulesFilter { flex: 1; min-width: 0; }
+.dialog-head, .rules-groups { flex-shrink: 0; }
+.rules-groups { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.rules-groups a {
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.rules-groups a:hover { border-color: var(--accent); color: var(--accent); }
+#rulesList { overflow: auto; padding: 0 16px 16px; }
 #rulesList table { width: 100%; border-collapse: collapse; font-size: 14px; }
-#rulesList td, #rulesList th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+#rulesList td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
 #rulesList td:first-child { font-family: var(--mono); white-space: nowrap; }
+#rulesList tr.group th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--card);
+  text-align: left;
+  font-size: 15px;
+  padding: 18px 8px 6px;
+  border-bottom: 2px solid var(--text);
+}
+#rulesList tr.group .count { margin-left: 8px; color: var(--muted); font-weight: normal; font-size: 13px; }
+#rulesList [hidden] { display: none !important; }
+
+@media (max-width: 600px) {
+  .rules-groups { flex-wrap: nowrap; overflow-x: auto; }
+  .rules-groups a { white-space: nowrap; }
+  #rulesList table, #rulesList tbody, #rulesList tr.group, #rulesList tr.group th { display: block; }
+  #rulesList tr.rule-row { display: grid; grid-template-columns: 1fr auto; border-bottom: 1px solid var(--border); padding: 4px 0; }
+  #rulesList tr.rule-row td { border: none; padding: 2px 8px; }
+  #rulesList tr.rule-row td:first-child { white-space: normal; overflow-wrap: anywhere; }
+  #rulesList tr.rule-row td:nth-child(3) { grid-column: 1 / -1; }
+}
 
 @media (max-width: 600px) {
   .finding { grid-template-columns: 1fr; }

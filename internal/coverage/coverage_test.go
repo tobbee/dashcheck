@@ -3,6 +3,7 @@ package coverage
 import (
 	"flag"
 	"os"
+	"slices"
 	"testing"
 
 	_ "github.com/tobbee/dashcheck" // registers all rules
@@ -24,6 +25,9 @@ func TestInventory(t *testing.T) {
 	known := map[string]bool{}
 	for _, r := range report.Rules() {
 		known[r.ID] = true
+		if !slices.Contains(report.Groups, r.Group) {
+			t.Errorf("rule %s has no display group (see report.groupOf)", r.ID)
+		}
 	}
 	ids := map[string]bool{}
 	for _, c := range inv.Checks {
