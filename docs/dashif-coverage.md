@@ -12,13 +12,13 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: Common | 5 | 4 | 0 | 0 | 1 |
 | Module: IOP | 15 | 14 | 0 | 0 | 1 |
 | Module: CMAF | 23 | 23 | 0 | 0 | 0 |
-| Module: Low Latency | 54 | 50 | 3 | 0 | 1 |
+| Module: Low Latency | 54 | 52 | 1 | 0 | 1 |
 | Module: DVB | 103 | 95 | 1 | 5 | 2 |
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
 | Module: WAVE HLS interop | 19 | 18 | 1 | 0 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **381** | **5** | **5** | **17** |
+| **Total** | **408** | **383** | **3** | **5** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -270,8 +270,8 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-18 | `9.X.4.5`: One of the following should hold | done | SEG-LL-DURATION-RECOMMENDED | upstream's second option is a stub that returns false; dashcheck warns when a chunked segment exceeds the target latency |
 | LL-19 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @contentType shall correspond with the hdlr type | done | XCHK-HANDLER |  |
 | LL-20 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @mimeType SHALL be either '&lt;@contentType&gt;/mp4' or &lt;#contentType&gt;/mp4, profiles='cmfc' | done | MPD-LL-MIMETYPE |  |
-| LL-21 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @maxWidth SHOULD correspond to the width in the 'tkhd' box | partial | XCHK-SIZE | dashcheck compares @width with the sample entry |
-| LL-22 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @maxHeight SHOULD correspond to the height in the 'tkhd' box | partial | XCHK-SIZE | dashcheck compares @height with the sample entry |
+| LL-21 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @maxWidth SHOULD correspond to the width in the 'tkhd' box | done | XCHK-CMAF-SIZE | dashcheck compares @maxWidth and @maxHeight with the largest tkhd size of the AdaptationSet, which the CMAF principal header has, and without them each @width and @height with its own tkhd; @width may also be on the @sar grid. The DASH profile for CMAF content applies with the CMAF profile or to low-latency chunked Representations. ISO/IEC 23009-1 8.12.4.3 says shall, so an error; upstream warns and compares @maxWidth with every track (bug 53) |
+| LL-22 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @maxHeight SHOULD correspond to the height in the 'tkhd' box | done | XCHK-CMAF-SIZE | dashcheck compares @maxWidth and @maxHeight with the largest tkhd size of the AdaptationSet, which the CMAF principal header has, and without them each @width and @height with its own tkhd; @width may also be on the @sar grid. The DASH profile for CMAF content applies with the CMAF profile or to low-latency chunked Representations. ISO/IEC 23009-1 8.12.4.3 says shall, so an error; upstream warns and compares @maxWidth with every track (bug 53) |
 | LL-23 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @codecs shall correspond with the sample descriptor type | done | XCHK-CODECS, XCHK-CODECS-DETAIL |  |
 | LL-24 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: If the content is protected, a ContentProtection element SHALL be present and set appropriately | done | SEG-LL-PROTECTION |  |
 | LL-25 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @timescale SHALL correspond to the timescale in the 'mdhd' box | done | SEG-LL-TIMESCALE |  |

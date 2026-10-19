@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Signal/Binary element.
 - SEG-CMAF-CHUNK (one traf with one trun per moof) and SEG-CMAF-SAP (video CMAF fragments start
   with a sync sample). The CMAF rules now also apply to low-latency chunked Representations.
+- XCHK-CMAF-SIZE: in the DASH profile for CMAF content, @maxWidth and @maxHeight (or @width and
+  @height) must be the tkhd size of the largest track.
 
 ## [0.1.2] - 2026-10-19
 

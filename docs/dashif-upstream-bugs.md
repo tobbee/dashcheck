@@ -65,6 +65,7 @@ yet unless stated.
 | 50 | Common XSDValidation | The DVB 2018 schema lacks UTCTiming | Verified in code |
 | 51 | DVB Codecs, LegacyCodecs | Codec lists lack VVC, AVS3, MPEG-H and DTS-UHD | Verified in spec |
 | 52 | CMAF Durations | First tfdt of a segment compared with every fragment | Verified in code |
+| 53 | Low Latency DASHProfile | @maxWidth and @maxHeight compared with every track; @width ignored | Verified in code and spec |
 
 ## Manifest handling
 
@@ -849,6 +850,26 @@ fragments are never found.
 **Fix:** Compare `$tfdtBoxes[$index]->decodeTime`, with the durations of bug 23
 fixed.
 
+### 53. @maxWidth and @maxHeight are compared with every track
+
+**Where:** [DASHProfile.php#L153-L166](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/LowLatency/Segments/DASHProfile.php#L153-L166)
+
+**Problem:** Each Representation's track width and height are compared with the
+AdaptationSet @maxWidth and @maxHeight. ISO/IEC 23009-1 8.12.4.3 requires
+"@maxWidth or @width" to be the width in the TrackHeaderBox of the CMAF
+Principal Header, which is one header for the whole Switching Set. Without
+@maxWidth, the track width is compared with an empty string. The checks are
+warnings, but the clause says "shall".
+
+**Effect:** In an AdaptationSet with several resolutions, every Representation
+but the largest fails, and an AdaptationSet with @width but no @maxWidth always
+fails (LL-21, LL-22).
+
+**Fix:** Compare @maxWidth and @maxHeight once per AdaptationSet with the tkhd
+size of the CMAF Principal Header (@initializationPrincipal, or else the
+largest track), and without them compare @width and @height. Report failures as
+errors.
+
 ## Other projects
 
 Found during the same work in projects that dashcheck builds on or tests with.
@@ -862,6 +883,7 @@ Found during the same work in projects that dashcheck builds on or tests with.
 | [livesim2](https://github.com/Dash-Industry-Forum/livesim2) | In SegmentTimeline mode, audio segments of up to 2.005333 s exceed `maxSegmentDuration="PT2S"`. |
 | livesim2 | The test asset `cmd/livesim2/app/testdata/assets/testpic_2s/Manifest.mpd` has `DASH-MPD.xsd"bprofiles=` (malformed XML) since commit d6fd0a2. |
 | livesim2 | The low-latency `testpic4_8s` video has trun version 1 and an offset edit list (media_time 1024). ISO/IEC 23000-19 9.2.5 forbids both together, and DASH-IF low-latency 9.X.4.5 requires CMAF fragments. |
+| livesim2 | `Manifest300.mpd` keeps `maxWidth="1280" maxHeight="720"` from the full ladder, but its only video Representation is 640x360. ISO/IEC 23009-1 5.3.3.2 defines @maxWidth as the largest @width of the AdaptationSet. |
 | livesim2 | With `continuous_1`, the period-continuity descriptors have `value="1"` instead of the @id of the earlier Period, and the AdaptationSets have no @id (ISO/IEC 23009-1 5.3.2.4 needs both). The first Period also carries the descriptor. |
 | CTA WAVE test content | The cenc vectors (for example `clg1_sets/12.5_25_50/t41-cenc/2025-01-15`) use 16-byte IVs; ISO/IEC 23000-19 8.2.3.1 (DIS text) limits cenc IVs to 8 bytes. |
 | BBC test card | The live test card's subtitle initialization segments (`testcard2020/*-subs/IS.mp4`) have an 8-byte 'sthd' box without the FullBox version and flags, so mp4ff cannot parse them. |

@@ -2,6 +2,7 @@ package segcheck
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/Eyevinn/mp4ff/mp4"
@@ -60,6 +61,11 @@ var (
 	RuleCMAFSAP = report.Register(report.Rule{
 		ID: "SEG-CMAF-SAP", Severity: report.Error,
 		Desc: "Each video CMAF fragment must start with a sync sample (SAP type 1 or 2)", SpecRef: refCMAF + " 9.2.8",
+	})
+	RuleCMAFSize = report.Register(report.Rule{
+		ID: "XCHK-CMAF-SIZE", Severity: report.Error,
+		Desc:    "In the DASH profile for CMAF content, @maxWidth and @maxHeight, or else @width and @height, must be the tkhd size of the CMAF principal header",
+		SpecRef: "ISO/IEC 23009-1 8.12.4.3",
 	})
 	RuleCMAFSubs = report.Register(report.Rule{
 		ID: "SEG-CMAF-SUBS", Severity: report.Error,
@@ -230,4 +236,63 @@ func cmafAdaptationSetRules(reps []*addressing.Rep, inits []*Init) []report.Find
 	slices.Sort(hs)
 	return []report.Finding{RuleCMAFSwitchingSet.New(report.Location{Path: reps[0].ASPath},
 		"tracks with different handlers: %s", strings.Join(hs, ", "))}
+}
+
+// dashCMAF reports whether the DASH profile for CMAF content applies to a
+// Representation: with the CMAF profile, or low-latency chunked (DASH-IF
+// low-latency 9.X.4.5).
+func dashCMAF(rep *addressing.Rep) bool {
+	return rep.HasProfile(profileCMAF) || llChunked(rep)
+}
+
+// cmafSizeRules checks the size attributes of a video AdaptationSet in the
+// DASH profile for CMAF content (LL-21, LL-22). @maxWidth and @maxHeight are
+// compared with the largest tkhd size of the set, which the CMAF principal
+// header has; without them, each @width and @height with its own track.
+func cmafSizeRules(reps []*addressing.Rep, inits []*Init) []report.Finding {
+	var f []report.Finding
+	var largest *Init
+	for i, rep := range reps {
+		init := inits[i]
+		if init == nil || init.Handler != "vide" || init.tkhdWidth == 0 || !dashCMAF(rep) {
+			continue
+		}
+		if largest == nil || init.tkhdWidth*init.tkhdHeight > largest.tkhdWidth*largest.tkhdHeight {
+			largest = init
+		}
+		if rep.MaxWidth == 0 && rep.Width != 0 && !widthMatches(rep.Width, init.tkhdWidth, rep.Sar) {
+			f = append(f, RuleCMAFSize.New(rep.Loc(), "@width %d, but the tkhd width is %d", rep.Width, init.tkhdWidth))
+		}
+		if rep.MaxHeight == 0 && rep.Height != 0 && rep.Height != init.tkhdHeight {
+			f = append(f, RuleCMAFSize.New(rep.Loc(), "@height %d, but the tkhd height is %d", rep.Height, init.tkhdHeight))
+		}
+	}
+	if largest == nil {
+		return f
+	}
+	as := reps[0]
+	loc := report.Location{Path: as.ASPath}
+	if as.MaxWidth != 0 && !widthMatches(as.MaxWidth, largest.tkhdWidth, as.Sar) {
+		f = append(f, RuleCMAFSize.New(loc, "@maxWidth %d, but the largest tkhd width is %d", as.MaxWidth, largest.tkhdWidth))
+	}
+	if as.MaxHeight != 0 && as.MaxHeight != largest.tkhdHeight {
+		f = append(f, RuleCMAFSize.New(loc, "@maxHeight %d, but the largest tkhd height is %d", as.MaxHeight, largest.tkhdHeight))
+	}
+	return f
+}
+
+// widthMatches reports whether a width attribute matches a tkhd width. CMAF
+// tkhd widths include the sample aspect ratio (ISO/IEC 23000-19 9.2.3), and
+// DASH widths are on the @sar grid, so both are accepted.
+func widthMatches(width, tkhd uint32, sar string) bool {
+	if width == tkhd {
+		return true
+	}
+	a, b, ok := strings.Cut(sar, ":")
+	n, err1 := strconv.ParseUint(a, 10, 32)
+	d, err2 := strconv.ParseUint(b, 10, 32)
+	if !ok || err1 != nil || err2 != nil || d == 0 {
+		return false
+	}
+	return (uint64(width)*n+d/2)/d == uint64(tkhd)
 }

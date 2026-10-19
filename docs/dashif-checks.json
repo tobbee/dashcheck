@@ -3886,22 +3886,22 @@
    "source": "LowLatency/Segments/DASHProfile.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.4",
    "text": "@maxWidth SHOULD correspond to the width in the 'tkhd' box",
-   "status": "partial",
+   "status": "done",
    "rules": [
-    "XCHK-SIZE"
+    "XCHK-CMAF-SIZE"
    ],
-   "note": "dashcheck compares @width with the sample entry"
+   "note": "dashcheck compares @maxWidth and @maxHeight with the largest tkhd size of the AdaptationSet, which the CMAF principal header has, and without them each @width and @height with its own tkhd; @width may also be on the @sar grid. The DASH profile for CMAF content applies with the CMAF profile or to low-latency chunked Representations. ISO/IEC 23009-1 8.12.4.3 says shall, so an error; upstream warns and compares @maxWidth with every track (bug 53)"
   },
   {
    "id": "LL-22",
    "source": "LowLatency/Segments/DASHProfile.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.4",
    "text": "@maxHeight SHOULD correspond to the height in the 'tkhd' box",
-   "status": "partial",
+   "status": "done",
    "rules": [
-    "XCHK-SIZE"
+    "XCHK-CMAF-SIZE"
    ],
-   "note": "dashcheck compares @height with the sample entry"
+   "note": "dashcheck compares @maxWidth and @maxHeight with the largest tkhd size of the AdaptationSet, which the CMAF principal header has, and without them each @width and @height with its own tkhd; @width may also be on the @sar grid. The DASH profile for CMAF content applies with the CMAF profile or to low-latency chunked Representations. ISO/IEC 23009-1 8.12.4.3 says shall, so an error; upstream warns and compares @maxWidth with every track (bug 53)"
   },
   {
    "id": "LL-23",

@@ -90,10 +90,12 @@ type Rep struct {
 	Codecs            string
 	Bandwidth         uint32
 	Width, Height     uint32
-	FrameRate         string
-	Sar               string
-	AudioSamplingRate string
-	StartWithSAP      uint32
+	// MaxWidth and MaxHeight are AdaptationSet@maxWidth and @maxHeight, 0 if absent.
+	MaxWidth, MaxHeight uint32
+	FrameRate           string
+	Sar                 string
+	AudioSamplingRate   string
+	StartWithSAP        uint32
 
 	Kind       Kind
 	BaseURL    string // absolute base URL for this Representation
@@ -266,6 +268,8 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 					Bandwidth:            rep.Bandwidth,
 					Width:                firstU(rep.Width, as.Width),
 					Height:               firstU(rep.Height, as.Height),
+					MaxWidth:             as.MaxWidth,
+					MaxHeight:            as.MaxHeight,
 					FrameRate:            first(string(rep.FrameRate), string(as.FrameRate)),
 					Sar:                  first(string(rep.Sar), string(as.Sar)),
 					AudioSamplingRate:    firstVec(rep.AudioSamplingRate, as.AudioSamplingRate),

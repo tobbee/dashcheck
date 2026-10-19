@@ -114,7 +114,9 @@ type Init struct {
 	DefaultKID  string   // tenc default KID of encrypted content
 	PsshSystems []string // system IDs of pssh boxes in moov
 	Channels    int      // audio channel count in the sample entry
-	cmafBrand   string   // the highest CMAF media profile brand of the track
+	tkhdWidth   uint32   // tkhd width and height, rounded to integers
+	tkhdHeight  uint32
+	cmafBrand   string // the highest CMAF media profile brand of the track
 	trex        *mp4.TrexBox
 	aac         *audioConfig // AAC AudioSpecificConfig, if any
 	tenc        *mp4.TencBox // track encryption defaults, if encrypted
@@ -152,8 +154,10 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 		return nil, append(f, RuleInitStructure.New(loc, "incomplete trak box"))
 	}
 	init := &Init{
-		TrackID:   trak.Tkhd.TrackID,
-		Timescale: trak.Mdia.Mdhd.Timescale,
+		TrackID:    trak.Tkhd.TrackID,
+		Timescale:  trak.Mdia.Mdhd.Timescale,
+		tkhdWidth:  uint32((uint64(trak.Tkhd.Width) + 0x8000) >> 16),
+		tkhdHeight: uint32((uint64(trak.Tkhd.Height) + 0x8000) >> 16),
 	}
 	if trak.Mdia.Hdlr != nil {
 		init.Handler = trak.Mdia.Hdlr.HandlerType

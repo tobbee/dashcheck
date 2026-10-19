@@ -118,3 +118,39 @@ func TestIsCMAF(t *testing.T) {
 		t.Error("low-latency segment mode: CMAF")
 	}
 }
+
+func TestCMAFSize(t *testing.T) {
+	cmaf := []string{profileCMAF}
+	cases := []struct {
+		name     string
+		profiles []string
+		maxW     uint32
+		maxH     uint32
+		sar      string
+		widths   [2]uint32 // @width of the two Representations
+		tkhd     [2][2]uint32
+		want     []string
+	}{
+		{"max size", cmaf, 1280, 720, "", [2]uint32{}, [2][2]uint32{{640, 360}, {1280, 720}}, nil},
+		{"max width too large", cmaf, 1920, 720, "", [2]uint32{}, [2][2]uint32{{640, 360}, {1280, 720}}, []string{"XCHK-CMAF-SIZE"}},
+		{"max height too small", cmaf, 1280, 360, "", [2]uint32{}, [2][2]uint32{{640, 360}, {1280, 720}}, []string{"XCHK-CMAF-SIZE"}},
+		{"max width with sar", cmaf, 1440, 1080, "4:3", [2]uint32{}, [2][2]uint32{{960, 720}, {1920, 1080}}, nil},
+		{"widths", cmaf, 0, 0, "", [2]uint32{640, 1280}, [2][2]uint32{{640, 360}, {1280, 720}}, nil},
+		{"wrong width", cmaf, 0, 0, "", [2]uint32{640, 1024}, [2][2]uint32{{640, 360}, {1280, 720}}, []string{"XCHK-CMAF-SIZE"}},
+		{"not the CMAF profile", nil, 1920, 1080, "", [2]uint32{}, [2][2]uint32{{640, 360}, {1280, 720}}, nil},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var rs []*addressing.Rep
+			var inits []*Init
+			for i := range 2 {
+				rs = append(rs, &addressing.Rep{ID: string(rune('a' + i)), ASPath: "Period[0]/AdaptationSet[0]", Profiles: c.profiles,
+					MaxWidth: c.maxW, MaxHeight: c.maxH, Sar: c.sar, Width: c.widths[i]})
+				inits = append(inits, &Init{Handler: "vide", tkhdWidth: c.tkhd[i][0], tkhdHeight: c.tkhd[i][1]})
+			}
+			if got := ruleIDs(cmafSizeRules(rs, inits)); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", got, c.want)
+			}
+		})
+	}
+}
