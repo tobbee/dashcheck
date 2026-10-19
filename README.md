@@ -1,5 +1,10 @@
 # dashcheck
 
+![Test](https://github.com/tobbee/dashcheck/workflows/Go/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/tobbee/dashcheck/badge.svg?branch=main)](https://coveralls.io/github/tobbee/dashcheck?branch=main)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tobbee/dashcheck.svg)](https://pkg.go.dev/github.com/tobbee/dashcheck)
+[![license](https://img.shields.io/github/license/tobbee/dashcheck.svg)](https://github.com/tobbee/dashcheck/blob/main/LICENSE)
+
 dashcheck checks MPEG-DASH streams: the MPD, its segments, and for live
 streams the timing against a synchronized clock. The same Go code runs as a
 command-line tool and in the browser as WebAssembly.
@@ -40,6 +45,8 @@ dashcheck -json https://example.com/stream.mpd
 ```
 
 The exit code is 1 if any error was found, which makes it usable in CI.
+`dashcheck -version` prints the version, which Go takes from the git tag and
+commit at build time.
 
 ## Browser
 
@@ -91,7 +98,24 @@ Bugs found in the DASH-IF tool while porting its checks are listed in
 
 Planned next steps:
 
-* Port the remaining DASH-IF checks (CTA WAVE, HbbTV, Dolby, the rest of DVB).
+* Port the remaining DASH-IF checks (DVB AVS3, which needs AVS3 support in mp4ff).
 * Bandwidth checks.
 * Chunk arrival timing for low-latency streams.
 * A long-running monitor mode.
+
+## Development
+
+```sh
+make             # golangci-lint, build, wasm and tests
+make coverage    # coverage.html and coverage.txt
+make codespell
+make pre-commit-install   # gofmt, golangci-lint and tests before each commit
+```
+
+Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+MIT, see [LICENSE](LICENSE). The XSD files in `schema/xsd` come from
+[MPEGGroup/DASHSchema](https://github.com/MPEGGroup/DASHSchema) under its own
+license.
