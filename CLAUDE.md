@@ -108,5 +108,13 @@ pre-commit ships in a `venv/` directory as a package.
 - dash-mpd rejects xs:duration values with years or months.
 - dash-mpd reads absent booleans and numbers as their zero value; use the raw tree.
 - mp4ff's `Sample.IsSync` requires `sample_depends_on` = 2; use `segcheck.isSync`.
+- jacoelho/xsd v0.6.4 does not check the enumeration of `xlink:actuate` with
+  the DASH schema: `xlink:actuate="bogus"` validates (xmllint rejects it),
+  while `xlink:type` and `xlink:show` fixed values are checked. A minimal
+  schema with the same xlink declarations is checked, so something else in
+  DASH-MPD.xsd triggers it. Ruled out: the attribute's default, the attribute
+  wildcard, the second import of xlink.xsd, and DASH-MPD-UP.xsd. To bisect
+  further and report upstream; `TestMutations` in `schema/` skips the case
+  and fails once it is caught.
 - When editing with scripted search and replace, remember that gofmt realigns
   struct fields and composite literals after earlier edits.
