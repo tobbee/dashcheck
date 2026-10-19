@@ -45,6 +45,7 @@ body {
 .top, main, .foot { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
 .top { padding-top: 24px; }
 h1 { margin: 0; font-size: 24px; }
+h1 .tagline { font-weight: 400; color: var(--muted); }
 .sub, .muted { color: var(--muted); }
 .sub { margin: 4px 0 16px; }
 
@@ -203,6 +204,10 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
 }
 
 @media (max-width: 600px) {
+  /* The filter gets its own row below the title and the close button. */
+  .dialog-head { flex-wrap: wrap; }
+  .dialog-head h2 { flex: 1; }
+  #rulesFilter { order: 1; flex-basis: 100%; }
   .finding { grid-template-columns: 1fr; }
   .loc { grid-column: 1; }
   .grid { grid-template-columns: 1fr; }

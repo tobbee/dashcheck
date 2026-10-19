@@ -339,6 +339,7 @@ $('rulesDialog').addEventListener('click', (ev) => {
 
 updateButtons();
 call({ type: 'version' }).then((msg) => { $('version').textContent = msg.version; }, () => {});
+loadRules().then(() => { $('ruleCount').textContent = ` (${ruleList.length})`; }, () => {});
 // A shared link has the MPD URL and, unless auto, the profiles.
 const params = new URL(location.href).searchParams;
 loadProfiles().then(() => {
