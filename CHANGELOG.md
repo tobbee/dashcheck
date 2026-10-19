@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SEG-SIDX-SPAN: the sidx box of a SegmentBase Representation must index every movie fragment of
   its file.
 
+### Changed
+- SEG-HLS-BITRATE (`-hls-interop`) also checks SegmentTemplate and SegmentList content when every
+  segment is checked, and live streams whose checked segments cover an hour (at most 110%).
+
 ### Fixed
 - `file:` URLs: a byte range that ends after the file is cut at its end, as over HTTP.
 

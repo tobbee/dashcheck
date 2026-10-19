@@ -118,6 +118,44 @@ func TestHLSInteropSidxAndVariants(t *testing.T) {
 	}
 }
 
+func TestHLSBitrate(t *testing.T) {
+	frags := func(dur float64, sizes ...float64) []Fragment {
+		var out []Fragment
+		for _, s := range sizes {
+			out = append(out, Fragment{Size: s, Dur: dur})
+		}
+		return out
+	}
+	hour := frags(2, make([]float64, 1800)...)
+	for i := range hour {
+		hour[i].Size = 1000
+	}
+	cases := []struct {
+		name      string
+		dynamic   bool
+		frags     []Fragment
+		fromStart bool
+		want      []string
+	}{
+		{"on demand, even, short last fragment", false, append(frags(2, 1000, 1050, 950), Fragment{Size: 400, Dur: 1}), true, nil},
+		{"on demand, one low", false, frags(2, 1000, 1000, 700, 1000), true, []string{"SEG-HLS-BITRATE"}},
+		{"on demand, not all segments", false, frags(2, 1000, 1000, 700, 1000), false, nil},
+		{"live from the start, one high", true, frags(2, 1000, 1000, 1400, 1000), true, []string{"SEG-HLS-BITRATE"}},
+		{"live from the start, one low", true, frags(2, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 700), true, nil},
+		{"live, less than an hour", true, frags(2, 1000, 1000, 1400, 1000), false, nil},
+		{"live hour, one high", true, append(slices.Clone(hour[1:]), Fragment{Size: 1500, Dur: 2}), false, []string{"SEG-HLS-BITRATE"}},
+		{"live, high fragment before the newest hour", true, append([]Fragment{{Size: 5000, Dur: 2}}, hour...), false, nil},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			rep := &addressing.Rep{Dynamic: c.dynamic}
+			if got := ruleIDs(CheckHLSBitrate(rep, c.frags, c.fromStart)); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", got, c.want)
+			}
+		})
+	}
+}
+
 func TestHLSInteropSplice(t *testing.T) {
 	_, video := dvbReps(t)
 	video.PeriodDur, video.LastPeriod, video.PTO, video.Timescale = 30, false, 0, 1000

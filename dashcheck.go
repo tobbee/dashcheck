@@ -311,6 +311,7 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 	if !rc.dynamic && len(segs) > 0 {
 		periodFirst = segs[0]
 	}
+	nAll := len(segs)
 	if rep.Kind == addressing.KindSegmentBase {
 		segs = rc.selectStatic(segs)
 	} else if rc.dynamic {
@@ -320,10 +321,18 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 	}
 	var prevSeg addressing.Segment
 	var prev, first *segcheck.Media
+	// Segment sizes for SEG-HLS-BITRATE, while every segment is checked.
+	hlsBitrate := rc.opts.HLSInterop && rep.Kind != addressing.KindSegmentBase && init.Timescale > 0
+	var frags []segcheck.Fragment
 	for i, seg := range segs {
 		media := rc.checkSegment(ctx, init, seg, seg == last)
 		if rc.opts.HLSInterop && seg == last && !rc.dynamic {
 			rc.add(segcheck.CheckHLSInteropSplice(rep, init, media, seg)...)
+		}
+		if media == nil {
+			hlsBitrate = false
+		} else {
+			frags = append(frags, segcheck.Fragment{Size: float64(media.Size), Dur: float64(media.Duration) / float64(init.Timescale)})
 		}
 		if i == 0 {
 			first = media
@@ -335,6 +344,16 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 			rc.add(segcheck.CheckContinuity(prev, media, init, rep, seg)...)
 		}
 		prev, prevSeg = media, seg
+	}
+	if hlsBitrate && len(segs) > 0 {
+		// On demand all segments of the Period must be checked; live, those
+		// from the start of the Period or of the newest hour.
+		start := segs[0]
+		fromStart := len(segs) == nAll
+		if rc.dynamic {
+			fromStart = rep.Start(start) < float64(start.Dur)/float64(rep.Timescale)
+		}
+		rc.add(segcheck.CheckHLSBitrate(rep, frags, fromStart)...)
 	}
 	if rc.sidx != nil {
 		// The index range precedes the media by construction of the sidx offsets.

@@ -66,6 +66,7 @@ yet unless stated.
 | 51 | DVB Codecs, LegacyCodecs | Codec lists lack VVC, AVS3, MPEG-H and DTS-UHD | Verified in spec |
 | 52 | CMAF Durations | First tfdt of a segment compared with every fragment | Verified in code |
 | 53 | Low Latency DASHProfile | @maxWidth and @maxHeight compared with every track; @width ignored | Verified in code and spec |
+| 54 | WaveHLSInterop Bitrate | On-demand rule applied to live and to the downloaded segments only | Verified in code and spec |
 
 ## Manifest handling
 
@@ -869,6 +870,29 @@ fails (LL-21, LL-22).
 size of the CMAF Principal Header (@initializationPrincipal, or else the
 largest track), and without them compare @width and @height. Report failures as
 errors.
+
+### 54. The fragment bitrate check applies the on-demand rule to any segments
+
+**Where:** [Bitrate.php#L46-L106](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/Bitrate.php#L46-L106)
+
+**Problem:** CTA-5005-B 4.1.2 has two rules. On demand, each CMAF fragment
+should be within 10% of the average bitrate of the whole track. Live, each
+fragment of a 1-hour slice, or of the whole track if shorter, should be at
+most 110% of the slice average. The check never looks at MPD@type, although
+its skip reason says "MPD is not signalled as on-demand". It applies the
+on-demand bounds to whichever segments were downloaded, and includes the last
+fragment, which may be short. A SHOULD is reported as FAIL
+([L102](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/WaveHLSInterop/Segments/Bitrate.php#L102)), and `$atLeastOneFailed |=` collects the results of
+passing checks, so the calculated bitrates are logged when a segment passes.
+
+**Effect:** Live streams fail when one fragment is below 90% of the
+average. On demand, the average comes from the downloaded segments rather than
+the track, and a short last fragment fails (WAVEHLS-2).
+
+**Fix:** Use the on-demand rule only for static MPDs and over all fragments of
+the track, excluding a short last fragment. For dynamic MPDs, apply only the
+110% upper bound over an hour of the track. Report a warning, and collect
+failures with `!pathAdd(...)`.
 
 ## Other projects
 

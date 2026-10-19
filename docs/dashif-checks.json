@@ -4274,11 +4274,11 @@
    "source": "WaveHLSInterop/Segments/Bitrate.php",
    "context": "4.1.2 -  Basic On-Demand and Live Streaming",
    "text": "The Average Bitrate of a CMAF Fragment [..] SHOULD be within 10% of the Average Bitrate …",
-   "status": "partial",
+   "status": "done",
    "rules": [
     "SEG-HLS-BITRATE"
    ],
-   "note": "on demand, from the sidx of SegmentBase track files; the live 1-hour rule and SegmentTemplate content would need all segment sizes"
+   "note": "on demand, from the sidx of SegmentBase track files, or from the sizes of all segments when every segment of a SegmentTemplate or SegmentList Representation is checked (-n -1 or few segments); live, when the checked segments cover an hour, or the track from its start (-n -1 with a long time-shift buffer), each fragment at most 110% of the average of the newest hour; segments count as fragments; upstream applies the on-demand rule to the downloaded segments of any MPD (bug 54)"
   },
   {
    "id": "WAVEHLS-3",

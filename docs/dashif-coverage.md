@@ -16,9 +16,9 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | Module: DVB | 103 | 95 | 1 | 5 | 2 |
 | Module: HbbTV | 10 | 5 | 0 | 0 | 5 |
 | Module: CTA WAVE | 21 | 16 | 0 | 0 | 5 |
-| Module: WAVE HLS interop | 19 | 18 | 1 | 0 | 0 |
+| Module: WAVE HLS interop | 19 | 19 | 0 | 0 | 0 |
 | Module: Dolby | 5 | 5 | 0 | 0 | 0 |
-| **Total** | **408** | **384** | **2** | **5** | **17** |
+| **Total** | **408** | **385** | **1** | **5** | **17** |
 
 ## Schematron: schematron.sch
 
@@ -459,7 +459,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | ID | Check | Status | dashcheck rules | Note |
 |---|---|---|---|---|
 | WAVEHLS-1 | `4.1.2 - Basic On-Demand and Live Streaming`: CMAF Track Files [..] SHALL contain a single 'sidx' following the CMAF header … | done | SEG-HLS-SIDX | for SegmentBase track files, which are the CMAF track files delivered to clients; upstream requires a sidx in every media segment (bug 48). Checks of CTA-5005 run with -hls-interop |
-| WAVEHLS-2 | `4.1.2 -  Basic On-Demand and Live Streaming`: The Average Bitrate of a CMAF Fragment [..] SHOULD be within 10% of the Average Bitrate … | partial | SEG-HLS-BITRATE | on demand, from the sidx of SegmentBase track files; the live 1-hour rule and SegmentTemplate content would need all segment sizes |
+| WAVEHLS-2 | `4.1.2 -  Basic On-Demand and Live Streaming`: The Average Bitrate of a CMAF Fragment [..] SHOULD be within 10% of the Average Bitrate … | done | SEG-HLS-BITRATE | on demand, from the sidx of SegmentBase track files, or from the sizes of all segments when every segment of a SegmentTemplate or SegmentList Representation is checked (-n -1 or few segments); live, when the checked segments cover an hour, or the track from its start (-n -1 with a long time-shift buffer), each fragment at most 110% of the average of the newest hour; segments count as fragments; upstream applies the on-demand rule to the downloaded segments of any MPD (bug 54) |
 | WAVEHLS-3 | The common encryption `cbcs` scheme SHALL be used for encryption | done | SEG-HLS-ENCRYPTION |  |
 | WAVEHLS-4 | Constant 16-byte Initialization Vectors SHALL be used | done | SEG-HLS-ENCRYPTION | tenc default_Per_Sample_IV_Size 0 and a 16-byte constant IV |
 | WAVEHLS-5 | An alternative using the `cenc` scheme MAY be produced | done | SEG-HLS-CBCS-VARIANT | per Period and media type, a cenc AdaptationSet needs a cbcs one (4.3.3); upstream leaves this as a TODO |

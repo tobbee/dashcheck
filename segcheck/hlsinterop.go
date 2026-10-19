@@ -26,7 +26,7 @@ var (
 	})
 	RuleHLSBitrate = report.Register(report.Rule{
 		ID: "SEG-HLS-BITRATE", Severity: report.Warning,
-		Desc:    "On demand, the average bitrate of each CMAF fragment should be within 10% of the average bitrate of the track",
+		Desc:    "The average bitrate of each CMAF fragment should be within 10% of that of the track on demand, and live at most 110% of that of the newest hour",
 		SpecRef: refHLS + " 4.1.2",
 	})
 	RuleHLSText = report.Register(report.Rule{
@@ -193,39 +193,88 @@ func hlsMediaRules(init *Init, mf *mp4.File, loc report.Location) []report.Findi
 // CheckHLSInteropSidx checks the index of a CMAF track file (WAVEHLS-1) and,
 // on demand, the bitrate of its fragments (WAVEHLS-2).
 func CheckHLSInteropSidx(rep *addressing.Rep, sidx *mp4.SidxBox, nSidx int) []report.Finding {
-	loc := rep.Loc()
 	var f []report.Finding
 	if nSidx != 1 {
-		f = append(f, RuleHLSSidx.New(loc, "%d sidx boxes", nSidx))
+		f = append(f, RuleHLSSidx.New(rep.Loc(), "%d sidx boxes", nSidx))
 	}
-	if sidx == nil || sidx.Timescale == 0 || rep.Dynamic || len(sidx.SidxRefs) < 2 {
+	if sidx == nil || sidx.Timescale == 0 || rep.Dynamic {
 		return f
 	}
-	var size, dur float64
+	frags := make([]Fragment, 0, len(sidx.SidxRefs))
 	for _, r := range sidx.SidxRefs {
-		size += float64(r.ReferencedSize)
-		dur += float64(r.SubSegmentDuration)
+		frags = append(frags, Fragment{Size: float64(r.ReferencedSize), Dur: float64(r.SubSegmentDuration) / float64(sidx.Timescale)})
 	}
-	avg := size / dur
-	n, worst := 0, 0.0
-	for i, r := range sidx.SidxRefs {
-		if r.SubSegmentDuration == 0 || i == len(sidx.SidxRefs)-1 {
-			continue // the last fragment may be short
+	return append(f, CheckHLSBitrate(rep, frags, true)...)
+}
+
+// Fragment is the size in bytes and the duration in seconds of a CMAF
+// fragment: a subsegment, or a segment, which may hold several fragments or
+// chunks.
+type Fragment struct{ Size, Dur float64 }
+
+// hlsSlice is the time slice of a live track for SEG-HLS-BITRATE.
+const hlsSlice = 3600.0
+
+// CheckHLSBitrate checks the average bitrate of the consecutive fragments of
+// a track (WAVEHLS-2). fromStart tells whether they start at the start of
+// the track. On demand, frags must be the whole track, and each fragment but
+// the last, which may be short, should be within 10% of the track average.
+// Live, the newest hour of frags is checked, or all of them if they start at
+// the start of the track; each fragment should be at most 110% of their
+// average.
+func CheckHLSBitrate(rep *addressing.Rep, frags []Fragment, fromStart bool) []report.Finding {
+	var span float64
+	for _, fr := range frags {
+		span += fr.Dur
+	}
+	if rep.Dynamic {
+		if span < hlsSlice && !fromStart {
+			return nil // less than an hour of the track
 		}
-		dev := (float64(r.ReferencedSize)/float64(r.SubSegmentDuration) - avg) / avg
-		if math.Abs(dev) > 0.1 {
+		var newest float64
+		i := len(frags)
+		for i > 0 && newest+frags[i-1].Dur <= hlsSlice+1e-6 {
+			i--
+			newest += frags[i].Dur
+		}
+		frags, span = frags[i:], newest
+	} else if !fromStart {
+		return nil
+	}
+	if len(frags) < 2 || span == 0 {
+		return nil
+	}
+	var size float64
+	for _, fr := range frags {
+		size += fr.Size
+	}
+	avg := size / span
+	n, worst := 0, 0.0
+	checked := frags
+	if !rep.Dynamic {
+		checked = frags[:len(frags)-1] // the last fragment may be short
+	}
+	for _, fr := range checked {
+		if fr.Dur == 0 {
+			continue
+		}
+		dev := (fr.Size/fr.Dur - avg) / avg
+		if (rep.Dynamic && dev > 0.1) || (!rep.Dynamic && math.Abs(dev) > 0.1) {
 			n++
 			if math.Abs(dev) > math.Abs(worst) {
 				worst = dev
 			}
 		}
 	}
-	if n > 0 {
-		ts := float64(sidx.Timescale)
-		f = append(f, RuleHLSBitrate.New(loc, "%d of %d fragments differ more than 10%% from the track average of %.0f bit/s (worst %+.0f%%)",
-			n, len(sidx.SidxRefs)-1, avg*8*ts, worst*100))
+	if n == 0 {
+		return nil
 	}
-	return f
+	if rep.Dynamic {
+		return []report.Finding{RuleHLSBitrate.New(rep.Loc(), "%d of %d fragments exceed 110%% of the average of %.0f bit/s over the newest %.0fs (worst %+.0f%%)",
+			n, len(checked), avg*8, span, worst*100)}
+	}
+	return []report.Finding{RuleHLSBitrate.New(rep.Loc(), "%d of %d fragments differ more than 10%% from the track average of %.0f bit/s (worst %+.0f%%)",
+		n, len(checked), avg*8, worst*100)}
 }
 
 // hlsPresentationRules checks that every cenc-encrypted media type in a

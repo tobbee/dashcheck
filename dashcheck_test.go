@@ -209,3 +209,25 @@ func TestSequenceNumbersOption(t *testing.T) {
 		}
 	}
 }
+
+func TestHLSBitrateOnDemand(t *testing.T) {
+	// The first 2 s segment of V300 has 26% less than the average bitrate,
+	// which only shows when all four segments are checked.
+	ts := server(t, "", nil)
+	for _, c := range []struct {
+		maxSegments int
+		want        bool
+	}{{4, true}, {2, false}} {
+		rpt := Check(context.Background(), ts.URL+"/Manifest.mpd",
+			Options{Fetcher: fetch.NewNative(5 * time.Second), HLSInterop: true, MaxSegments: c.maxSegments})
+		var got []string
+		for _, f := range rpt.Findings {
+			if f.Rule == "SEG-HLS-BITRATE" {
+				got = append(got, f.Location.RepID)
+			}
+		}
+		if want := map[bool][]string{true: {"V300"}}[c.want]; !slices.Equal(got, want) {
+			t.Errorf("-n %d: SEG-HLS-BITRATE for %v, want %v", c.maxSegments, got, want)
+		}
+	}
+}

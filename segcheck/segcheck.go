@@ -282,6 +282,7 @@ type Media struct {
 	Duration       uint64  // sum of sample durations, media timescale
 	EPT            float64 // earliest presentation time in seconds, before presentationTimeOffset
 	Samples        int
+	Size           int   // bytes
 	FirstCTO       int32 // composition time offset of the first sample
 	FirstSync      bool  // the first sample is a sync sample
 	// Event messages before the first moof and later in the segment, as
@@ -304,7 +305,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	if len(mf.Segments) == 0 || len(mf.Segments[0].Fragments) == 0 {
 		return nil, append(f, RuleSegStructure.New(loc, "no moof box"))
 	}
-	media := &Media{}
+	media := &Media{Size: len(data)}
 	minCT := int64(math.MaxInt64)
 	firstSample := true
 	wrongTrack := false
