@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-19
+
 ### Fixed
 - The dot of LIVE TIMING in the logo no longer touches the text.
 
@@ -35,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The browser tool, published on GitHub Pages for each release, counts visits and checks with
   GoatCounter, without cookies or MPD URLs.
 
-[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/tobbee/dashcheck/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/tobbee/dashcheck/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/tobbee/dashcheck/releases/tag/v0.1.0
