@@ -49,7 +49,8 @@ upstream commit e311ec6e12b21394355fd1749101590400e31cbb (2026-10-16).
 6. Commit one area per commit (see the user's commit rules).
 
 Remaining at the last update: only DVB AVS3 (DVB-60 to DVB-64), which needs
-AVS3 support in mp4ff, plus six partial checks (see the coverage notes).
+AVS3 support in mp4ff, and DVB-34 in part: the SCTE-35 splice time is an MPEG-2
+TS PTS without a known relation to the media timeline (see the coverage notes).
 Rules for specifications that MPDs do not signal, and conventions that no spec
 requires, are opt-in options (`-hls-interop` for CTA-5005, `-sequence-numbers`). Segment Sequences (@k, $SubNumber$) are not
 addressed yet (ADDR-UNSUPPORTED).
@@ -113,13 +114,14 @@ pre-commit ships in a `venv/` directory as a package.
 - dash-mpd rejects xs:duration values with years or months.
 - dash-mpd reads absent booleans and numbers as their zero value; use the raw tree.
 - mp4ff's `Sample.IsSync` requires `sample_depends_on` = 2; use `segcheck.isSync`.
-- jacoelho/xsd v0.6.4 does not check the enumeration of `xlink:actuate` with
-  the DASH schema: `xlink:actuate="bogus"` validates (xmllint rejects it),
-  while `xlink:type` and `xlink:show` fixed values are checked. A minimal
-  schema with the same xlink declarations is checked, so something else in
-  DASH-MPD.xsd triggers it. Ruled out: the attribute's default, the attribute
-  wildcard, the second import of xlink.xsd, and DASH-MPD-UP.xsd. To bisect
-  further and report upstream; `TestMutations` in `schema/` skips the case
-  and fails once it is caught.
+- jacoelho/xsd (v0.6.4 and older) has built-in xlink:type, href, role,
+  arcrole, title, show and actuate attributes typed xs:string or xs:anyURI,
+  registered before any schema loads, so they shadow the declarations of the
+  imported xlink.xsd (`internal/schema/builtin.go`, and
+  `AddGlobalAttributeComponent` skips redeclarations). XLink enumerations and
+  facets are not checked: `xlink:actuate="bogus"` validates, while fixed
+  values are, as plain strings. `TestMutations` in `schema/` skips the case
+  and fails once it is caught. Reported as
+  https://github.com/jacoelho/xsd/issues/137.
 - When editing with scripted search and replace, remember that gofmt realigns
   struct fields and composite literals after earlier edits.

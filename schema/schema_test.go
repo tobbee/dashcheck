@@ -67,7 +67,7 @@ func TestMutations(t *testing.T) {
 		old, new string
 		wantMsg  string // "" for a valid MPD
 		wantPath string
-		// knownGap marks an error that jacoelho/xsd misses (see CLAUDE.md).
+		// knownGap marks an error that jacoelho/xsd misses (jacoelho/xsd#137, see CLAUDE.md).
 		knownGap bool
 	}{
 		{name: "unknown element", old: period, new: period + `<Foo/>`,
