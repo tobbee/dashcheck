@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-19
+
 ### Added
 - `dashcheck` command and browser tool (WebAssembly) that check an MPEG-DASH MPD, its segments
   and, for live streams, the segment availability against a synchronized clock.
@@ -25,4 +27,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The browser tool, published on GitHub Pages for each release, counts visits and checks with
   GoatCounter, without cookies or MPD URLs.
 
-[Unreleased]: https://github.com/tobbee/dashcheck/commits/main
+[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/tobbee/dashcheck/releases/tag/v0.1.0
