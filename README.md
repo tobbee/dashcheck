@@ -82,6 +82,12 @@ Browser limits: the stream must send CORS headers (almost all DASH CDNs do,
 since players need them), and an https page cannot fetch `http://` URLs. Use
 the command-line tool for such streams.
 
+Each release is published on GitHub Pages by `.github/workflows/pages.yml`
+(it can also be run by hand). The published page counts visits and checks with
+[GoatCounter](https://www.goatcounter.com), without cookies: it sends the page
+path and title, the screen width, the referrer without its query string, and
+for a check whether it was a URL or a folder, never an MPD URL.
+
 ## Design
 
 ```

@@ -73,6 +73,32 @@ async function loadRules() {
   return rules;
 }
 
+// Visits and checks are counted with GoatCounter, without cookies, on the
+// published page only, so not on localhost or on a fork's copy. The counts are
+// sent to its /count endpoint directly rather than with its count.js, which
+// would also send the query string, and that can hold the MPD URL of a check.
+// They carry the path, title, screen width and the referrer without its query.
+const goatCounter = 'https://dashcheck.goatcounter.com/count';
+const countedHost = 'tobbee.github.io';
+
+function countURL(path, title, event) {
+  const q = new URLSearchParams({ p: path, t: title, e: String(event), s: String(screen.width) });
+  if (!event && document.referrer) q.set('r', document.referrer.split(/[?#]/)[0]);
+  q.set('rnd', Math.random().toString(36).slice(2, 7));
+  return `${goatCounter}?${q}`;
+}
+
+function count(path, title, event) {
+  if (location.hostname !== countedHost || navigator.webdriver) return;
+  const url = countURL(path, title, event);
+  if (!navigator.sendBeacon || !navigator.sendBeacon(url)) new Image().src = url;
+}
+
+// countCheck counts a check as an event, by kind only, never with the MPD URL.
+function countCheck(kind) {
+  count(`check-${kind}`, `Check ${kind}`, true);
+}
+
 async function run(msg, label) {
   setBusy(true);
   $('results').hidden = true;
@@ -249,6 +275,7 @@ $('form').addEventListener('submit', (ev) => {
   if (profiles === 'auto') u.searchParams.delete('profiles');
   else u.searchParams.set('profiles', profiles);
   history.replaceState(null, '', u);
+  countCheck('url');
   run({ type: 'check', url, options: options() }, url);
 });
 
@@ -265,6 +292,7 @@ $('folder').addEventListener('change', () => {
 
 $('runLocal').addEventListener('click', () => {
   const mpdPath = $('mpdSelect').value;
+  countCheck('folder');
   run({ type: 'checkLocal', files: folderFiles, mpdPath, options: options() }, mpdPath);
 });
 
@@ -338,6 +366,7 @@ $('rulesDialog').addEventListener('click', (ev) => {
 });
 
 updateButtons();
+count(location.pathname, document.title, false);
 call({ type: 'version' }).then((msg) => { $('version').textContent = msg.version; }, () => {});
 loadRules().then(() => { $('ruleCount').textContent = ` (${ruleList.length})`; }, () => {});
 // A shared link has the MPD URL and, unless auto, the profiles.

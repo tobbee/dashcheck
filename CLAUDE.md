@@ -9,6 +9,9 @@ meant to replace the DASH-IF Conformance tool. See README.md for the overview.
   and `clock.Clock`, so checks are identical in the CLI and the browser and can
   be tested with test servers and fixed clocks.
 - `fetch/js.go` must not import `net/http` (it adds about 7 MB to the wasm).
+- The page counts visits and checks with GoatCounter by calling its /count
+  endpoint from `web/app.js`, not with count.js, which also sends the query
+  string. Never send the query string or an MPD URL: `?url=` holds one.
   Run `make check`, which also lints the js/wasm build.
 - Each check is a `report.Rule` registered in a package-level var, with a stable
   ID and a spec reference. Prefixes: `MPD-` (mpdcheck), `ADDR-` (addressing),

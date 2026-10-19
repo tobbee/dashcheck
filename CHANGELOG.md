@@ -22,5 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `dashcheck -short streams/*.mpd`, checked `-parallel` at a time.
 - `-json`: the report, or with `-short` an array of reports, with error, warning and info counts.
 - `-version`, and the version in the footer of the browser tool.
+- The browser tool, published on GitHub Pages for each release, counts visits and checks with
+  GoatCounter, without cookies or MPD URLs.
 
 [Unreleased]: https://github.com/tobbee/dashcheck/commits/main
