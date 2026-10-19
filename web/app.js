@@ -34,9 +34,34 @@ function options() {
     maxSegments: Number($('maxSegments').value) || 4,
     // 0 in the form means no update checks, which the Go side spells -1.
     mpdUpdates: Number($('mpdUpdates').value) || -1,
+    profiles: profileChoice(),
     hlsInterop: $('hlsInterop').checked,
     reference: $('reference').value.trim() || 'none',
   };
+}
+
+// profileChoice returns the checked profiles as -profiles spells them,
+// such as "auto" or "dvb,hbbtv".
+function profileChoice() {
+  const names = [...document.querySelectorAll('#profiles input[data-profile]:checked')].map((i) => i.dataset.profile);
+  if ($('profileAuto').checked) names.unshift('auto');
+  return names.join(',') || 'none';
+}
+
+// setProfileChoice checks the profiles of a choice such as "auto,dvb".
+function setProfileChoice(choice) {
+  const names = choice.split(',').map((s) => s.trim());
+  $('profileAuto').checked = names.includes('auto');
+  for (const i of document.querySelectorAll('#profiles input[data-profile]')) {
+    i.checked = names.includes(i.dataset.profile);
+  }
+}
+
+async function loadProfiles() {
+  const msg = await call({ type: 'profiles' });
+  $('profileChoices').replaceChildren(...msg.profiles.map((p) =>
+    el('label', { class: 'toggle', title: p.prefix ? `${p.prefix}…` : p.urn },
+      el('input', { type: 'checkbox', 'data-profile': p.name }), ` ${p.title}`)));
 }
 
 async function loadRules() {
@@ -108,7 +133,12 @@ function render(rpt) {
   summary.replaceChildren();
   const add = (k, v) => summary.append(el('dt', {}, k), el('dd', {}, v));
   add('MPD', rpt.mpdURL);
-  if (rpt.type) add('Type', rpt.type);
+  if (rpt.type) {
+    add('Type', rpt.type);
+    const names = (rpt.profiles || []).join(', ') || 'no profile-specific rules';
+    const choice = rpt.profileChoice || 'auto';
+    add('Profiles', choice === 'auto' ? `${names} (from @profiles)` : `${names} (chosen: ${choice})`);
+  }
   if (rpt.clockSource === 'local clock') {
     add('Clock', 'local clock (no time source could be reached)');
   } else if (rpt.clockSource) {
@@ -215,6 +245,9 @@ $('form').addEventListener('submit', (ev) => {
   if (!url) return;
   const u = new URL(location.href);
   u.searchParams.set('url', url);
+  const profiles = profileChoice();
+  if (profiles === 'auto') u.searchParams.delete('profiles');
+  else u.searchParams.set('profiles', profiles);
   history.replaceState(null, '', u);
   run({ type: 'check', url, options: options() }, url);
 });
@@ -306,8 +339,14 @@ $('rulesDialog').addEventListener('click', (ev) => {
 
 updateButtons();
 call({ type: 'version' }).then((msg) => { $('version').textContent = msg.version; }, () => {});
-const initial = new URL(location.href).searchParams.get('url');
-if (initial) {
-  $('url').value = initial;
-  $('form').requestSubmit();
-}
+// A shared link has the MPD URL and, unless auto, the profiles.
+const params = new URL(location.href).searchParams;
+loadProfiles().then(() => {
+  if (params.has('profiles')) setProfileChoice(params.get('profiles'));
+}, () => {}).then(() => {
+  const initial = params.get('url');
+  if (initial) {
+    $('url').value = initial;
+    $('form').requestSubmit();
+  }
+});

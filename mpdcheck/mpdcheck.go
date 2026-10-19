@@ -11,6 +11,7 @@ import (
 	m "github.com/Eyevinn/dash-mpd/mpd"
 	"github.com/tobbee/dashcheck/report"
 	"github.com/tobbee/dashcheck/schema"
+	"github.com/tobbee/dashcheck/spec"
 )
 
 const (
@@ -104,8 +105,15 @@ var (
 	})
 )
 
-// Check validates the MPD and returns the parsed MPD (nil if it could not be parsed).
+// Check validates the MPD and returns the parsed MPD (nil if it could not be
+// parsed). The profile-specific rules follow the MPD's @profiles.
 func Check(data []byte, mpdURL string) (*m.MPD, []report.Finding) {
+	return CheckWith(data, mpdURL, spec.Selection{})
+}
+
+// CheckWith is Check with the profiles chosen by sel. The returned MPD has the
+// @profiles that sel.Apply rewrote, so that the segment rules follow the same choice.
+func CheckWith(data []byte, mpdURL string, sel spec.Selection) (*m.MPD, []report.Finding) {
 	findings, err := schema.Validate(data, mpdURL)
 	if err != nil {
 		findings = append(findings, RuleParse.New(report.Location{URL: mpdURL}, "schema setup failed: %v", err))
@@ -116,12 +124,16 @@ func Check(data []byte, mpdURL string) (*m.MPD, []report.Finding) {
 		findings = append(findings, RuleParse.New(report.Location{URL: mpdURL}, "%v", err))
 		return nil, findings
 	}
+	for _, p := range sel.Apply(md) {
+		findings = append(findings, RuleProfileChosen.New(report.Location{Path: "MPD"},
+			"MPD@profiles does not signal %s (%s); checked as if it did", p.Title, p.Signal()))
+	}
 	findings = append(findings, Rules(md)...)
 	findings = append(findings, structureRules(md)...)
 	findings = append(findings, profileRules(md)...)
 	findings = append(findings, descriptorRules(md)...)
 	findings = append(findings, dolbyRules(md)...)
-	findings = append(findings, lowLatencyRules(md)...)
+	findings = append(findings, lowLatencyRules(md, !sel.Only)...)
 	raw := parseRaw(data)
 	findings = append(findings, rawStructureRules(raw)...)
 	findings = append(findings, dvbRules(md, raw, len(data), mpdURL)...)

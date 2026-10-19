@@ -6,6 +6,7 @@
 //	dashcheck.check(mpdURL, optionsJSON, onProgress) -> Promise<reportJSON>
 //	dashcheck.checkData(mpdBytes, mpdURL, optionsJSON, onProgress) -> Promise<reportJSON>
 //	dashcheck.rules() -> rulesJSON
+//	dashcheck.profiles() -> profilesJSON, the profiles that options.profiles can choose
 //	dashcheck.version() -> "v0.1.0, date: 2026-10-19"
 //
 // where onProgress receives progress objects as JSON strings.
@@ -22,12 +23,14 @@ import (
 	"github.com/tobbee/dashcheck/fetch"
 	"github.com/tobbee/dashcheck/internal"
 	"github.com/tobbee/dashcheck/report"
+	"github.com/tobbee/dashcheck/spec"
 )
 
 // jsOptions are the options accepted from JavaScript.
 type jsOptions struct {
 	MaxSegments  int    `json:"maxSegments"`
 	MPDUpdates   int    `json:"mpdUpdates"`
+	Profiles     string `json:"profiles"`
 	HLSInterop   bool   `json:"hlsInterop"`
 	Reference    string `json:"reference"`
 	Concurrency  int    `json:"concurrency"`
@@ -39,6 +42,7 @@ func main() {
 		"check":     js.FuncOf(check),
 		"checkData": js.FuncOf(checkData),
 		"rules":     js.FuncOf(rules),
+		"profiles":  js.FuncOf(profiles),
 		"version":   js.FuncOf(version),
 	}))
 	select {}
@@ -51,10 +55,15 @@ func options(optsJSON string, onProgress js.Value) (dashcheck.Options, error) {
 			return dashcheck.Options{}, fmt.Errorf("options: %w", err)
 		}
 	}
+	sel, err := spec.Parse(jo.Profiles)
+	if err != nil {
+		return dashcheck.Options{}, fmt.Errorf("options: %w", err)
+	}
 	opts := dashcheck.Options{
 		Fetcher:     fetch.Browser{},
 		MaxSegments: jo.MaxSegments,
 		MPDUpdates:  jo.MPDUpdates,
+		Profiles:    sel,
 		HLSInterop:  jo.HLSInterop,
 		Reference:   jo.Reference,
 		Concurrency: jo.Concurrency,
@@ -105,6 +114,11 @@ func checkData(this js.Value, args []js.Value) any {
 
 func rules(this js.Value, args []js.Value) any {
 	b, _ := json.Marshal(report.Rules())
+	return string(b)
+}
+
+func profiles(this js.Value, args []js.Value) any {
+	b, _ := json.Marshal(spec.Profiles)
 	return string(b)
 }
 

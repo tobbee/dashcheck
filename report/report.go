@@ -255,7 +255,13 @@ type Report struct {
 	ClockOffset float64   `json:"clockOffsetS,omitempty"` // reference clock minus local clock
 	Segments    int       `json:"segmentsChecked"`
 	MPDUpdates  int       `json:"mpdUpdatesChecked,omitempty"` // later fetches of a dynamic MPD that were compared
-	Findings    []Finding `json:"findings"`
+	// ProfileChoice is the choice of profiles, such as "auto" or "dvb,hbbtv",
+	// and Profiles the titles of the profiles in @profiles after that choice.
+	// In auto mode, CMAF brands and chunked low-latency Representations also
+	// turn on the CMAF and low-latency rules.
+	ProfileChoice string    `json:"profileChoice,omitempty"`
+	Profiles      []string  `json:"profiles,omitempty"`
+	Findings      []Finding `json:"findings"`
 }
 
 // Counts returns the number of findings per severity.

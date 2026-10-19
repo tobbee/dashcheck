@@ -78,6 +78,9 @@ type Rep struct {
 
 	Profiles           []string // effective @profiles
 	BitstreamSwitching bool     // effective @bitstreamSwitching
+	// OnlyProfiles is set by UseOnlyProfiles. CMAF brands in the init
+	// segment then do not turn on the CMAF rules; only the CMAF profile does.
+	OnlyProfiles bool
 
 	ContentType       string
 	Lang              string              // AdaptationSet@lang
@@ -699,6 +702,15 @@ func (r *Rep) HasProfile(profile string) bool {
 		}
 	}
 	return false
+}
+
+// UseOnlyProfiles makes only the profiles in Profiles turn on the
+// profile-specific rules, for when the user chose the profiles to check
+// (spec.Selection.Only). Chunking then does not make the Representation low
+// latency, and CMAF brands do not make it CMAF.
+func (r *Rep) UseOnlyProfiles() {
+	r.OnlyProfiles = true
+	r.LowLatency = r.LowLatency && r.HasProfile(ProfileLowLatency)
 }
 
 // HasProfilePrefix reports whether any effective profile starts with prefix.

@@ -83,6 +83,23 @@ button.link { border: none; background: none; color: var(--accent); padding: 7px
 }
 .file-button input { display: none; }
 
+.profiles { border: none; margin: 12px 0 0; padding: 0; min-width: 0; }
+.profiles legend { padding: 0; }
+#profileChoices { display: contents; }
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.toggle:has(input:checked) { border-color: var(--accent); background: var(--info-bg); }
+.toggle input { margin: 0; padding: 0; }
+.hint { margin: 6px 0 0; font-size: 13px; }
+
 .options { margin-top: 12px; }
 .options summary { cursor: pointer; color: var(--muted); }
 .grid { display: grid; grid-template-columns: max-content 1fr; gap: 8px 12px; align-items: center; margin-top: 8px; }

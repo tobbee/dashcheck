@@ -20,6 +20,15 @@
           <input id="url" type="url" required placeholder="Paste an MPD URL, e.g. https://example.com/live/Manifest.mpd" autocomplete="url">
           <button id="run" type="submit" class="primary">Check</button>
         </div>
+        <fieldset class="profiles">
+          <legend class="label">Check against</legend>
+          <div id="profiles" class="row">
+            <label class="toggle"><input id="profileAuto" type="checkbox" checked> Auto: the MPD's @profiles</label>
+            <span id="profileChoices"></span>
+            <label class="toggle"><input id="hlsInterop" type="checkbox"> DASH-HLS (CTA-5005)</label>
+          </div>
+          <p class="hint muted">Checked profiles are checked even if the MPD does not signal them. Without Auto, only they are.</p>
+        </fieldset>
         <div class="row secondary-row">
           <label class="file-button">
             <input id="folder" type="file" webkitdirectory multiple>
@@ -36,8 +45,6 @@
             <input id="maxSegments" type="number" min="1" max="1000" value="4">
             <label for="mpdUpdates">MPD updates to check (live)</label>
             <input id="mpdUpdates" type="number" min="0" max="100" value="1">
-            <label for="hlsInterop">DASH-HLS interoperability (CTA-5005)</label>
-            <input id="hlsInterop" type="checkbox">
             <label for="reference">Reference clock (http-iso)</label>
             <input id="reference" type="url" value="https://time.akamai.com/?iso&amp;ms">
           </div>

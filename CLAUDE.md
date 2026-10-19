@@ -20,6 +20,11 @@ meant to replace the DASH-IF Conformance tool. See README.md for the overview.
   re-deriving inherited values in each rule.
 - Rules that need to know whether an attribute is present, or attributes the
   dash-mpd model does not keep, use the raw tree in `mpdcheck/rawxml.go`.
+- Gate profile-specific rules on the effective @profiles (`Rep.Profiles`, or
+  `md.Profiles` and `effective` in mpdcheck), so that `-profiles` works: the
+  `spec` package rewrites @profiles of the parsed MPD for the user's choice.
+  Gates on other signals (CMAF brands, chunking) must honour
+  `Rep.OnlyProfiles`. A new profile family goes into `spec.Profiles`.
 
 ## Porting DASH-IF checks
 

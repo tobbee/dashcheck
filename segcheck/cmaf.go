@@ -63,9 +63,13 @@ var (
 	})
 )
 
-// isCMAF reports whether a track is declared as CMAF.
+// isCMAF reports whether a track is declared as CMAF, by the CMAF profile
+// or, unless the user chose the profiles, by a CMAF brand.
 func isCMAF(rep *addressing.Rep, brands []string) bool {
-	return rep.HasProfile(profileCMAF) || slices.Contains(brands, "cmfc") || slices.Contains(brands, "cmf2")
+	if rep.HasProfile(profileCMAF) {
+		return true
+	}
+	return !rep.OnlyProfiles && (slices.Contains(brands, "cmfc") || slices.Contains(brands, "cmf2"))
 }
 
 func cmafInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, top []mp4.Box, loc report.Location) []report.Finding {

@@ -100,15 +100,16 @@ var (
 	})
 )
 
-// isLowLatency reports whether a dynamic MPD uses low-latency features.
-func isLowLatency(md *m.MPD, reps []*addressing.Rep) bool {
+// isLowLatency reports whether a dynamic MPD uses low-latency features: it
+// has the low-latency profile or, if chunked is set, chunked Representations.
+func isLowLatency(md *m.MPD, reps []*addressing.Rep, chunked bool) bool {
 	if md.GetType() != "dynamic" {
 		return false
 	}
 	if profiles(splitProfiles(string(md.Profiles))).has(profileLowLatency) {
 		return true
 	}
-	return slices.ContainsFunc(reps, isChunked)
+	return chunked && slices.ContainsFunc(reps, isChunked)
 }
 
 // isChunked reports whether a Representation is offered in chunks.
@@ -127,9 +128,11 @@ func targetLatency(md *m.MPD) (ms uint32, ok bool) {
 	return 0, false
 }
 
-func lowLatencyRules(md *m.MPD) []report.Finding {
+// lowLatencyRules checks low-latency MPDs. chunked turns on the rules for
+// MPDs with chunked Representations but without the low-latency profile.
+func lowLatencyRules(md *m.MPD, chunked bool) []report.Finding {
 	reps, _ := addressing.Reps(md, "")
-	if !isLowLatency(md, reps) {
+	if !isLowLatency(md, reps, chunked) {
 		return nil
 	}
 	var f []report.Finding

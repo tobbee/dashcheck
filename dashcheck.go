@@ -22,6 +22,7 @@ import (
 	"github.com/tobbee/dashcheck/mpdcheck"
 	"github.com/tobbee/dashcheck/report"
 	"github.com/tobbee/dashcheck/segcheck"
+	"github.com/tobbee/dashcheck/spec"
 )
 
 // Options control a check.
@@ -44,6 +45,9 @@ type Options struct {
 	// MPDUpdates is the number of times a dynamic MPD is fetched again to
 	// check its updates. Zero means DefaultMPDUpdates; negative disables it.
 	MPDUpdates int
+	// Profiles chooses the profiles whose rules apply. The zero value is the
+	// profiles that the MPD signals in @profiles.
+	Profiles spec.Selection
 	// HLSInterop adds the checks of the DASH-HLS Interoperability
 	// Specification CTA-5005-B, which MPDs do not signal.
 	HLSInterop bool
@@ -157,12 +161,16 @@ func CheckData(ctx context.Context, data []byte, mpdURL string, opts Options) *r
 // the clock used.
 func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.Response, opts *Options) (*m.MPD, clock.Clock) {
 	opts.progress("mpd", 0, 1, "checking MPD")
-	md, findings := mpdcheck.Check(data, resp.URL)
+	md, findings := mpdcheck.CheckWith(data, resp.URL, opts.Profiles)
 	rpt.Findings = append(rpt.Findings, findings...)
 	if md == nil {
 		return nil, nil
 	}
 	rpt.Type = md.GetType()
+	rpt.ProfileChoice = opts.Profiles.String()
+	for _, p := range spec.Signalled(md) {
+		rpt.Profiles = append(rpt.Profiles, p.Title)
+	}
 	dynamic := rpt.Type == "dynamic"
 
 	clk := opts.Clock
@@ -185,6 +193,11 @@ func checkMPD(ctx context.Context, rpt *report.Report, data []byte, resp *fetch.
 	// Relative URLs resolve against the MPD URL after redirects.
 	reps, af := addressing.Reps(md, resp.URL)
 	rpt.Findings = append(rpt.Findings, af...)
+	if opts.Profiles.Only {
+		for _, r := range reps {
+			r.UseOnlyProfiles()
+		}
+	}
 	now := clk.Now()
 	if dynamic {
 		rpt.Findings = append(rpt.Findings, liveMPDChecks(md, reps, now)...)

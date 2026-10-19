@@ -14,6 +14,7 @@ import (
 
 	"github.com/tobbee/dashcheck/fetch"
 	"github.com/tobbee/dashcheck/report"
+	"github.com/tobbee/dashcheck/spec"
 )
 
 const testDir = "testdata/testpic_2s"
@@ -162,6 +163,36 @@ func TestLiveUpdate(t *testing.T) {
 			}
 			if !slices.Equal(got, c.want) || rpt.MPDUpdates != 1 {
 				t.Errorf("got %v and %d updates, want %v and 1", got, rpt.MPDUpdates, c.want)
+			}
+		})
+	}
+}
+
+func TestProfileChoice(t *testing.T) {
+	ts := server(t, "", nil)
+	cases := []struct {
+		choice  string
+		want    []string // report.Profiles
+		chosenW bool     // whether MPD-PROFILE-CHOSEN is reported
+	}{
+		{"auto", []string{"DASH-IF IOP"}, false},
+		{"auto,dvb", []string{"DASH-IF IOP", "DVB-DASH 2014"}, true},
+		{"dvb", []string{"DVB-DASH 2014"}, true},
+		{"none", nil, false},
+	}
+	for _, c := range cases {
+		t.Run(c.choice, func(t *testing.T) {
+			sel, err := spec.Parse(c.choice)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rpt := Check(context.Background(), ts.URL+"/Manifest.mpd",
+				Options{Fetcher: fetch.NewNative(5 * time.Second), MaxSegments: 1, Profiles: sel})
+			if rpt.ProfileChoice != c.choice || !slices.Equal(rpt.Profiles, c.want) {
+				t.Errorf("got choice %q, profiles %v; want %q, %v", rpt.ProfileChoice, rpt.Profiles, c.choice, c.want)
+			}
+			if got := slices.Contains(ruleSet(rpt.Findings, report.Warning), "MPD-PROFILE-CHOSEN"); got != c.chosenW {
+				t.Errorf("MPD-PROFILE-CHOSEN %v, want %v\n%v", got, c.chosenW, rpt.Findings)
 			}
 		})
 	}

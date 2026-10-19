@@ -74,6 +74,9 @@ self.onmessage = async (ev) => {
       case 'rules':
         reply('rules', { rules: JSON.parse(self.dashcheck.rules()) });
         break;
+      case 'profiles':
+        reply('profiles', { profiles: JSON.parse(self.dashcheck.profiles()) });
+        break;
       case 'version':
         reply('version', { version: self.dashcheck.version() });
         break;

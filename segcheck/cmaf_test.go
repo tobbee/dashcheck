@@ -48,3 +48,25 @@ func TestCMAFRules(t *testing.T) {
 		t.Errorf("encryption profile: got %v", f)
 	}
 }
+
+func TestIsCMAF(t *testing.T) {
+	cases := []struct {
+		name     string
+		profiles []string
+		brands   []string
+		only     bool
+		want     bool
+	}{
+		{"profile", []string{profileCMAF}, nil, false, true},
+		{"brand", nil, []string{"iso6", "cmfc"}, false, true},
+		{"no signal", nil, []string{"iso6"}, false, false},
+		{"brand, profiles chosen", nil, []string{"iso6", "cmfc"}, true, false},
+		{"profile, profiles chosen", []string{profileCMAF}, []string{"cmfc"}, true, true},
+	}
+	for _, c := range cases {
+		rep := &addressing.Rep{Profiles: c.profiles, OnlyProfiles: c.only}
+		if got := isCMAF(rep, c.brands); got != c.want {
+			t.Errorf("%s: isCMAF = %v, want %v", c.name, got, c.want)
+		}
+	}
+}

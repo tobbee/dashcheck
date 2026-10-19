@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/tobbee/dashcheck/spec"
 )
 
 const iopMPD = `<?xml version="1.0" encoding="UTF-8"?>
@@ -90,6 +92,49 @@ func TestProfileRules(t *testing.T) {
 			var got []string
 			for _, f := range findings {
 				if f.Rule != "MPD-XSD" && !strings.HasPrefix(f.Rule, "MPD-DVB-XSD") {
+					got = append(got, f.Rule)
+				}
+			}
+			slices.Sort(got)
+			if !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v\n%v", got, c.want, findings)
+			}
+		})
+	}
+}
+
+func TestProfileChoice(t *testing.T) {
+	noDVB := strings.Replace(dvbMPD, "urn:dvb:dash:profile:dvb-dash:2014,", "", 1)
+	badDVB := strings.Replace(dvbMPD, ` par="16:9"`, "", 1)
+	noLL := strings.Replace(llMPD, ",http://www.dashif.org/guidelines/low-latency-live-v5", "", 1)
+	cases := []struct {
+		name, mpd, choice string
+		want              []string // the MPD-DVB-, MPD-LL- and MPD-PROFILE-CHOSEN findings
+	}{
+		{"dvb signalled", badDVB, "auto", []string{"MPD-DVB-VIDEO"}},
+		{"dvb not signalled", noDVB, "auto", nil},
+		{"dvb chosen", noDVB, "dvb", []string{"MPD-PROFILE-CHOSEN"}},
+		{"dvb chosen and signalled", badDVB, "dvb", []string{"MPD-DVB-VIDEO"}},
+		{"dvb not chosen", badDVB, "none", nil},
+		{"dvb added", strings.Replace(badDVB, "urn:dvb:dash:profile:dvb-dash:2014,", "", 1), "auto,dvb",
+			[]string{"MPD-DVB-VIDEO", "MPD-PROFILE-CHOSEN"}},
+		{"chunked", noLL, "auto", []string{"MPD-LL-PROFILE"}},
+		{"chunked, other profile chosen", noLL, "iop", []string{"MPD-PROFILE-CHOSEN"}},
+		{"chunked, low latency chosen", noLL, "low-latency", []string{"MPD-PROFILE-CHOSEN"}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			sel, err := spec.Parse(c.choice)
+			if err != nil {
+				t.Fatal(err)
+			}
+			md, findings := CheckWith([]byte(c.mpd), "https://example.com/Manifest.mpd", sel)
+			if md == nil {
+				t.Fatalf("MPD not parsed: %v", findings)
+			}
+			var got []string
+			for _, f := range findings {
+				if strings.HasPrefix(f.Rule, "MPD-DVB-") || strings.HasPrefix(f.Rule, "MPD-LL-") || f.Rule == "MPD-PROFILE-CHOSEN" {
 					got = append(got, f.Rule)
 				}
 			}

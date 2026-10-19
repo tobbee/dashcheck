@@ -30,6 +30,11 @@ const (
 )
 
 var (
+	RuleProfileChosen = report.Register(report.Rule{
+		ID: "MPD-PROFILE-CHOSEN", Severity: report.Warning,
+		Desc:    "A profile chosen for the check (-profiles) should be listed in MPD@profiles",
+		SpecRef: refProfiles,
+	})
 	RuleProfileType = report.Register(report.Rule{
 		ID: "MPD-PROFILE-TYPE", Severity: report.Error,
 		Desc: "On-demand profiles require a static MPD", SpecRef: refProfiles,

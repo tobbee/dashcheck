@@ -19,6 +19,7 @@ import (
 	"github.com/tobbee/dashcheck/fetch"
 	"github.com/tobbee/dashcheck/internal"
 	"github.com/tobbee/dashcheck/report"
+	"github.com/tobbee/dashcheck/spec"
 )
 
 const usage = `Usage: dashcheck [options] <MPD URL or file>
@@ -28,6 +29,12 @@ semantic rules, fetches the initialization segment and some media segments of
 every Representation, and checks them against the MPD. For live (dynamic) MPDs
 the clock is synchronized to the MPD's UTCTiming and the newest available
 segments are checked against the availability window.
+
+The profile-specific rules (DASH-IF IOP, CMAF, low latency, DVB-DASH, HbbTV,
+CTA WAVE) follow the MPD's @profiles. -profiles checks other profiles: a list
+of auto, iop, cmaf, low-latency, dvb, dvb2017, hbbtv and wave, or none. With
+auto in the list, the chosen profiles are added to those the MPD signals;
+without it, only the chosen profiles are checked.
 
 The exit code is 1 if any error was found.
 
@@ -47,6 +54,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 	nSegs := fs.Int("n", dashcheck.DefaultMaxSegments, "media segments to check per Representation")
 	all := fs.Bool("all", false, "check all segments (static MPDs)")
+	profiles := fs.String("profiles", "auto", "profiles to check, such as dvb,hbbtv or auto,dvb (see above)")
 	hlsInterop := fs.Bool("hls-interop", false, "also check the DASH-HLS interoperability rules of CTA-5005-B")
 	updates := fs.Int("updates", dashcheck.DefaultMPDUpdates, "times a dynamic MPD is fetched again to check its updates (0 for none)")
 	jsonOut := fs.Bool("json", false, "write the report as JSON")
@@ -76,6 +84,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "bad -level: %v\n", err)
 		return 2
 	}
+	sel, err := spec.Parse(*profiles)
+	if err != nil {
+		fmt.Fprintf(stderr, "bad -profiles: %v\n", err)
+		return 2
+	}
 	mpdURL, err := toURL(fs.Arg(0))
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -92,6 +105,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 	opts.MPDUpdates = *updates
 	opts.HLSInterop = *hlsInterop
+	opts.Profiles = sel
 	if *updates <= 0 {
 		opts.MPDUpdates = -1
 	}
@@ -146,6 +160,7 @@ func printReport(w io.Writer, rpt *report.Report, shown []report.Finding) {
 	fmt.Fprintf(w, "MPD:      %s\n", rpt.MPDURL)
 	if rpt.Type != "" {
 		fmt.Fprintf(w, "Type:     %s\n", rpt.Type)
+		fmt.Fprintf(w, "Profiles: %s\n", describeProfiles(rpt))
 	}
 	switch rpt.ClockSource {
 	case "":
@@ -173,6 +188,20 @@ func printReport(w io.Writer, rpt *report.Report, shown []report.Finding) {
 		fmt.Fprintln(w)
 	}
 	fmt.Fprintf(w, "%d errors, %d warnings, %d info\n", c[report.Error], c[report.Warning], c[report.Info])
+}
+
+// describeProfiles names the profiles whose rules were checked, and how they were chosen.
+func describeProfiles(rpt *report.Report) string {
+	names := "no profile-specific rules"
+	if len(rpt.Profiles) > 0 {
+		names = strings.Join(rpt.Profiles, ", ")
+	}
+	switch rpt.ProfileChoice {
+	case "", "auto":
+		return names + " (from @profiles)"
+	default:
+		return names + " (-profiles " + rpt.ProfileChoice + ")"
+	}
 }
 
 func printRules(w io.Writer) {

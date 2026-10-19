@@ -29,9 +29,12 @@ It checks:
   (`-updates N` sets how many times) and compared with the version before:
   @publishTime, ids, Representation attributes and the timing of segments that
   both versions describe, plus the DVB-DASH update constraints.
-* **Profiles:** DASH-IF IOP, CMAF, low latency, DVB-DASH, CTA WAVE and more,
-  selected by the MPD's @profiles. The DASH-HLS interoperability rules of
-  CTA-5005, which MPDs do not signal, are added with `-hls-interop`.
+* **Profiles:** DASH-IF IOP, CMAF, low latency, DVB-DASH 2014 and 2017, HbbTV
+  and CTA WAVE, selected by the MPD's @profiles. `-profiles` chooses them
+  instead: `-profiles auto,dvb` adds DVB-DASH to the profiles the MPD
+  signals, and `-profiles dvb,hbbtv` checks only DVB-DASH and HbbTV, as if
+  MPD@profiles listed them. The DASH-HLS interoperability rules of CTA-5005,
+  which MPDs do not signal, are added with `-hls-interop`.
 
 All findings carry a stable rule ID; `dashcheck -rules` lists them.
 
@@ -42,6 +45,7 @@ go install github.com/tobbee/dashcheck/cmd/dashcheck@latest
 dashcheck https://livesim2.dashif.org/livesim2/segtimeline_1/testpic_2s/Manifest.mpd
 dashcheck -n 10 -level warning path/to/local/Manifest.mpd
 dashcheck -json https://example.com/stream.mpd
+dashcheck -profiles auto,hbbtv https://example.com/stream.mpd
 ```
 
 The exit code is 1 if any error was found, which makes it usable in CI.
@@ -75,6 +79,7 @@ segcheck             init and media segment checks with mp4ff
 clock                UTCTiming measurement and synchronized clock
 fetch                Fetcher interface: native and browser fetch
 report               rules, findings, report
+spec                 profiles to check, chosen or from @profiles
 ```
 
 No check does I/O or reads the clock directly. Everything goes through

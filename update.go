@@ -51,6 +51,7 @@ func checkUpdates(ctx context.Context, rpt *report.Report, mpdURL string, md *m.
 			rpt.Findings = append(rpt.Findings, mpdcheck.RuleParse.New(report.Location{URL: r.URL}, "MPD update: %v", err))
 			return
 		}
+		opts.Profiles.Apply(next)
 		cur := mpdcheck.Version{MPD: next, Data: r.Body, Time: clk.Now().Add(-time.Since(r.End))}
 		rpt.Findings = append(rpt.Findings, mpdcheck.CheckUpdate(prev, cur, r.URL)...)
 		rpt.MPDUpdates++

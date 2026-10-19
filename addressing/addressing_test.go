@@ -180,3 +180,16 @@ func TestTemplateInheritance(t *testing.T) {
 		t.Errorf("a=%+v b=%+v", a, b)
 	}
 }
+
+func TestUseOnlyProfiles(t *testing.T) {
+	chunked := &Rep{LowLatency: true}
+	chunked.UseOnlyProfiles()
+	if chunked.LowLatency || !chunked.OnlyProfiles {
+		t.Errorf("chunked without the profile: LowLatency %v, OnlyProfiles %v", chunked.LowLatency, chunked.OnlyProfiles)
+	}
+	ll := &Rep{LowLatency: true, Profiles: []string{ProfileLowLatency}}
+	ll.UseOnlyProfiles()
+	if !ll.LowLatency {
+		t.Error("the low-latency profile no longer makes the Representation low latency")
+	}
+}
