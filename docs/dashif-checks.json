@@ -4185,11 +4185,12 @@
    "source": "LowLatency/Segments/SelfInitializingSidx.php",
    "context": "9.X.4.5 => MPEG-DASH 8.X.3",
    "text": "The 'sidx' box reference count SHALL match the number of 'mmof' boxes",
-   "status": "partial",
+   "status": "done",
    "rules": [
-    "SEG-CMAF-SIDX"
+    "SEG-CMAF-SIDX",
+    "SEG-SIDX-SPAN"
    ],
-   "note": "dashcheck checks that each fetched subsegment of a CMAF track is one fragment, not the total count"
+   "note": "dashcheck checks that each fetched subsegment of a CMAF track is one fragment (every subsegment with -n -1), and reads the box headers after the sidx box and after the last subsegment to find movie fragments that the sidx does not index; this applies to all indexed segments (ISO/IEC 23009-1 6.3.4.4)"
   },
   {
    "id": "LL-49",

@@ -265,6 +265,9 @@ type repChecker struct {
 	sidx     *mp4.SidxBox // index of a SegmentBase Representation
 	firstEPT float64      // presentation time of the first segment of the Period, NaN if not checked
 	nSidx    int          // number of sidx boxes in its index range
+	// Byte positions in the file of a SegmentBase Representation: between the
+	// sidx box and the first subsegment, and after the last subsegment.
+	gapStart, gapEnd, indexEnd uint64
 }
 
 func (rc *repChecker) add(f ...report.Finding) { rc.findings = append(rc.findings, f...) }
@@ -337,6 +340,7 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		// The index range precedes the media by construction of the sidx offsets.
 		rc.add(segcheck.CheckSelfInitSidx(rep, init, rc.sidx, rc.nSidx, true, first)...)
 		rc.add(segcheck.CheckDVBSidx(rep, rc.sidx, rc.nSidx)...)
+		rc.checkSidxSpan(ctx)
 		if rc.opts.HLSInterop {
 			rc.add(segcheck.CheckHLSInteropSidx(rep, rc.sidx, rc.nSidx)...)
 		}

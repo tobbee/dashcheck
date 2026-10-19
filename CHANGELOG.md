@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with a sync sample). The CMAF rules now also apply to low-latency chunked Representations.
 - XCHK-CMAF-SIZE: in the DASH profile for CMAF content, @maxWidth and @maxHeight (or @width and
   @height) must be the tkhd size of the largest track.
+- SEG-SIDX-SPAN: the sidx box of a SegmentBase Representation must index every movie fragment of
+  its file.
+
+### Fixed
+- `file:` URLs: a byte range that ends after the file is cut at its end, as over HTTP.
 
 ## [0.1.2] - 2026-10-19
 

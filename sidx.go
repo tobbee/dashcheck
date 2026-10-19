@@ -3,6 +3,7 @@ package dashcheck
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"fmt"
 	"strconv"
 	"strings"
@@ -49,6 +50,7 @@ func (rc *repChecker) sidxSegments(ctx context.Context) ([]addressing.Segment, e
 	rep.Timescale = sidx.Timescale
 
 	offset := first + box.Size() + sidx.FirstOffset
+	rc.gapStart, rc.gapEnd = first+box.Size(), offset
 	t := sidx.EarliestPresentationTime
 	segs := make([]addressing.Segment, 0, len(sidx.SidxRefs))
 	for i, ref := range sidx.SidxRefs {
@@ -66,7 +68,74 @@ func (rc *repChecker) sidxSegments(ctx context.Context) ([]addressing.Segment, e
 		offset = end + 1
 		t += uint64(ref.SubSegmentDuration)
 	}
+	rc.indexEnd = offset
 	return segs, nil
+}
+
+// maxProbedBoxes limits the box headers that checkSidxSpan reads after the
+// last subsegment.
+const maxProbedBoxes = 16
+
+// checkSidxSpan looks for movie fragments that the sidx box does not index:
+// between the sidx box and its first subsegment, and after the last one.
+func (rc *repChecker) checkSidxSpan(ctx context.Context) {
+	rep := rc.rep
+	n := len(rc.sidx.SidxRefs)
+	if rc.gapStart < rc.gapEnd {
+		if pos, ok := rc.findMoof(ctx, rc.gapStart, rc.gapEnd); ok {
+			rc.add(segcheck.RuleSidxSpan.New(rep.Loc(), "moof box at byte %d, before the first of %d subsegments at byte %d", pos, n, rc.gapEnd))
+		}
+	}
+	if pos, ok := rc.findMoof(ctx, rc.indexEnd, 0); ok {
+		rc.add(segcheck.RuleSidxSpan.New(rep.Loc(), "moof box at byte %d, after the last of %d subsegments", pos, n))
+	}
+}
+
+// findMoof reads the top-level box headers of the Representation's file from
+// pos up to end (0 for the end of the file) with small range requests, and
+// returns the position of the first moof box.
+func (rc *repChecker) findMoof(ctx context.Context, pos, end uint64) (uint64, bool) {
+	var whole []byte // the file, if the server ignores ranges
+	for range maxProbedBoxes {
+		if end != 0 && pos >= end {
+			return 0, false
+		}
+		var hdr []byte
+		if whole == nil {
+			resp, err := rc.opts.Fetcher.Fetch(ctx, fetch.Request{URL: rc.rep.BaseURL, Range: fmt.Sprintf("%d-%d", pos, pos+15)})
+			if err != nil || !resp.OK() { // 416: pos is at the end of the file
+				return 0, false
+			}
+			hdr = resp.Body
+			if resp.Status == 200 {
+				whole = resp.Body
+			}
+		}
+		if whole != nil {
+			if pos >= uint64(len(whole)) {
+				return 0, false
+			}
+			hdr = whole[pos:]
+		}
+		if len(hdr) < 8 {
+			return 0, false
+		}
+		if string(hdr[4:8]) == "moof" {
+			return pos, true
+		}
+		size := uint64(binary.BigEndian.Uint32(hdr))
+		switch {
+		case size == 0: // the box extends to the end of the file
+			return 0, false
+		case size == 1 && len(hdr) >= 16:
+			size = binary.BigEndian.Uint64(hdr[8:16])
+		}
+		if size < 8 {
+			return 0, false
+		}
+		pos += size
+	}
+	return 0, false
 }
 
 // countSidx counts the sidx boxes among the top-level boxes in data.

@@ -78,6 +78,9 @@ func fetchFile(req Request) (*Response, error) {
 		if err != nil {
 			return nil, err
 		}
+		if first >= len(data) {
+			return &Response{URL: req.URL, Status: 416, Start: start, End: time.Now()}, nil
+		}
 		data = data[first : last+1]
 		status = 206
 	}
@@ -101,10 +104,11 @@ func parseRange(r string, size int) (first, last int, err error) {
 			return 0, 0, fmt.Errorf("bad range %q", r)
 		}
 	}
-	if first > last || last >= size {
-		return 0, 0, fmt.Errorf("range %q outside file of size %d", r, size)
+	if first > last {
+		return 0, 0, fmt.Errorf("bad range %q", r)
 	}
-	return first, last, nil
+	// Like HTTP, a range that ends after the file is cut at its end.
+	return first, min(last, size-1), nil
 }
 
 func lowerKeys(h map[string][]string) map[string]string {
