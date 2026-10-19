@@ -46,9 +46,25 @@ dashcheck https://livesim2.dashif.org/livesim2/segtimeline_1/testpic_2s/Manifest
 dashcheck -n 10 -level warning path/to/local/Manifest.mpd
 dashcheck -json https://example.com/stream.mpd
 dashcheck -profiles auto,hbbtv https://example.com/stream.mpd
+dashcheck -short streams/*.mpd
+dashcheck -short -json $(cat urls.txt) > results.json
 ```
 
 The exit code is 1 if any error was found, which makes it usable in CI.
+
+`-short` prints one line per MPD instead of the report, and takes several
+MPDs, which it checks `-parallel` at a time. `-level` adds the findings below
+each line.
+
+```
+$ dashcheck -short testdata/*.mpd testdata/*/*.mpd
+FAIL  testdata/malformed.mpd  (3 errors, 0 warnings, 0 info)
+OK    testdata/testpic_2s/Manifest.mpd  (0 errors, 0 warnings, 0 info)
+
+2 MPDs: 1 with errors, 0 with warnings, 1 OK
+```
+
+With `-json`, `-short` writes an array of reports, each with its counts.
 `dashcheck -version` prints the version, which Go takes from the git tag and
 commit at build time.
 

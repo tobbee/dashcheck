@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `-updates`: refetches a dynamic MPD and checks the update against the version before.
 - `-hls-interop`: the DASH-HLS interoperability rules of CTA-5005.
 - 380 of the 408 checks of the DASH-IF Conformance tool, and 6 in part; see `docs/dashif-coverage.md`.
+- `-short`: a FAIL, WARN or OK line per MPD instead of the report, also for several MPDs such as
+  `dashcheck -short streams/*.mpd`, checked `-parallel` at a time.
+- `-json`: the report, or with `-short` an array of reports, with error, warning and info counts.
 - `-version`, and the version in the footer of the browser tool.
 
 [Unreleased]: https://github.com/tobbee/dashcheck/commits/main
