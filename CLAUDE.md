@@ -9,7 +9,7 @@ meant to replace the DASH-IF Conformance tool. See README.md for the overview.
   and `clock.Clock`, so checks are identical in the CLI and the browser and can
   be tested with test servers and fixed clocks.
 - `fetch/js.go` must not import `net/http` (it adds about 7 MB to the wasm).
-  Run `make lint`, which also vets the js/wasm build.
+  Run `make check`, which also lints the js/wasm build.
 - Each check is a `report.Rule` registered in a package-level var, with a stable
   ID and a spec reference. Prefixes: `MPD-` (mpdcheck), `ADDR-` (addressing),
   `INIT-`, `SEG-`, `XCHK-` (segcheck), `LIVE-`, `HTTP-` (runner), `CLOCK-`.
@@ -73,11 +73,17 @@ rules there.
 
 ```sh
 go test ./...                          # all tests
-make lint                              # vet, including js/wasm
+make check                             # golangci-lint, including js/wasm
 go test ./internal/coverage -update    # regenerate docs/dashif-coverage.md
 go build -o out/dashcheck ./cmd/dashcheck && out/dashcheck -n 2 <MPD URL>
 make serve PORT=8090                   # browser UI on http://localhost:8090
 ```
+
+Add user-visible changes to CHANGELOG.md under [Unreleased]. The version comes
+from the git tag (`internal.Version`); a release is a CHANGELOG section and a
+`vX.Y.Z` tag. The pre-commit hook (`make pre-commit-install`) runs gofmt,
+golangci-lint and the tests; its venv is `.venv`, since Go would see the Go file
+pre-commit ships in a `venv/` directory as a package.
 
 ## Test streams
 
