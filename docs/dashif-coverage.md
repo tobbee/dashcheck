@@ -226,7 +226,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | CMAF-2 | `Section A.1.2`: Audio adaptation sets SHALL include at least one 'caac' representation | done | SEG-CMAF-PRESENTATIONPROFILE |  |
 | CMAF-3 | `Section 9.2.1`: Video tracks SHALL contain either 'trun(v1)' OR 'elst' combined with 'trun(v0)', but not both | done | SEG-CMAF-COMPTIME | upstream requires an edit list with trun version 0 even when there are no composition offsets |
 | CMAF-4 | `Section 7.3.5`: All media samples in a CMAF Fragment SHALL be addressed by byte offsets in the 'trun' box | done | SEG-CMAF-DATAOFFSET, SEG-PARSE | upstream compares trun sample sizes with parsed NAL samples; dashcheck requires moof-relative data offsets, and mp4ff checks that samples lie within mdat |
-| CMAF-5 | `Section 7.3.2.2`: baseMediaDecodeTime SHALL be equal to the sum of all prior segments | done | SEG-CONTINUITY | dashcheck checks continuity between consecutive checked segments |
+| CMAF-5 | `Section 7.3.2.2`: baseMediaDecodeTime SHALL be equal to the sum of all prior segments | done | SEG-CONTINUITY, SEG-CONTINUITY-FRAGMENT | dashcheck checks the decode time between consecutive checked segments and between the chunks and fragments of each segment, with the sample durations from trun, tfhd or trex; upstream compares the first tfdt of a segment with every fragment (bug 52) and uses only the tfhd default duration (bug 23) |
 | CMAF-6 | `Section A.1.2`: Tracks SHALL NOT contain a track encryption box | done | SEG-CMAF-ENCRYPTION |  |
 | CMAF-7 | `Section A.1.3`: Tracks SHALL be available in 'cenc' encryption | done | SEG-CMAF-ENCRYPTION |  |
 | CMAF-8 | `Section A.1.4`: Tracks SHALL be available in 'cbcs' encryption | done | SEG-CMAF-ENCRYPTION |  |

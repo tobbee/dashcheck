@@ -1736,9 +1736,10 @@
    "text": "baseMediaDecodeTime SHALL be equal to the sum of all prior segments",
    "status": "done",
    "rules": [
-    "SEG-CONTINUITY"
+    "SEG-CONTINUITY",
+    "SEG-CONTINUITY-FRAGMENT"
    ],
-   "note": "dashcheck checks continuity between consecutive checked segments"
+   "note": "dashcheck checks the decode time between consecutive checked segments and between the chunks and fragments of each segment, with the sample durations from trun, tfhd or trex; upstream compares the first tfdt of a segment with every fragment (bug 52) and uses only the tfhd default duration (bug 23)"
   },
   {
    "id": "CMAF-6",

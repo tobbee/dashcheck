@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- SEG-CONTINUITY-FRAGMENT: each chunk or fragment in a segment must start at the previous one's
+  tfdt plus its sample durations (ISO/IEC 23000-19 7.3.2.2, 7.3.2.3).
+
 ## [0.1.2] - 2026-10-19
 
 ### Fixed

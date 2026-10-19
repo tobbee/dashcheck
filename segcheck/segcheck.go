@@ -86,6 +86,11 @@ var (
 		ID: "SEG-CONTINUITY", Severity: report.Error,
 		Desc: "Consecutive segments must have no gaps or overlaps in decode time", SpecRef: refCMAF + " 7.3.2.2",
 	})
+	RuleSegFragmentContinuity = report.Register(report.Rule{
+		ID: "SEG-CONTINUITY-FRAGMENT", Severity: report.Error,
+		Desc:    "Each chunk or fragment in a segment must have the tfdt of the previous one plus its sample durations",
+		SpecRef: refCMAF + " 7.3.2.2 c, 7.3.2.3 g",
+	})
 	RuleSegSAP = report.Register(report.Rule{
 		ID: "SEG-SAP", Severity: report.Error,
 		Desc: "With @startWithSAP 1 or 2, every segment must start with a sync sample", SpecRef: refStartWithSAP,
@@ -288,10 +293,17 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	minCT := int64(math.MaxInt64)
 	firstSample := true
 	wrongTrack := false
+	// The decode time where the next fragment (or chunk) must start: the
+	// previous one's tfdt plus its sample durations. Not known after a
+	// fragment that could not be read.
+	var next uint64
+	haveNext := false
 	for si, ms := range mf.Segments {
 		for fi, frag := range ms.Fragments {
 			floc := loc
 			floc.Path = fmt.Sprintf("segment[%d]/fragment[%d]", si, fi)
+			expect, check := next, haveNext
+			haveNext = false
 			if frag.Moof == nil || frag.Moof.Traf == nil {
 				f = append(f, RuleSegStructure.New(floc, "no traf box"))
 				continue
@@ -313,15 +325,28 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 				f = append(f, RuleSegStructure.New(floc, "no trun box"))
 				continue
 			}
+			tfdt := traf.Tfdt.BaseMediaDecodeTime()
+			if check && tfdt != expect {
+				diff := int64(tfdt) - int64(expect)
+				kind := "gap"
+				if diff < 0 {
+					kind = "overlap"
+				}
+				f = append(f, RuleSegFragmentContinuity.New(floc,
+					"%s of %d ticks (%.3fs): tfdt %d, but the previous fragment ends at %d",
+					kind, diff, float64(diff)/float64(init.Timescale), tfdt, expect))
+			}
 			if firstSample {
-				media.DecodeTime = traf.Tfdt.BaseMediaDecodeTime()
+				media.DecodeTime = tfdt
 			}
 			samples, err := frag.GetFullSamples(init.trex)
 			if err != nil {
 				f = append(f, RuleSegParse.New(floc, "samples: %v", err))
 				continue
 			}
+			next, haveNext = tfdt, true
 			for _, s := range samples {
+				next += uint64(s.Dur)
 				if firstSample {
 					firstSample = false
 					media.FirstCTO = s.CompositionTimeOffset

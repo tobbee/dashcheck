@@ -831,6 +831,23 @@ ETSI TS 103 285 V1.4.1 also specifies VVC (`vvc1`, `vvi1`, clause 5.3), AVS3
 
 **Fix:** Add the codecs of TS 103 285 V1.4.1 clauses 5 to 7.
 
+### 52. Durations compares the first tfdt of a segment with every fragment
+
+**Where:** [app/Modules/CMAF/Segments/Durations.php#L61](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/CMAF/Segments/Durations.php#L61)
+
+**Problem:** The loop over the fragments of a segment compares `$tfdtBoxes[0]`,
+the first fragment's baseMediaDecodeTime, with the running offset, instead of
+`$tfdtBoxes[$index]`. ISO/IEC 23000-19 clauses 7.3.2.2 c) and 7.3.2.3 g) require
+each CMAF fragment and chunk to start at the previous one's baseMediaDecodeTime
+plus its sample durations.
+
+**Effect:** Every valid segment with more than one fragment or chunk, as in
+low-latency streams, fails, and wrong baseMediaDecodeTime values in later
+fragments are never found.
+
+**Fix:** Compare `$tfdtBoxes[$index]->decodeTime`, with the durations of bug 23
+fixed.
+
 ## Other projects
 
 Found during the same work in projects that dashcheck builds on or tests with.

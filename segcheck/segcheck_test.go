@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
@@ -150,6 +151,51 @@ func TestImplicitAAC(t *testing.T) {
 		reason, _ := compareCodecs(c.mpd, info)
 		if (reason == "") != c.want {
 			t.Errorf("%s: reason %q", c.mpd, reason)
+		}
+	}
+}
+
+// TestFragmentContinuity joins media segments into one segment with several
+// fragments, which must follow each other in decode time.
+func TestFragmentContinuity(t *testing.T) {
+	cases := []struct {
+		name  string
+		files []string
+		want  []string // messages of SEG-CONTINUITY-FRAGMENT, by prefix
+	}{
+		{"consecutive", []string{"1.m4s", "2.m4s", "3.m4s"}, nil},
+		{"gap", []string{"1.m4s", "3.m4s"}, []string{"gap of 180000 ticks (2.000s)"}},
+		{"overlap", []string{"2.m4s", "1.m4s"}, []string{"overlap of -360000 ticks (-4.000s)"}},
+		{"gap, then consecutive", []string{"1.m4s", "3.m4s", "4.m4s"}, []string{"gap of 180000 ticks (2.000s)"}},
+	}
+	for _, rep := range reps(t) {
+		if rep.ID != "V300" {
+			continue
+		}
+		init, _ := CheckInit(read(t, "V300/init.mp4"), rep, rep.Loc())
+		segs, _ := rep.Segments(0, rep.PeriodDur)
+		for _, c := range cases {
+			t.Run(c.name, func(t *testing.T) {
+				var data []byte
+				for _, name := range c.files {
+					data = append(data, read(t, "V300/"+name)...)
+				}
+				_, f := CheckMedia(data, init, rep, segs[0], false)
+				var got []string
+				for _, x := range f {
+					if x.Rule == "SEG-CONTINUITY-FRAGMENT" {
+						got = append(got, x.Message)
+					}
+				}
+				if len(got) != len(c.want) {
+					t.Fatalf("got %q, want %q", got, c.want)
+				}
+				for i := range got {
+					if !strings.HasPrefix(got[i], c.want[i]) {
+						t.Errorf("got %q, want prefix %q", got[i], c.want[i])
+					}
+				}
+			})
 		}
 	}
 }
