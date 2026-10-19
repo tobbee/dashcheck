@@ -9,7 +9,7 @@ dashcheck checks MPEG-DASH streams: the MPD, its segments, and for live
 streams the timing against a synchronized clock. The same Go code runs as a
 command-line tool and in the browser as WebAssembly.
 
-**Try it in the browser: https://tobbee.github.io/dashcheck/**
+<a href="https://tobbee.github.io/dashcheck/"><img src="images/favico.svg" alt="" width="20" height="20" align="top"></a> **Try it in the browser: https://tobbee.github.io/dashcheck/**
 
 It checks:
 
