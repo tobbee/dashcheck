@@ -1,6 +1,7 @@
 package segcheck
 
 import (
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -196,6 +197,55 @@ func TestFragmentContinuity(t *testing.T) {
 					}
 				}
 			})
+		}
+	}
+}
+
+func TestSequenceNumbers(t *testing.T) {
+	rep := reps(t)[1]
+	segs, _ := rep.Segments(0, rep.PeriodDur)
+	check := func(opt bool, files ...string) []string {
+		init, _ := CheckInit(read(t, "V300/init.mp4"), rep, rep.Loc())
+		init.SequenceNumbers = opt
+		var data []byte
+		for _, name := range files {
+			data = append(data, read(t, "V300/"+name)...)
+		}
+		_, f := CheckMedia(data, init, rep, segs[0], false)
+		var got []string
+		for _, x := range f {
+			if x.Rule == "SEG-SEQUENCE-NUMBER" {
+				got = append(got, x.Message)
+			}
+		}
+		return got
+	}
+	if got := check(true, "1.m4s"); got != nil {
+		t.Errorf("one chunk: %q", got)
+	}
+	if got := check(false, "1.m4s", "2.m4s"); got != nil {
+		t.Errorf("not asked for: %q", got)
+	}
+	if got := check(true, "1.m4s", "2.m4s"); len(got) != 1 || !strings.Contains(got[0], "different sequence numbers") {
+		t.Errorf("chunks with different numbers: %q", got)
+	}
+
+	init := &Init{SequenceNumbers: true, Timescale: 1}
+	cases := []struct {
+		prev, cur uint32
+		ok        bool
+	}{
+		{5, 6, true},
+		{5, 9, true},
+		{5, 5, false},
+		{6, 5, false},
+		{math.MaxUint32, 0, true},
+		{0, math.MaxUint32, false},
+	}
+	for _, c := range cases {
+		f := sequenceNumberContinuity(&Media{SequenceNumber: c.prev}, &Media{SequenceNumber: c.cur}, init, rep, segs[1])
+		if (len(f) == 0) != c.ok {
+			t.Errorf("%d then %d: %v", c.prev, c.cur, f)
 		}
 	}
 }

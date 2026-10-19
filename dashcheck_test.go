@@ -197,3 +197,15 @@ func TestProfileChoice(t *testing.T) {
 		})
 	}
 }
+
+func TestSequenceNumbersOption(t *testing.T) {
+	// Segment 2 is served again as segment 3, so its sequence number does not increase.
+	ts := server(t, "", map[string]string{"/V300/3.m4s": "/V300/2.m4s"})
+	for _, on := range []bool{false, true} {
+		rpt := Check(context.Background(), ts.URL+"/Manifest.mpd",
+			Options{Fetcher: fetch.NewNative(5 * time.Second), SequenceNumbers: on})
+		if got := slices.Contains(ruleSet(rpt.Findings, report.Warning), "SEG-SEQUENCE-NUMBER"); got != on {
+			t.Errorf("option %v: SEG-SEQUENCE-NUMBER reported %v\n%v", on, got, rpt.Findings)
+		}
+	}
+}

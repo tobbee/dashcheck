@@ -22,7 +22,9 @@ It checks:
   [mp4ff](https://github.com/Eyevinn/mp4ff), and cross-checked against the
   MPD: `@codecs` against the decoder configuration, size, sample rate, handler,
   earliest presentation time and duration against the MPD timeline, continuity
-  between segments, and sync samples at segment start.
+  between segments, and sync samples at segment start. `-sequence-numbers`
+  adds a check of a convention that no spec requires: one mfhd sequence
+  number per segment, shared by its chunks and increasing.
 * **Live timing:** the clock is synchronized to the MPD's UTCTiming source,
   as a player would do, and compared with a reference clock. The newest segments
   in the availability window must be available, the next one must not be

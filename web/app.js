@@ -36,6 +36,7 @@ function options() {
     mpdUpdates: Number($('mpdUpdates').value) || -1,
     profiles: profileChoice(),
     hlsInterop: $('hlsInterop').checked,
+    sequenceNumbers: $('sequenceNumbers').checked,
     reference: $('reference').value.trim() || 'none',
   };
 }

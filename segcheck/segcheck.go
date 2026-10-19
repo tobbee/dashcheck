@@ -122,6 +122,9 @@ type Init struct {
 	kinds       []*mp4.KindBox
 	// HLSInterop turns on the CTA-5005 checks in CheckMedia; the runner sets it.
 	HLSInterop bool
+	// SequenceNumbers turns on the sequence number convention of
+	// SEG-SEQUENCE-NUMBER (-sequence-numbers); the runner sets it.
+	SequenceNumbers bool
 }
 
 // CheckInit parses and checks an initialization segment.
@@ -264,12 +267,14 @@ func contains(list []string, s string) bool {
 
 // Media summarizes a checked media segment.
 type Media struct {
-	DecodeTime uint64  // tfdt of the first fragment, media timescale
-	Duration   uint64  // sum of sample durations, media timescale
-	EPT        float64 // earliest presentation time in seconds, before presentationTimeOffset
-	Samples    int
-	FirstCTO   int32 // composition time offset of the first sample
-	FirstSync  bool  // the first sample is a sync sample
+	DecodeTime uint64 // tfdt of the first fragment, media timescale
+	// SequenceNumber is the mfhd sequence_number of the first fragment.
+	SequenceNumber uint32
+	Duration       uint64  // sum of sample durations, media timescale
+	EPT            float64 // earliest presentation time in seconds, before presentationTimeOffset
+	Samples        int
+	FirstCTO       int32 // composition time offset of the first sample
+	FirstSync      bool  // the first sample is a sync sample
 	// Event messages before the first moof and later in the segment, as
 	// "scheme value id" keys.
 	EarlyEmsgs, LateEmsgs []string
@@ -364,6 +369,9 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 		}
 	}
 	media.EarlyEmsgs, media.LateEmsgs = emsgPlacement(mf)
+	var otherSeqNr string
+	media.SequenceNumber, otherSeqNr = firstSequenceNumber(mf)
+	f = append(f, sequenceNumberMediaRules(init, otherSeqNr, media.SequenceNumber, loc)...)
 	if media.Samples == 0 {
 		if !wrongTrack {
 			f = append(f, RuleSegStructure.New(loc, "no samples"))
@@ -447,6 +455,7 @@ func CheckContinuity(prev, cur *Media, init *Init, rep *addressing.Rep, seg addr
 		return nil
 	}
 	f := emsgRepeatRules(prev, cur, init, rep, seg)
+	f = append(f, sequenceNumberContinuity(prev, cur, init, rep, seg)...)
 	if prev.End() == cur.DecodeTime {
 		return f
 	}

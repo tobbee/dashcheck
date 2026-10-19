@@ -50,8 +50,8 @@ upstream commit e311ec6e12b21394355fd1749101590400e31cbb (2026-10-16).
 
 Remaining at the last update: only DVB AVS3 (DVB-60 to DVB-64), which needs
 AVS3 support in mp4ff, plus six partial checks (see the coverage notes).
-Rules for specifications that MPDs do not signal are opt-in options
-(`-hls-interop` for CTA-5005). Segment Sequences (@k, $SubNumber$) are not
+Rules for specifications that MPDs do not signal, and conventions that no spec
+requires, are opt-in options (`-hls-interop` for CTA-5005, `-sequence-numbers`). Segment Sequences (@k, $SubNumber$) are not
 addressed yet (ADDR-UNSUPPORTED).
 `docs/dashif-coverage.md` has the current numbers.
 

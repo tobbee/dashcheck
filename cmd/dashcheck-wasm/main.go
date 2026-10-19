@@ -32,6 +32,7 @@ type jsOptions struct {
 	MPDUpdates   int    `json:"mpdUpdates"`
 	Profiles     string `json:"profiles"`
 	HLSInterop   bool   `json:"hlsInterop"`
+	SeqNumbers   bool   `json:"sequenceNumbers"`
 	Reference    string `json:"reference"`
 	Concurrency  int    `json:"concurrency"`
 	LiveMarginMS int    `json:"liveMarginMs"`
@@ -60,14 +61,15 @@ func options(optsJSON string, onProgress js.Value) (dashcheck.Options, error) {
 		return dashcheck.Options{}, fmt.Errorf("options: %w", err)
 	}
 	opts := dashcheck.Options{
-		Fetcher:     fetch.Browser{},
-		MaxSegments: jo.MaxSegments,
-		MPDUpdates:  jo.MPDUpdates,
-		Profiles:    sel,
-		HLSInterop:  jo.HLSInterop,
-		Reference:   jo.Reference,
-		Concurrency: jo.Concurrency,
-		LiveMargin:  time.Duration(jo.LiveMarginMS) * time.Millisecond,
+		Fetcher:         fetch.Browser{},
+		MaxSegments:     jo.MaxSegments,
+		MPDUpdates:      jo.MPDUpdates,
+		Profiles:        sel,
+		HLSInterop:      jo.HLSInterop,
+		SequenceNumbers: jo.SeqNumbers,
+		Reference:       jo.Reference,
+		Concurrency:     jo.Concurrency,
+		LiveMargin:      time.Duration(jo.LiveMarginMS) * time.Millisecond,
 	}
 	if onProgress.Type() == js.TypeFunction {
 		opts.Progress = func(p dashcheck.Progress) {

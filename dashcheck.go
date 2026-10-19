@@ -51,6 +51,9 @@ type Options struct {
 	// HLSInterop adds the checks of the DASH-HLS Interoperability
 	// Specification CTA-5005-B, which MPDs do not signal.
 	HLSInterop bool
+	// SequenceNumbers adds the check of a sequence number convention: one
+	// mfhd sequence_number per segment, increasing (SEG-SEQUENCE-NUMBER).
+	SequenceNumbers bool
 	// UpdateInterval is the time between MPD fetches. Zero means about one
 	// segment duration, between 2 and 10 seconds.
 	UpdateInterval time.Duration
@@ -388,6 +391,9 @@ func (rc *repChecker) checkInit(ctx context.Context) *segcheck.Init {
 	}
 	init, f := segcheck.CheckInit(resp.Body, rep, loc)
 	rc.add(f...)
+	if init != nil && rc.opts.SequenceNumbers {
+		init.SequenceNumbers = true
+	}
 	if init != nil && rc.opts.HLSInterop {
 		init.HLSInterop = true
 		rc.add(segcheck.CheckHLSInteropInit(rep, init, loc)...)

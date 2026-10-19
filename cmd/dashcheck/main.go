@@ -63,6 +63,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	all := fs.Bool("all", false, "check all segments (static MPDs)")
 	profiles := fs.String("profiles", "auto", "profiles to check, such as dvb,hbbtv or auto,dvb (see above)")
 	hlsInterop := fs.Bool("hls-interop", false, "also check the DASH-HLS interoperability rules of CTA-5005-B")
+	seqNumbers := fs.Bool("sequence-numbers", false, "also check that the chunks of a segment share one mfhd sequence_number, increasing per segment")
 	updates := fs.Int("updates", dashcheck.DefaultMPDUpdates, "times a dynamic MPD is fetched again to check its updates (0 for none)")
 	short := fs.Bool("short", false, "print a FAIL, WARN or OK line per MPD instead of the report; allows several MPDs")
 	parallel := fs.Int("parallel", 4, "MPDs checked at the same time with -short")
@@ -124,6 +125,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 	opts.MPDUpdates = *updates
 	opts.HLSInterop = *hlsInterop
+	opts.SequenceNumbers = *seqNumbers
 	opts.Profiles = sel
 	if *updates <= 0 {
 		opts.MPDUpdates = -1
