@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The dot of LIVE TIMING in the logo no longer touches the text.
+
 ## [0.1.1] - 2026-10-19
 
 ### Added
