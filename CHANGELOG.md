@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SEG-SSR-SAP: the Partial Segments that SegmentSequenceProperties@cadence selects must start with
   a sync sample when @sapType is 1 or 2.
 
+- `docs/rules.md` documents all rules with the DASH-IF checks each covers, and marks the rules that
+  the DASH-IF Conformance tool does not have.
+
 ### Changed
 - Segment Sequences (ISO/IEC 23009-1 5.3.9.7, `@k` and `$SubNumber$`) are now addressed and their
   Partial Segments checked, with @startWithSAP on the first of each sequence. Only SegmentTimeline

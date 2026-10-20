@@ -10,11 +10,12 @@ import (
 	"github.com/tobbee/dashcheck/report"
 )
 
-var update = flag.Bool("update", false, "rewrite docs/dashif-coverage.md")
+var update = flag.Bool("update", false, "rewrite docs/dashif-coverage.md and docs/rules.md")
 
 const (
 	inventoryFile = "../../docs/dashif-checks.json"
 	markdownFile  = "../../docs/dashif-coverage.md"
+	rulesFile     = "../../docs/rules.md"
 )
 
 func TestInventory(t *testing.T) {
@@ -64,18 +65,24 @@ func TestMarkdownUpToDate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	md := inv.Markdown()
+	checkGenerated(t, markdownFile, inv.Markdown())
+	checkGenerated(t, rulesFile, inv.RulesMarkdown(report.Rules()))
+}
+
+// checkGenerated compares a generated file with its content, or rewrites it with -update.
+func checkGenerated(t *testing.T, path, content string) {
+	t.Helper()
 	if *update {
-		if err := os.WriteFile(markdownFile, []byte(md), 0o644); err != nil {
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		return
 	}
-	current, err := os.ReadFile(markdownFile)
+	current, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(current) != md {
-		t.Errorf("%s is out of date; run: go test ./internal/coverage -update", markdownFile)
+	if string(current) != content {
+		t.Errorf("%s is out of date; run: go test ./internal/coverage -update", path)
 	}
 }

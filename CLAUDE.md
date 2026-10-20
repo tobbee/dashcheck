@@ -43,7 +43,9 @@ upstream commit e311ec6e12b21394355fd1749101590400e31cbb (2026-10-16).
    mutation per case. Filter `MPD-XSD` when a mutation is schema-invalid on purpose.
 3. Run it on real streams to catch false positives (see below).
 4. Record the status with `tools/set-status.py` and note every difference from
-   upstream, then `go test ./internal/coverage -update`.
+   upstream, then `go test ./internal/coverage -update`. Run it after adding or
+   changing any rule too: it also regenerates `docs/rules.md`, the list of all
+   rules, where those without an upstream check are marked **dashcheck**.
 5. Add every upstream bug found to `docs/dashif-upstream-bugs.md` right away,
    with a commit-pinned link, problem, effect and fix.
 6. Commit one area per commit (see the user's commit rules).
@@ -87,7 +89,7 @@ rules there.
 ```sh
 go test ./...                          # all tests
 make check                             # golangci-lint, including js/wasm
-go test ./internal/coverage -update    # regenerate docs/dashif-coverage.md
+go test ./internal/coverage -update    # regenerate docs/dashif-coverage.md and docs/rules.md
 go build -o out/dashcheck ./cmd/dashcheck && out/dashcheck -n 2 <MPD URL>
 make serve PORT=8090                   # browser UI on http://localhost:8090
 ```

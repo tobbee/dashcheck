@@ -1,6 +1,7 @@
 // Package coverage tracks which checks of the DASH-IF Conformance tool have
 // been ported to dashcheck. The inventory lives in docs/dashif-checks.json
 // (built by tools/dashif-inventory.py) and is rendered to docs/dashif-coverage.md.
+// docs/rules.md lists all dashcheck rules with the checks they cover.
 package coverage
 
 import (
@@ -8,6 +9,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/tobbee/dashcheck/report"
 )
 
 // Statuses of a check.
@@ -129,6 +132,71 @@ func (inv *Inventory) Markdown() string {
 			}
 			fmt.Fprintf(&b, "| %s | %s | %s | %s | %s |\n", c.ID, escape(text), c.Status,
 				escape(strings.Join(c.Rules, ", ")), escape(c.Note))
+		}
+	}
+	return b.String()
+}
+
+// RulesMarkdown renders the list of all dashcheck rules, by group, with the
+// DASH-IF checks that each covers.
+func (inv *Inventory) RulesMarkdown(rules []report.Rule) string {
+	covers := map[string][]string{}
+	for _, c := range inv.Checks {
+		for _, r := range c.Rules {
+			covers[r] = append(covers[r], c.ID)
+		}
+	}
+	byGroup := map[string][]report.Rule{}
+	own := map[string]int{}
+	for _, r := range rules {
+		byGroup[r.Group] = append(byGroup[r.Group], r)
+		if len(covers[r.ID]) == 0 {
+			own[r.Group]++
+			own[""]++
+		}
+	}
+	var b strings.Builder
+	b.WriteString("# dashcheck rules\n\n")
+	b.WriteString("<!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->\n\n")
+	fmt.Fprintf(&b, "All %d rules that dashcheck reports, as `dashcheck -rules` lists them. ", len(rules))
+	b.WriteString("Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. " +
+		"The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. ")
+	fmt.Fprintf(&b, "The %d rules marked **dashcheck** have no counterpart in that tool.\n\n", own[""])
+
+	b.WriteString("| Group | Rules | dashcheck only |\n|---|---:|---:|\n")
+	for _, g := range report.Groups {
+		if len(byGroup[g]) > 0 {
+			fmt.Fprintf(&b, "| [%s](#%s) | %d | %d |\n", g, anchor(g), len(byGroup[g]), own[g])
+		}
+	}
+	fmt.Fprintf(&b, "| **Total** | **%d** | **%d** |\n", len(rules), own[""])
+
+	for _, g := range report.Groups {
+		if len(byGroup[g]) == 0 {
+			continue
+		}
+		fmt.Fprintf(&b, "\n## %s\n\n", g)
+		b.WriteString("| Rule | Severity | Description | Spec | DASH-IF checks |\n|---|---|---|---|---|\n")
+		for _, r := range byGroup[g] {
+			checks := "**dashcheck**"
+			if ids := covers[r.ID]; len(ids) > 0 {
+				checks = strings.Join(ids, ", ")
+			}
+			fmt.Fprintf(&b, "| %s | %s | %s | %s | %s |\n", r.ID, r.Severity, escape(r.Desc), escape(r.SpecRef), checks)
+		}
+	}
+	return b.String()
+}
+
+// anchor returns the GitHub anchor of a Markdown heading.
+func anchor(heading string) string {
+	var b strings.Builder
+	for _, c := range strings.ToLower(heading) {
+		switch {
+		case c >= 'a' && c <= 'z', c >= '0' && c <= '9', c == '-', c == '_':
+			b.WriteRune(c)
+		case c == ' ':
+			b.WriteByte('-')
 		}
 	}
 	return b.String()

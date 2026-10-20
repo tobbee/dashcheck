@@ -40,7 +40,9 @@ It checks:
   MPD@profiles listed them. The DASH-HLS interoperability rules of CTA-5005,
   which MPDs do not signal, are added with `-hls-interop`.
 
-All findings carry a stable rule ID; `dashcheck -rules` lists them.
+All findings carry a stable rule ID; `dashcheck -rules` lists them, and
+[docs/rules.md](docs/rules.md) documents them with the DASH-IF checks that each
+covers, marking the rules that the DASH-IF Conformance tool does not have.
 
 ## Command line
 
@@ -125,7 +127,8 @@ internal DTD entities expanded.
 This is an early version. [docs/dashif-coverage.md](docs/dashif-coverage.md)
 lists all 408 checks of the DASH-IF Conformance tool and which dashcheck rules
 cover them. It is generated from `docs/dashif-checks.json`; after changing that
-file, run `go test ./internal/coverage -update`. To refresh the list from a newer
+file, run `go test ./internal/coverage -update`, which also regenerates
+[docs/rules.md](docs/rules.md). To refresh the list from a newer
 version of the DASH-IF tool, run `tools/dashif-inventory.py <clone> docs/dashif-checks.json`.
 Bugs found in the DASH-IF tool while porting its checks are listed in
 [docs/dashif-upstream-bugs.md](docs/dashif-upstream-bugs.md), ready to be reported.
