@@ -111,12 +111,15 @@ type Rep struct {
 	// SegmentSequences is set when the segments are Partial Segments in
 	// Segment Sequences (@k greater than 1, S@ssp, or $SubNumber$).
 	SegmentSequences bool
-	BaseURL          string // absolute base URL for this Representation
-	InitURL          string
-	InitRange        string
-	IndexRange       string // SegmentBase@indexRange
-	Timescale        uint32
-	PTO              uint64 // presentationTimeOffset in Timescale ticks
+	// SequenceProperties are the effective SegmentSequenceProperties
+	// elements, from the Representation or else the AdaptationSet.
+	SequenceProperties []*m.SegmentSequencePropertiesType
+	BaseURL            string // absolute base URL for this Representation
+	InitURL            string
+	InitRange          string
+	IndexRange         string // SegmentBase@indexRange
+	Timescale          uint32
+	PTO                uint64 // presentationTimeOffset in Timescale ticks
 
 	Dynamic     bool
 	AST         time.Time // MPD@availabilityStartTime (dynamic only)
@@ -268,10 +271,11 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 					ASCodecs:             as.Codecs,
 					TargetLatency:        targetLatency(md),
 					HasContentProtection: len(rep.ContentProtections)+len(as.ContentProtections) > 0,
-					ContentProtections:   firstCPs(rep.ContentProtections, as.ContentProtections),
-					AudioChannelConfigs:  firstDescs(rep.AudioChannelConfigurations, as.AudioChannelConfigurations),
+					ContentProtections:   firstElements(rep.ContentProtections, as.ContentProtections),
+					AudioChannelConfigs:  firstElements(rep.AudioChannelConfigurations, as.AudioChannelConfigurations),
 					Essentials:           slices.Concat(as.EssentialProperties, rep.EssentialProperties),
 					Supplementals:        slices.Concat(as.SupplementalProperties, rep.SupplementalProperties),
+					SequenceProperties:   firstElements(rep.SegmentSequenceProperties, as.SegmentSequenceProperties),
 					SegmentProfiles:      first(listOf4CC(rep.SegmentProfiles), listOf4CC(as.SegmentProfiles)),
 					Profiles:             splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
 					BitstreamSwitching:   boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),
@@ -326,16 +330,8 @@ func targetLatency(md *m.MPD) float64 {
 	return 0
 }
 
-func firstCPs(levels ...[]*m.ContentProtectionType) []*m.ContentProtectionType {
-	for _, l := range levels {
-		if len(l) > 0 {
-			return l
-		}
-	}
-	return nil
-}
-
-func firstDescs(levels ...[]*m.DescriptorType) []*m.DescriptorType {
+// firstElements returns the first non-empty list of elements, lowest level first.
+func firstElements[T any](levels ...[]T) []T {
 	for _, l := range levels {
 		if len(l) > 0 {
 			return l

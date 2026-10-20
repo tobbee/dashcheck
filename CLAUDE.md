@@ -55,8 +55,7 @@ Rules for specifications that MPDs do not signal, and conventions that no spec
 requires, are opt-in options (`-hls-interop` for CTA-5005, `-sequence-numbers`).
 Segment Sequences (@k, $SubNumber$) are addressed as Partial Segments
 (`Segment.Partial`, `SubNumber`); SegmentTimeline duration patterns (S@p,
-S@ssp) are not addressed yet (ADDR-UNSUPPORTED). livesim2 makes SSR content
-with `ssras_2,1/chunkdurssr_2,0.5/testpic_2s_low_delay/Manifest.mpd`.
+S@ssp) are not addressed yet (ADDR-UNSUPPORTED).
 `docs/dashif-coverage.md` has the current numbers.
 
 ## Standards
@@ -105,6 +104,11 @@ pre-commit ships in a `venv/` directory as a package.
   with URL options `segtimeline_1/`, `chunkdur_0.25/ato_7/testpic4_8s/Manifest300.mpd`
   (low latency), `periods_60/`, `utc_none/`, and faults `timeoffset_10/`,
   `timeoffset_-10/`, `statuscode_[{cycle:2,rsq:0,code:404,rep:V300}]/` (URL-encode the brackets).
+- Segment Sequence Representations (SSR): livesim2
+  `ssras_2,1/chunkdurssr_2,1/testpic_2s_low_delay/Manifest.mpd`. With
+  `chunkdurssr_2,0.5`, Partial Segments 1 and 3 start without an IDR picture
+  although SegmentSequenceProperties signals SAP type 1 (SEG-SSR-SAP), and the
+  Partial Segments of the sequence in progress get 425 (HTTP-SEGMENT).
 - On-demand with sidx: `https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd`.
 - CMAF: `https://dash.akamaized.net/WAVE/vectors/cfhd_sets/12.5_25_50/t1/2022-10-17/stream.mpd`.
 - DVB-DASH: `https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-full.mpd`

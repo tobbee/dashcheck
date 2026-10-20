@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Segment Sequence MPD rules: MPD-SSR-SIGNAL (a profile that allows them or the
   `urn:mpeg:dash:ssr:2023` EssentialProperty), MPD-SSR-TIMELINE, MPD-SSR-ATTRIBUTES and
   MPD-SSR-PROPERTIES.
+- SEG-SSR-SAP: the Partial Segments that SegmentSequenceProperties@cadence selects must start with
+  a sync sample when @sapType is 1 or 2.
 
 ### Changed
 - Segment Sequences (ISO/IEC 23009-1 5.3.9.7, `@k` and `$SubNumber$`) are now addressed and their

@@ -167,6 +167,11 @@ func TestPartialSegments(t *testing.T) {
 	noSync := nonSyncStart(t, seg2)
 	tl := *video
 	tl.Kind = addressing.KindTimelineNumber
+	ssr := func(sapType, cadence uint32) *addressing.Rep {
+		r := *video
+		r.SequenceProperties = []*m.SegmentSequencePropertiesType{{SapType: sapType, Cadence: cadence}}
+		return &r
+	}
 	shift := func(s addressing.Segment, time, dur uint64) addressing.Segment {
 		s.Time += time
 		s.Dur += dur
@@ -182,6 +187,11 @@ func TestPartialSegments(t *testing.T) {
 		{"segment without sync start", video, noSync, segs[1], []string{"SEG-SAP"}},
 		{"first Partial Segment without sync start", video, noSync, partial(0), []string{"SEG-SAP"}},
 		{"later Partial Segment without sync start", video, noSync, partial(1), nil},
+		{"Partial Segment with sapType 1 without sync start", ssr(1, 1), noSync, partial(1), []string{"SEG-SSR-SAP"}},
+		{"Partial Segment outside the cadence", ssr(1, 2), noSync, partial(1), nil},
+		{"Partial Segment at the cadence", ssr(1, 2), noSync, partial(2), []string{"SEG-SSR-SAP"}},
+		{"Partial Segment with sapType 3", ssr(3, 1), noSync, partial(1), nil},
+		{"first Partial Segment reported by SEG-SAP", ssr(1, 1), noSync, partial(0), []string{"SEG-SAP"}},
 		{"timeline segment one tick long", &tl, seg2, shift(segs[1], 0, 1), []string{"SEG-DURATION"}},
 		{"timeline Partial Segment one tick long", &tl, seg2, shift(partial(1), 0, 1), nil},
 		{"timeline sequence start one tick late", &tl, seg2, shift(partial(0), 1, 0), []string{"SEG-EPT"}},
