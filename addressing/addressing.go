@@ -131,14 +131,13 @@ type Rep struct {
 	ATC         *bool     // effective availabilityTimeComplete, nil if absent
 	Media       string    // effective SegmentTemplate@media
 
-	LowLatency           bool                       // the MPD uses low-latency profile or chunked delivery
-	TargetLatency        float64                    // ServiceDescription target latency in seconds, 0 if absent
-	HasContentProtection bool                       // ContentProtection on the Representation or AdaptationSet
-	ContentProtections   []*m.ContentProtectionType // effective ContentProtection elements
-	AudioChannelConfigs  []*m.DescriptorType        // effective AudioChannelConfiguration elements
-	Essentials           []*m.DescriptorType        // EssentialProperty elements of the AdaptationSet and Representation
-	Supplementals        []*m.DescriptorType        // SupplementalProperty elements of the AdaptationSet and Representation
-	SegmentProfiles      string                     // effective @segmentProfiles
+	LowLatency          bool                       // the MPD uses low-latency profile or chunked delivery
+	TargetLatency       float64                    // ServiceDescription target latency in seconds, 0 if absent
+	ContentProtections  []*m.ContentProtectionType // ContentProtection of the AdaptationSet and Representation, with @ref resolved
+	AudioChannelConfigs []*m.DescriptorType        // effective AudioChannelConfiguration elements
+	Essentials          []*m.DescriptorType        // EssentialProperty elements of the AdaptationSet and Representation
+	Supplementals       []*m.DescriptorType        // SupplementalProperty elements of the AdaptationSet and Representation
+	SegmentProfiles     string                     // effective @segmentProfiles
 
 	tmpl  *m.SegmentTemplateType
 	list  *m.SegmentListType
@@ -245,6 +244,7 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 
 	starts, durs, f := periodTimes(md)
 	findings = append(findings, f...)
+	cpSources := ContentProtectionSources(md)
 
 	for pi, p := range md.Periods {
 		pPath := fmt.Sprintf("Period[%d]", pi)
@@ -259,47 +259,46 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 				rBase, f := resolveBase(asBase, rep.BaseURLs, rPath)
 				findings = append(findings, f...)
 				r := &Rep{
-					ID:                   rep.Id,
-					Path:                 rPath,
-					PeriodID:             p.Id,
-					PeriodIndex:          pi,
-					ASPath:               asPath,
-					ASID:                 optUint(as.Id),
-					Lang:                 as.Lang,
-					ContainerProfiles:    containerProfiles(rep.ContainerProfiles, as.ContainerProfiles),
-					Roles:                as.Roles,
-					ASCodecs:             as.Codecs,
-					TargetLatency:        targetLatency(md),
-					HasContentProtection: len(rep.ContentProtections)+len(as.ContentProtections) > 0,
-					ContentProtections:   firstElements(rep.ContentProtections, as.ContentProtections),
-					AudioChannelConfigs:  firstElements(rep.AudioChannelConfigurations, as.AudioChannelConfigurations),
-					Essentials:           slices.Concat(as.EssentialProperties, rep.EssentialProperties),
-					Supplementals:        slices.Concat(as.SupplementalProperties, rep.SupplementalProperties),
-					SequenceProperties:   firstElements(rep.SegmentSequenceProperties, as.SegmentSequenceProperties),
-					SegmentProfiles:      first(listOf4CC(rep.SegmentProfiles), listOf4CC(as.SegmentProfiles)),
-					Profiles:             splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
-					BitstreamSwitching:   boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),
-					ContentType:          string(as.ContentType),
-					MimeType:             first(rep.MimeType, as.MimeType),
-					Codecs:               first(rep.Codecs, as.Codecs),
-					Bandwidth:            rep.Bandwidth,
-					Width:                firstU(rep.Width, as.Width),
-					Height:               firstU(rep.Height, as.Height),
-					MaxWidth:             as.MaxWidth,
-					MaxHeight:            as.MaxHeight,
-					FrameRate:            first(string(rep.FrameRate), string(as.FrameRate)),
-					Sar:                  first(string(rep.Sar), string(as.Sar)),
-					AudioSamplingRate:    firstVec(rep.AudioSamplingRate, as.AudioSamplingRate),
-					StartWithSAP:         firstU(rep.StartWithSAP, as.StartWithSAP),
-					BaseURL:              rBase.String(),
-					Dynamic:              dynamic,
-					AST:                  ast,
-					PeriodStart:          starts[pi],
-					PeriodDur:            durs[pi],
-					LastPeriod:           pi == len(md.Periods)-1,
-					TSBD:                 tsbd,
-					ATO:                  baseURLATO(md.BaseURL, p.BaseURLs, as.BaseURLs, rep.BaseURLs),
-					repID:                rep.Id,
+					ID:                  rep.Id,
+					Path:                rPath,
+					PeriodID:            p.Id,
+					PeriodIndex:         pi,
+					ASPath:              asPath,
+					ASID:                optUint(as.Id),
+					Lang:                as.Lang,
+					ContainerProfiles:   containerProfiles(rep.ContainerProfiles, as.ContainerProfiles),
+					Roles:               as.Roles,
+					ASCodecs:            as.Codecs,
+					TargetLatency:       targetLatency(md),
+					ContentProtections:  ResolveContentProtections(slices.Concat(as.ContentProtections, rep.ContentProtections), cpSources),
+					AudioChannelConfigs: firstElements(rep.AudioChannelConfigurations, as.AudioChannelConfigurations),
+					Essentials:          slices.Concat(as.EssentialProperties, rep.EssentialProperties),
+					Supplementals:       slices.Concat(as.SupplementalProperties, rep.SupplementalProperties),
+					SequenceProperties:  firstElements(rep.SegmentSequenceProperties, as.SegmentSequenceProperties),
+					SegmentProfiles:     first(listOf4CC(rep.SegmentProfiles), listOf4CC(as.SegmentProfiles)),
+					Profiles:            splitProfiles(first(string(rep.Profiles), string(as.Profiles), string(md.Profiles))),
+					BitstreamSwitching:  boolAttr(as.BitstreamSwitching, p.BitstreamSwitching),
+					ContentType:         string(as.ContentType),
+					MimeType:            first(rep.MimeType, as.MimeType),
+					Codecs:              first(rep.Codecs, as.Codecs),
+					Bandwidth:           rep.Bandwidth,
+					Width:               firstU(rep.Width, as.Width),
+					Height:              firstU(rep.Height, as.Height),
+					MaxWidth:            as.MaxWidth,
+					MaxHeight:           as.MaxHeight,
+					FrameRate:           first(string(rep.FrameRate), string(as.FrameRate)),
+					Sar:                 first(string(rep.Sar), string(as.Sar)),
+					AudioSamplingRate:   firstVec(rep.AudioSamplingRate, as.AudioSamplingRate),
+					StartWithSAP:        firstU(rep.StartWithSAP, as.StartWithSAP),
+					BaseURL:             rBase.String(),
+					Dynamic:             dynamic,
+					AST:                 ast,
+					PeriodStart:         starts[pi],
+					PeriodDur:           durs[pi],
+					LastPeriod:          pi == len(md.Periods)-1,
+					TSBD:                tsbd,
+					ATO:                 baseURLATO(md.BaseURL, p.BaseURLs, as.BaseURLs, rep.BaseURLs),
+					repID:               rep.Id,
 				}
 				findings = append(findings, r.setAddressing(p, as, rep)...)
 				reps = append(reps, r)

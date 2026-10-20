@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   MPD-SSR-PROPERTIES.
 - SEG-SSR-SAP: the Partial Segments that SegmentSequenceProperties@cadence selects must start with
   a sync sample when @sapType is 1 or 2.
+- ContentProtection cross-checks with the initialization segment: XCHK-CP-MISSING, XCHK-CP-SCHEME
+  (@value is the schm scheme) and XCHK-CP-KID (cenc:default_KID lists the tenc default_KID), and
+  the MPD-CP-DEFAULTKID warning.
 
 - `docs/rules.md` documents all rules with the DASH-IF checks each covers, and marks the rules that
   the DASH-IF Conformance tool does not have.
@@ -35,10 +38,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Segment Sequences (ISO/IEC 23009-1 5.3.9.7, `@k` and `$SubNumber$`) are now addressed and their
   Partial Segments checked, with @startWithSAP on the first of each sequence. Only SegmentTimeline
   duration patterns (S@p, S@ssp) remain ADDR-UNSUPPORTED.
+- XCHK-CP-MISSING replaces SEG-LL-PROTECTION and checks all encrypted tracks, not only low latency.
 - SEG-HLS-BITRATE (`-hls-interop`) also checks SegmentTemplate and SegmentList content when every
   segment is checked, and live streams whose checked segments cover an hour (at most 110%).
 
 ### Fixed
+- ContentProtection@ref is resolved, so MPD-CP-VALUE, MPD-IOP-CP and SEG-DVB-PSSH see the @value,
+  cenc:default_KID and cenc:pssh that a descriptor inherits from its source.
 - `file:` URLs: a byte range that ends after the file is cut at its end, as over HTTP.
 
 ## [0.1.2] - 2026-10-19

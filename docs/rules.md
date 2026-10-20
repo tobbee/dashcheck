@@ -2,25 +2,25 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 248 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 49 rules marked **dashcheck** have no counterpart in that tool.
+All 251 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 50 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
 | [MPD syntax](#mpd-syntax) | 3 | 1 |
-| [MPD](#mpd) | 57 | 15 |
+| [MPD](#mpd) | 58 | 16 |
 | [MPD updates](#mpd-updates) | 5 | 3 |
 | [Segment addressing](#segment-addressing) | 7 | 6 |
-| [Segments](#segments) | 25 | 11 |
+| [Segments](#segments) | 28 | 11 |
 | [Live timing and HTTP](#live-timing-and-http) | 12 | 12 |
 | [DASH-IF IOP](#dash-if-iop) | 18 | 0 |
 | [CMAF](#cmaf) | 18 | 1 |
-| [Low latency](#low-latency) | 26 | 0 |
+| [Low latency](#low-latency) | 25 | 0 |
 | [DVB-DASH](#dvb-dash) | 55 | 0 |
 | [HbbTV](#hbbtv) | 3 | 0 |
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **248** | **49** |
+| **Total** | **251** | **50** |
 
 ## MPD syntax
 
@@ -46,6 +46,7 @@ All 248 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-COMMON-BOTH | warning | Common attributes should be on the AdaptationSet or its Representations, not both | ISO/IEC 23009-1 5.3.7 | SCH-22 |
 | MPD-CONTENTCOMPONENT | error | ContentComponent ids must be unique and must not repeat AdaptationSet attributes | ISO/IEC 23009-1 5.3.4 | SCH-21, SCH-33 |
 | MPD-CONTENTTYPE | warning | AdaptationSet@contentType should agree with @mimeType | ISO/IEC 23009-1 5.3.3 | **dashcheck** |
+| MPD-CP-DEFAULTKID | warning | The mp4protection descriptor of Common Encryption content should have cenc:default_KID | ISO/IEC 23009-1 5.8.5.2.2, ISO/IEC 23001-7 11.3.2 | **dashcheck** |
 | MPD-CP-VALUE | error | ContentProtection @value must be a 4CC for mp4protection and 4 hex digits for CA_descriptor | ISO/IEC 23009-1 5.8.5.2 | SCH-55, SCH-56 |
 | MPD-DURATION-MISSING | error | Without @minimumUpdatePeriod and a last Period@duration, MPD@mediaPresentationDuration must be present | ISO/IEC 23009-1 5.3.1 | SCH-3, SCH-6 |
 | MPD-DURATION-YM | warning | xs:duration values should not use years or months, whose length varies | DASH-IF IOP | IOP-1 |
@@ -140,6 +141,9 @@ All 248 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | SEG-UNSUPPORTED | info | Segments in formats other than ISOBMFF are not checked |  | **dashcheck** |
 | XCHK-CODECS | error | @codecs must match the sample entry type |  | DVB-85, LL-23 |
 | XCHK-CODECS-DETAIL | warning | @codecs should match the codec string derived from the decoder configuration |  | DVB-85, LL-23 |
+| XCHK-CP-KID | error | cenc:default_KID must list the default_KID in the tenc box of the track | ISO/IEC 23001-7 11.3.2 | LL-24 |
+| XCHK-CP-MISSING | error | Encrypted tracks need ContentProtection in the MPD, and Common Encryption the mp4protection descriptor | ISO/IEC 23009-1 5.8.4.1.1, ISO/IEC 23001-7 11.3.2 | LL-24 |
+| XCHK-CP-SCHEME | error | The mp4protection @value must be the scheme type in the schm box of the track | ISO/IEC 23009-1 5.8.5.2.2 | LL-24 |
 | XCHK-HANDLER | error | The track handler must match @contentType or @mimeType |  | DVB-82, LL-19 |
 | XCHK-SAMPLERATE | warning | @audioSamplingRate should match the sample entry |  | DVB-83 |
 | XCHK-SIZE | warning | @width and @height should match the sample entry |  | **dashcheck** |
@@ -232,7 +236,6 @@ All 248 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | SEG-LL-CHUNKS | warning | Segments of chunked low-latency Representations should contain more than one chunk | DASH-IF Low-Latency Modes 9.X.4.5 | LL-14 |
 | SEG-LL-DURATION | error | Low-latency segments must not exceed 50% of the target latency in segment mode | DASH-IF Low-Latency Modes 9.X.4.4 | LL-36 |
 | SEG-LL-DURATION-RECOMMENDED | warning | Low-latency segments should not exceed 30% of the target latency in segment mode, or the target latency when chunked | DASH-IF Low-Latency Modes 9.X.4.4 | LL-18, LL-36 |
-| SEG-LL-PROTECTION | error | Encrypted low-latency content must have a ContentProtection element | DASH-IF Low-Latency Modes 9.X.4.5 | LL-24 |
 | SEG-LL-SIDX | error | A self-initializing low-latency segment needs one sidx before the first moof that matches the track | DASH-IF Low-Latency Modes 9.X.4.5 | LL-43, LL-44, LL-45, LL-46, LL-47, LL-49, LL-50, LL-51, LL-52, LL-53, LL-54 |
 | SEG-LL-SINGLEMOOF | warning | Segments of low-latency segment-mode Representations should have a single moof box | DASH-IF Low-Latency Modes 9.X.4.4 | LL-34 |
 | SEG-LL-SMDS | error | Segments with the smds brand need smds in @segmentProfiles | DASH-IF Low-Latency Modes 9.X.4.4 | LL-35 |

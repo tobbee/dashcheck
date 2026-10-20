@@ -43,9 +43,6 @@ func TestLowLatencySegments(t *testing.T) {
 			t.Errorf("%s: got %v", c.name, f)
 		}
 	}
-	if f := llInitRules(&video, &Init{Encrypted: true, Timescale: 1}, video.Loc()); len(f) != 1 || f[0].Rule != "SEG-LL-PROTECTION" {
-		t.Errorf("protection: got %v", f)
-	}
 }
 
 func TestSelfInitSidx(t *testing.T) {

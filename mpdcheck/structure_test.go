@@ -22,6 +22,23 @@ const staticMPD = `<?xml version="1.0" encoding="UTF-8"?>
   </Period>
 </MPD>`
 
+// The mp4protection descriptor of the AdaptationSet gets @value and
+// cenc:default_KID from a source in the Period (ISO/IEC 23009-1 5.8.4.1.3).
+func TestContentProtectionRef(t *testing.T) {
+	ref := strings.NewReplacer(`<Period id="p0">`, `<Period id="p0">
+    <ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc" refId="cp" cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266"/>`,
+		` value="cenc" cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266"/>`, ` ref="cp"/>`)
+	for name, mpd := range map[string]string{"static": staticMPD, "IOP": iopMPD} {
+		data := ref.Replace(mpd)
+		if !strings.Contains(data, `ref="cp"/>`) {
+			t.Fatalf("%s: no referencing ContentProtection", name)
+		}
+		if _, findings := Check([]byte(data), "https://example.com/vod.mpd"); len(findings) > 0 {
+			t.Errorf("%s: %v", name, findings)
+		}
+	}
+}
+
 func TestStructureRules(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -52,6 +69,8 @@ func TestStructureRules(t *testing.T) {
       <Representation id="v2" bandwidth="2000000" width="1280" height="720" frameRate="30"/>`, "",
 			[]string{"MPD-AS-NOREP"}},
 		{"mp4protection value", `value="cenc"`, `value="cenc-ctr"`, []string{"MPD-CP-VALUE"}},
+		{"no default_KID", ` cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266"`, "", []string{"MPD-CP-DEFAULTKID"}},
+		{"no default_KID for another scheme", ` value="cenc" cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266"`, ` value="abcd"`, nil},
 		{"role value", `value="main"`, `value="primary"`, []string{"MPD-ROLE-VALUE"}},
 		{"newer role value", `value="main"`, `value="forced-subtitle"`, nil},
 		{"event stream actuate", `</Period>`, `<EventStream schemeIdUri="urn:x" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:actuate="onLoad"/></Period>`,

@@ -67,6 +67,7 @@ yet unless stated.
 | 52 | CMAF Durations | First tfdt of a segment compared with every fragment | Verified in code |
 | 53 | Low Latency DASHProfile | @maxWidth and @maxHeight compared with every track; @width ignored | Verified in code and spec |
 | 54 | WaveHLSInterop Bitrate | On-demand rule applied to live and to the downloaded segments only | Verified in code and spec |
+| 55 | Low Latency DASHProfile | KIDs compared in different formats; cenc:pssh read as an attribute | Verified in code and spec |
 
 ## Manifest handling
 
@@ -893,6 +894,34 @@ the track, and a short last fragment fails (WAVEHLS-2).
 the track, excluding a short last fragment. For dynamic MPDs, apply only the
 110% upper bound over an hour of the track. Report a warning, and collect
 failures with `!pathAdd(...)`.
+
+### 55. LL-24 compares KIDs in different formats and reads cenc:pssh as an attribute
+
+**Where:** [DASHProfile.php#L181-L240](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/LowLatency/Segments/DASHProfile.php#L181-L240),
+with the KID from [MP4BoxRepresentation.php#L318](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Services/Validators/MP4BoxRepresentation.php#L318)
+
+**Problem:** The tenc KID comes from the MP4Box dump as `0x` and 32 upper-case
+hex digits (`KID="0x9EB4050D..."`, checked with GPAC 26.07), and is compared as
+a string with cenc:default_KID, which ISO/IEC 23001-7 11.2 writes as a UUID
+(`9eb4050d-e44b-...`), so the two never match. `getAttribute('cenc:pssh')`
+reads an element as an attribute and is always empty; read as an element, the
+base64 pssh box would be compared with the SystemID of the first pssh box in the
+initialization segment. The check passes when any one descriptor matches, so a
+DRM-specific descriptor without cenc:default_KID passes it without the
+mp4protection descriptor that ISO/IEC 23001-7 11.3.2 requires, and the
+mp4protection @value is not compared with the schm scheme type (ISO/IEC
+23009-1 5.8.5.2.2).
+
+**Effect:** Encrypted low-latency content fails LL-24 when every
+ContentProtection descriptor has cenc:default_KID, even the right one, and
+passes when any descriptor has none, whatever its scheme and the other KIDs.
+
+**Fix:** Compare KIDs as 16 bytes, for example as hex digits in one letter
+case. Require the mp4protection descriptor for the ISO/IEC 23001-7 schemes,
+compare its @value with the schm scheme type, and check that the
+cenc:default_KID of every descriptor lists the tenc KID. Read cenc:pssh as a
+child element in the urn:mpeg:cenc:2013 namespace and compare the SystemID of
+the decoded box with the UUID of the descriptor.
 
 ## Other projects
 
