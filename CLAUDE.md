@@ -76,6 +76,10 @@ and must not be committed or quoted at length:
 - `cta-5001-f.txt` (CTA WAVE; `CTA/WAVE/`), `iso-23000-19-2024-amd1.txt` (CMAF amendment)
 - `iso-23000-19-2023-fdis.txt` (CMAF 3rd edition FDIS; `MPEG/23000-19 CMAF/`) and
   `iso-14496-12-2022.txt` (ISO BMFF; `SIS/.../SS-ISO_IEC 14496-12_2022.pdf`)
+- `iso-23001-7-2022.txt` (Common Encryption, clause 11 has the MPD signalling;
+  `SIS/.../SS-ISO_IEC 23001-7_2023.pdf`)
+- `dashif-iop-v4.3.txt` (DASH-IF IOP v4.3, clause 7 is content protection) and
+  `dashif-iop-6-v5.0.0.txt` (IOP v5 part 6, Content Protection; both `DASH-IF/`)
 
 Find a clause with `grep -n` and read around it with `sed -n`. Extract more
 documents the same way when a rule needs them.
@@ -116,6 +120,14 @@ pre-commit ships in a `venv/` directory as a package.
 - DVB-DASH: `https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-full.mpd`
   and `.../testcard/simulcast/manifests/avc-full.mpd` (live).
 - DASH-IF IOP: `https://dash.akamaized.net/dash264/TestCasesIOP41/MultiTrack/alternative_content/1/manifest_alternative_content_live.mpd`.
+- Encrypted: `https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey-MultiPeriod/Manifest_1080p.mpd`
+  (also `v7-MultiDRM-SingleKey/`, `v9-MultiFormat/Encrypted_Cbcs/`), livesim2 Clear Key
+  `eccp_cbcs/testpic_2s/Manifest.mpd` and `eccp_cenc/`, and the Widevine
+  `https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine/dash.mpd`. Faulty:
+  `https://storage.googleapis.com/wvmedia/cenc/h264/tears/tears.mpd` gives one
+  cenc:default_KID for Representations with different keys (XCHK-CP-KID), and
+  `https://test.playready.microsoft.com/media/dash/APPLEENC_CBCS_BBB_1080p/1080p.mpd`
+  signals cenc and a KID for cbcs content with a zero tenc KID (XCHK-CP-SCHEME, XCHK-CP-KID).
 
 ## Known quirks of the dependencies
 

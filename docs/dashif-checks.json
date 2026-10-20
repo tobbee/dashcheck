@@ -3922,9 +3922,11 @@
    "text": "If the content is protected, a ContentProtection element SHALL be present and set appropriately",
    "status": "done",
    "rules": [
-    "SEG-LL-PROTECTION"
+    "XCHK-CP-MISSING",
+    "XCHK-CP-SCHEME",
+    "XCHK-CP-KID"
    ],
-   "note": ""
+   "note": "dashcheck checks all encrypted tracks, not only low latency: the mp4protection descriptor for Common Encryption, its @value against the schm scheme type, and the cenc:default_KID of every descriptor against the tenc KID; upstream compares the KIDs in different formats and passes when any one descriptor matches (bug 55)"
   },
   {
    "id": "LL-25",

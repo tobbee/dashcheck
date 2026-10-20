@@ -223,6 +223,7 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 		init.PsshSystems = append(init.PsshSystems, p.SystemID.String())
 	}
 	f = append(f, crossCheckInit(rep, init, info, loc)...)
+	f = append(f, protectionInitRules(rep, init, loc)...)
 	f = append(f, iopInitRules(rep, init, loc)...)
 	f = append(f, llInitRules(rep, init, loc)...)
 	f = append(f, dvbInitRules(rep, init, info, loc)...)

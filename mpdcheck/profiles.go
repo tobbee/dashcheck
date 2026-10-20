@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
+	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/report"
 )
 
@@ -150,6 +151,7 @@ func profileRules(md *m.MPD) []report.Finding {
 	mpdP := profiles(splitProfiles(string(md.Profiles)))
 	dynamic := md.GetType() == "dynamic"
 	iop := mpdP.iop()
+	cpSources := addressing.ContentProtectionSources(md)
 
 	// SCH-5, SCH-8. SCH-7 (extended live requires static) is not in ISO/IEC 23009-1 8.8.
 	if dynamic {
@@ -209,7 +211,7 @@ func profileRules(md *m.MPD) []report.Finding {
 		for ai, as := range p.AdaptationSets {
 			asPath := fmt.Sprintf("%s/AdaptationSet[%d]", pPath, ai)
 			asP := effective(as.Profiles, mpdP)
-			f = append(f, adaptationSetProfileRules(p, ai, as, asP, mpdP, iop, asPath)...)
+			f = append(f, adaptationSetProfileRules(p, ai, as, asP, mpdP, iop, asPath, cpSources)...)
 			for ri, rep := range as.Representations {
 				repP := effective(rep.Profiles, asP)
 				f = append(f, representationProfileRules(p, as, ri, rep, repP, asP, mpdP, iop, asPath)...)
@@ -219,7 +221,8 @@ func profileRules(md *m.MPD) []report.Finding {
 	return f
 }
 
-func adaptationSetProfileRules(p *m.Period, ai int, as *m.AdaptationSetType, asP, mpdP profiles, iop bool, asPath string) []report.Finding {
+func adaptationSetProfileRules(p *m.Period, ai int, as *m.AdaptationSetType, asP, mpdP profiles, iop bool, asPath string,
+	cpSources map[string]*m.ContentProtectionType) []report.Finding {
 	var f []report.Finding
 	loc := report.Location{Path: asPath}
 	// SCH-100
@@ -289,7 +292,7 @@ func adaptationSetProfileRules(p *m.Period, ai int, as *m.AdaptationSetType, asP
 		// SCH-90
 		f = append(f, checkSwitchingAlignment(p, ai, as, loc)...)
 		// SCH-115, SCH-116, SCH-117
-		for i, cp := range as.ContentProtections {
+		for i, cp := range addressing.ResolveContentProtections(as.ContentProtections, cpSources) {
 			if cp.SchemeIdUri == "urn:mpeg:dash:mp4protection:2011" && cp.DefaultKID == "" {
 				f = append(f, RuleIOPContentProtection.New(report.Location{Path: fmt.Sprintf("%s/ContentProtection[%d]", asPath, i)},
 					"mp4protection ContentProtection without cenc:default_KID"))

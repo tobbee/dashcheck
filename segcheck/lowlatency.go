@@ -37,10 +37,6 @@ var (
 		Desc:    "Low-latency segments should not exceed 30% of the target latency in segment mode, or the target latency when chunked",
 		SpecRef: refLL + ".4",
 	})
-	RuleLLProtection = report.Register(report.Rule{
-		ID: "SEG-LL-PROTECTION", Severity: report.Error,
-		Desc: "Encrypted low-latency content must have a ContentProtection element", SpecRef: refLL + ".5",
-	})
 	RuleLLTimescale = report.Register(report.Rule{
 		ID: "SEG-LL-TIMESCALE", Severity: report.Error,
 		Desc: "The SegmentTemplate @timescale of low-latency content must equal the mdhd timescale", SpecRef: refLL + ".5",
@@ -63,11 +59,7 @@ func llInitRules(rep *addressing.Rep, init *Init, loc report.Location) []report.
 		return nil
 	}
 	var f []report.Finding
-	// LL-24
-	if init.Encrypted && !rep.HasContentProtection {
-		f = append(f, RuleLLProtection.New(loc, "encrypted track without ContentProtection in the MPD"))
-	}
-	// LL-25
+	// LL-25 (LL-24 is XCHK-CP-MISSING, for all encrypted tracks)
 	switch rep.Kind {
 	case addressing.KindNumber, addressing.KindTimelineTime, addressing.KindTimelineNumber:
 		if rep.Timescale != init.Timescale {

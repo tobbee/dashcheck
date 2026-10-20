@@ -8,6 +8,7 @@ import (
 	"time"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
+	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/report"
 )
 
@@ -88,6 +89,11 @@ var (
 		Desc:    "ContentProtection @value must be a 4CC for mp4protection and 4 hex digits for CA_descriptor",
 		SpecRef: "ISO/IEC 23009-1 5.8.5.2",
 	})
+	RuleCPDefaultKID = report.Register(report.Rule{
+		ID: "MPD-CP-DEFAULTKID", Severity: report.Warning,
+		Desc:    "The mp4protection descriptor of Common Encryption content should have cenc:default_KID",
+		SpecRef: "ISO/IEC 23009-1 5.8.5.2.2, ISO/IEC 23001-7 11.3.2",
+	})
 	RuleRoleValue = report.Register(report.Rule{
 		ID: "MPD-ROLE-VALUE", Severity: report.Error,
 		Desc: "Role values must be valid for their scheme", SpecRef: "ISO/IEC 23009-1 5.8.5.5",
@@ -151,6 +157,9 @@ var numberOrTimeRe = regexp.MustCompile(`\$(Number|Time)(%[^$]*)?\$`)
 func structureRules(md *m.MPD) []report.Finding {
 	var f []report.Finding
 	mpdLoc := report.Location{Path: "MPD"}
+	cpSources := addressing.ContentProtectionSources(md)
+	// MPD-IOP-CP requires cenc:default_KID on the AdaptationSets of IOP MPDs.
+	iop := profiles(splitProfiles(string(md.Profiles))).iop()
 
 	// SCH-3, SCH-6
 	if md.MediaPresentationDuration == nil && md.MinimumUpdatePeriod == nil {
@@ -231,7 +240,7 @@ func structureRules(md *m.MPD) []report.Finding {
 			f = append(f, checkContentComponents(as, asLoc)...)
 			f = append(f, checkCommonBoth(as, asLoc)...)
 			f = append(f, checkRanges(as, asPath)...)
-			f = append(f, checkDescriptors(&as.RepresentationBaseType, as.Roles, asPath)...)
+			f = append(f, checkDescriptors(addressing.ResolveContentProtections(as.ContentProtections, cpSources), as.Roles, asPath, iop)...)
 			f = append(f, checkChaining(as.SupplementalProperties, asPath, false)...)
 			// SCH-27
 			if len(as.Representations) == 0 {
@@ -243,7 +252,7 @@ func structureRules(md *m.MPD) []report.Finding {
 				f = append(f, checkSegInfoCount(rep.SegmentBase != nil, rep.SegmentTemplate != nil, rep.SegmentList != nil, rLoc)...)
 				f = append(f, checkTemplateInit(rep.SegmentTemplate, rLoc)...)
 				f = append(f, checkSegInfoAttrs(rep.SegmentBase, rep.SegmentTemplate, rep.SegmentList, mpdTSBD, rLoc)...)
-				f = append(f, checkDescriptors(&rep.RepresentationBaseType, nil, rPath)...)
+				f = append(f, checkDescriptors(addressing.ResolveContentProtections(rep.ContentProtections, cpSources), nil, rPath, false)...)
 				f = append(f, checkChaining(rep.SupplementalProperties, rPath, false)...)
 				// SCH-40
 				for si, sr := range rep.SubRepresentations {
@@ -469,15 +478,23 @@ func parseFrameRate(s string) (float64, bool) {
 
 var hex4Re = regexp.MustCompile(`^[0-9a-f]{4}$`)
 
-// SCH-55 to SCH-58
-func checkDescriptors(rb *m.RepresentationBaseType, roles []*m.DescriptorType, path string) []report.Finding {
+// cencSchemes are the protection schemes of ISO/IEC 23001-7.
+var cencSchemes = map[string]bool{"cenc": true, "cens": true, "cbc1": true, "cbcs": true}
+
+// SCH-55 to SCH-58. cps are the ContentProtection elements with @ref
+// resolved. kidRequired is set where MPD-IOP-CP reports a missing
+// cenc:default_KID, which then replaces the MPD-CP-DEFAULTKID warning.
+func checkDescriptors(cps []*m.ContentProtectionType, roles []*m.DescriptorType, path string, kidRequired bool) []report.Finding {
 	var f []report.Finding
-	for i, cp := range rb.ContentProtections {
+	for i, cp := range cps {
 		loc := report.Location{Path: fmt.Sprintf("%s/ContentProtection[%d]", path, i)}
 		switch cp.SchemeIdUri {
 		case "urn:mpeg:dash:mp4protection:2011":
 			if len(cp.Value) != 4 {
 				f = append(f, RuleContentProtectionValue.New(loc, "mp4protection @value %q is not a 4CC like cenc or cbcs", cp.Value))
+			}
+			if scheme, _, _ := strings.Cut(cp.Value, ":"); cencSchemes[scheme] && cp.DefaultKID == "" && !kidRequired {
+				f = append(f, RuleCPDefaultKID.New(loc, "%s descriptor without cenc:default_KID", scheme))
 			}
 		case "urn:mpeg:dash:13818:1:CA_descriptor:2011":
 			if !hex4Re.MatchString(cp.Value) {
