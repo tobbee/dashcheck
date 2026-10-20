@@ -136,6 +136,7 @@ func CheckWith(data []byte, mpdURL string, sel spec.Selection) (*m.MPD, []report
 	findings = append(findings, lowLatencyRules(md, !sel.Only)...)
 	raw := parseRaw(data)
 	findings = append(findings, rawStructureRules(raw)...)
+	findings = append(findings, ssrRules(md, raw)...)
 	findings = append(findings, dvbRules(md, raw, len(data), mpdURL)...)
 	findings = append(findings, hbbtvCodecRules(md)...)
 	findings = append(findings, dvbSchemaRules(md, data, mpdURL)...)

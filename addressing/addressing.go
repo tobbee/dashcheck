@@ -109,7 +109,7 @@ type Rep struct {
 
 	Kind Kind
 	// SegmentSequences is set when the segments are Partial Segments in
-	// Segment Sequences (@k greater than 1, or $SubNumber$).
+	// Segment Sequences (@k greater than 1, S@ssp, or $SubNumber$).
 	SegmentSequences bool
 	BaseURL          string // absolute base URL for this Representation
 	InitURL          string
@@ -954,9 +954,10 @@ func containerProfiles(rep, as *m.ListOf4CCType) []string {
 	return nil
 }
 
-// timelineSequences reports whether a SegmentTimeline has Segment Sequences.
+// timelineSequences reports whether a SegmentTimeline has Segment Sequences,
+// with S@k or a Segment Sequence duration pattern (S@ssp).
 func timelineSequences(stl *m.SegmentTimelineType) bool {
-	return stl != nil && slices.ContainsFunc(stl.S, func(s *m.S) bool { return s.K != nil && *s.K > 1 })
+	return stl != nil && slices.ContainsFunc(stl.S, func(s *m.S) bool { return (s.K != nil && *s.K > 1) || s.Ssp != nil })
 }
 
 // durationPatterns reports whether the SegmentTimeline uses duration
