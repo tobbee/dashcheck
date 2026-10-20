@@ -52,8 +52,11 @@ Remaining at the last update: only DVB AVS3 (DVB-60 to DVB-64), which needs
 AVS3 support in mp4ff, and DVB-34 in part: the SCTE-35 splice time is an MPEG-2
 TS PTS without a known relation to the media timeline (see the coverage notes).
 Rules for specifications that MPDs do not signal, and conventions that no spec
-requires, are opt-in options (`-hls-interop` for CTA-5005, `-sequence-numbers`). Segment Sequences (@k, $SubNumber$) are not
-addressed yet (ADDR-UNSUPPORTED).
+requires, are opt-in options (`-hls-interop` for CTA-5005, `-sequence-numbers`).
+Segment Sequences (@k, $SubNumber$) are addressed as Partial Segments
+(`Segment.Partial`, `SubNumber`); SegmentTimeline duration patterns (S@p,
+S@ssp) are not addressed yet (ADDR-UNSUPPORTED). livesim2 makes SSR content
+with `ssras_2,1/chunkdurssr_2,0.5/testpic_2s_low_delay/Manifest.mpd`.
 `docs/dashif-coverage.md` has the current numbers.
 
 ## Standards

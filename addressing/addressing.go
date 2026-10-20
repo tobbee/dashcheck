@@ -46,22 +46,32 @@ func (k Kind) String() string {
 	}
 }
 
-// Segment is one media segment.
+// Segment is one media segment, or one Partial Segment of a Segment Sequence
+// (ISO/IEC 23009-1 5.3.9.7).
 type Segment struct {
-	Number uint64 // segment number (number-based and timeline addressing)
-	Time   uint64 // earliest presentation time in Timescale ticks, including presentationTimeOffset
-	Dur    uint64 // duration in Timescale ticks
-	URL    string
-	Range  string // byte range "first-last" for SegmentBase and SegmentList@mediaRange
+	// Number is the segment number (number-based and timeline addressing).
+	// With $SubNumber$ it is the number of the Segment Sequence.
+	Number uint64
+	// SubNumber is the position of a Partial Segment in its Segment Sequence,
+	// from 0. It is 0 for other segments.
+	SubNumber uint64
+	Partial   bool   // a Partial Segment of a Segment Sequence
+	Time      uint64 // earliest presentation time in Timescale ticks, including presentationTimeOffset
+	Dur       uint64 // duration in Timescale ticks
+	URL       string
+	Range     string // byte range "first-last" for SegmentBase and SegmentList@mediaRange
+	sub       bool   // addressed with $SubNumber$
 }
 
 // ID returns a short segment identifier for locations.
 func (s Segment) ID(k Kind) string {
-	if k == KindTimelineTime {
+	switch {
+	case k == KindTimelineTime:
 		return fmt.Sprintf("t=%d", s.Time)
-	}
-	if k == KindSegmentBase {
+	case k == KindSegmentBase:
 		return fmt.Sprintf("bytes=%s", s.Range)
+	case s.sub:
+		return fmt.Sprintf("%d.%d", s.Number, s.SubNumber)
 	}
 	return fmt.Sprintf("%d", s.Number)
 }
@@ -97,13 +107,16 @@ type Rep struct {
 	AudioSamplingRate   string
 	StartWithSAP        uint32
 
-	Kind       Kind
-	BaseURL    string // absolute base URL for this Representation
-	InitURL    string
-	InitRange  string
-	IndexRange string // SegmentBase@indexRange
-	Timescale  uint32
-	PTO        uint64 // presentationTimeOffset in Timescale ticks
+	Kind Kind
+	// SegmentSequences is set when the segments are Partial Segments in
+	// Segment Sequences (@k greater than 1, or $SubNumber$).
+	SegmentSequences bool
+	BaseURL          string // absolute base URL for this Representation
+	InitURL          string
+	InitRange        string
+	IndexRange       string // SegmentBase@indexRange
+	Timescale        uint32
+	PTO              uint64 // presentationTimeOffset in Timescale ticks
 
 	Dynamic     bool
 	AST         time.Time // MPD@availabilityStartTime (dynamic only)
@@ -356,6 +369,8 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 		r.Media = t.Media
 		hasTime := containsID(t.Media, "Time")
 		hasNumber := containsID(t.Media, "Number")
+		hasSub := containsID(t.Media, "SubNumber")
+		r.SegmentSequences = hasSub || (t.K != nil && *t.K > 1) || timelineSequences(t.SegmentTimeline)
 		switch {
 		case t.Media == "":
 			return []report.Finding{RuleTemplate.New(loc, "SegmentTemplate has no @media")}
@@ -381,8 +396,14 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 		default:
 			return []report.Finding{RuleTemplate.New(loc, "@media %q has neither $Number$ nor $Time$", t.Media)}
 		}
+		// Partial Segments are addressed with $Number$ alone, or with
+		// $SubNumber$ (ISO/IEC 23009-1 5.3.9.7.1).
+		if r.SegmentSequences && hasTime && !hasSub {
+			r.Kind = KindUnknown
+			return []report.Finding{RuleTemplate.New(loc, "Segment Sequences with $Time$ in @media %q need $SubNumber$", t.Media)}
+		}
 		if t.Initialization != "" {
-			init, err := r.expand(t.Initialization, 0, 0)
+			init, err := r.expand(t.Initialization, 0, 0, 0)
 			if err != nil {
 				return []report.Finding{RuleTemplate.New(loc, "@initialization: %v", err)}
 			}
@@ -396,6 +417,7 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 		l := firstList(rep.SegmentList, as.SegmentList, p.SegmentList)
 		r.list = l
 		r.Kind = KindSegmentList
+		r.SegmentSequences = (l.K != nil && *l.K > 1) || timelineSequences(l.SegmentTimeline)
 		r.Timescale = 1
 		if l.Timescale != nil {
 			r.Timescale = *l.Timescale
@@ -447,8 +469,8 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 // seconds relative to the Period start. to may be +Inf for a bounded Period. It is not used for SegmentBase,
 // whose segments come from the sidx box.
 func (r *Rep) Segments(from, to float64) ([]Segment, error) {
-	if r.segmentSequences() {
-		return nil, ErrSegmentSequences
+	if r.durationPatterns() {
+		return nil, ErrDurationPatterns
 	}
 	switch r.Kind {
 	case KindNumber:
@@ -477,7 +499,9 @@ func (r *Rep) startNumber() uint64 {
 
 func (r *Rep) numberSegments(from, to float64) ([]Segment, error) {
 	ts := float64(r.Timescale)
-	dur := uint64(*r.tmpl.Duration)
+	dur := uint64(*r.tmpl.Duration) // of a segment or a Segment Sequence
+	k := partials(r.tmpl.K)
+	sub := containsID(r.tmpl.Media, "SubNumber")
 	if r.PeriodDur >= 0 && to > r.PeriodDur {
 		to = r.PeriodDur
 	}
@@ -487,30 +511,71 @@ func (r *Rep) numberSegments(from, to float64) ([]Segment, error) {
 	if from < 0 {
 		from = 0
 	}
-	kFirst := uint64(math.Floor(from * ts / float64(dur)))
-	kEnd := uint64(math.Ceil(to * ts / float64(dur))) // exclusive
-	start := r.startNumber()
-	if r.tmpl.EndNumber != nil {
-		last := uint64(*r.tmpl.EndNumber)
-		if last < start {
-			return nil, nil
-		}
-		kEnd = min(kEnd, last-start+1)
-	}
-	if kEnd > kFirst+MaxSegments {
+	qFirst := uint64(math.Floor(from * ts / float64(dur)))
+	qEnd := uint64(math.Ceil(to * ts / float64(dur))) // exclusive
+	if (qEnd-min(qEnd, qFirst))*k > MaxSegments {
 		return nil, fmt.Errorf("more than %d segments", MaxSegments)
 	}
+	start := r.startNumber()
 	var segs []Segment
-	for k := kFirst; k < kEnd; k++ {
-		s := Segment{Number: start + k, Time: r.PTO + k*dur, Dur: dur}
-		u, err := r.expand(r.tmpl.Media, s.Number, s.Time)
-		if err != nil {
-			return nil, err
+	for q := qFirst; q < qEnd; q++ {
+		for j := range k {
+			// With $SubNumber$, $Number$ counts Segment Sequences, otherwise
+			// Partial Segments (ISO/IEC 23009-1 5.3.9.7).
+			nr := start + q*k + j
+			if sub {
+				nr = start + q
+			}
+			if r.afterEnd(nr, j, sub) {
+				return segs, nil
+			}
+			ps, pe := q*dur+j*dur/k, q*dur+(j+1)*dur/k
+			if float64(ps) >= to*ts {
+				return segs, nil
+			}
+			if float64(pe) <= from*ts {
+				continue
+			}
+			s := r.segment(nr, j, sub, r.PTO+ps, pe-ps)
+			u, err := r.expand(r.tmpl.Media, s.Number, s.SubNumber, s.Time)
+			if err != nil {
+				return nil, err
+			}
+			s.URL = u
+			segs = append(segs, s)
 		}
-		s.URL = u
-		segs = append(segs, s)
 	}
 	return segs, nil
+}
+
+// partials returns the number of Partial Segments in a Segment Sequence
+// from @k, 1 if absent.
+func partials(k *uint64) uint64 {
+	if k != nil && *k > 1 {
+		return *k
+	}
+	return 1
+}
+
+// afterEnd reports whether segment number nr, with sub-number j when sub is
+// set, comes after @endNumber and @endSubNumber.
+func (r *Rep) afterEnd(nr, j uint64, sub bool) bool {
+	t := r.tmpl
+	if t == nil || t.EndNumber == nil {
+		return false
+	}
+	end := uint64(*t.EndNumber)
+	return nr > end || (sub && nr == end && t.EndSubNumber != nil && j > *t.EndSubNumber)
+}
+
+// segment returns a segment, as a Partial Segment if the Representation uses
+// Segment Sequences.
+func (r *Rep) segment(nr, j uint64, sub bool, t, dur uint64) Segment {
+	s := Segment{Number: nr, Time: t, Dur: dur}
+	if r.SegmentSequences {
+		s.Partial, s.SubNumber, s.sub = true, j, sub
+	}
+	return s
 }
 
 func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from, to float64) ([]Segment, error) {
@@ -524,6 +589,7 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 	var segs []Segment
 	var t uint64
 	nr := startNr
+	sub := r.tmpl != nil && containsID(r.tmpl.Media, "SubNumber")
 	for i, s := range stl.S {
 		if s.T != nil {
 			t = *s.T
@@ -549,14 +615,28 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 			}
 			repeat = (limit - t + s.D - 1) / s.D
 		}
+		// With @k, each S describes Segment Sequences of k Partial Segments.
+		k := partials(s.K)
 		for range repeat {
-			if float64(t) >= toTicks {
-				return segs, nil
-			}
-			if float64(t+s.D) > fromTicks {
-				seg := Segment{Number: nr, Time: t, Dur: s.D}
+			for j := range k {
+				ps, pe := t+j*s.D/k, t+(j+1)*s.D/k
+				if float64(ps) >= toTicks {
+					return segs, nil
+				}
+				if float64(pe) <= fromTicks {
+					continue
+				}
+				seg := r.segment(nr+j, j, sub, ps, pe-ps)
+				if sub {
+					seg.Number = nr
+				}
 				if r.list == nil {
-					u, err := r.expand(r.tmpl.Media, nr, t)
+					// With $SubNumber$, $Time$ is the start of the Segment Sequence.
+					ut := ps
+					if sub {
+						ut = t
+					}
+					u, err := r.expand(r.tmpl.Media, seg.Number, seg.SubNumber, ut)
 					if err != nil {
 						return nil, err
 					}
@@ -568,7 +648,11 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 				}
 			}
 			t += s.D
-			nr++
+			if sub {
+				nr++
+			} else {
+				nr += k
+			}
 		}
 	}
 	return segs, nil
@@ -588,8 +672,13 @@ func (r *Rep) listSegments(from, to float64) ([]Segment, error) {
 		if l.Duration != nil {
 			dur = uint64(*l.Duration)
 		}
-		for k := range l.SegmentURL {
-			segs = append(segs, Segment{Number: r.startNumber() + uint64(k), Time: r.PTO + uint64(k)*dur, Dur: dur})
+		// With @k, each SegmentURL is a Partial Segment and @duration is that
+		// of a Segment Sequence.
+		k := partials(l.K)
+		for i := range uint64(len(l.SegmentURL)) {
+			q, j := i/k, i%k
+			ps, pe := q*dur+j*dur/k, q*dur+(j+1)*dur/k
+			segs = append(segs, r.segment(r.startNumber()+i, j, false, r.PTO+ps, pe-ps))
 		}
 	}
 	var out []Segment
@@ -622,8 +711,8 @@ func (r *Rep) resolve(ref string) string {
 	return base.ResolveReference(u).String()
 }
 
-func (r *Rep) expand(tmpl string, number, t uint64) (string, error) {
-	s, err := Substitute(tmpl, Values{RepresentationID: r.repID, Number: number, Time: t, Bandwidth: r.Bandwidth})
+func (r *Rep) expand(tmpl string, number, sub, t uint64) (string, error) {
+	s, err := Substitute(tmpl, Values{RepresentationID: r.repID, Number: number, SubNumber: sub, Time: t, Bandwidth: r.Bandwidth})
 	if err != nil {
 		return "", err
 	}
@@ -818,6 +907,12 @@ func mergeTemplates(levels ...*m.SegmentTemplateType) *m.SegmentTemplateType {
 		if t.EndNumber != nil {
 			out.EndNumber = t.EndNumber
 		}
+		if t.EndSubNumber != nil {
+			out.EndSubNumber = t.EndSubNumber
+		}
+		if t.K != nil {
+			out.K = t.K
+		}
 		if t.SegmentTimeline != nil {
 			out.SegmentTimeline = t.SegmentTimeline
 		}
@@ -859,23 +954,20 @@ func containerProfiles(rep, as *m.ListOf4CCType) []string {
 	return nil
 }
 
-// segmentSequences reports whether the Representation uses Segment
-// Sequences, where one S element or @duration describes several Partial
-// Segments.
-func (r *Rep) segmentSequences() bool {
-	t := r.tmpl
-	if t == nil {
-		return false
+// timelineSequences reports whether a SegmentTimeline has Segment Sequences.
+func timelineSequences(stl *m.SegmentTimelineType) bool {
+	return stl != nil && slices.ContainsFunc(stl.S, func(s *m.S) bool { return s.K != nil && *s.K > 1 })
+}
+
+// durationPatterns reports whether the SegmentTimeline uses duration
+// patterns (S@p or S@ssp), which are not supported.
+func (r *Rep) durationPatterns() bool {
+	var stl *m.SegmentTimelineType
+	switch {
+	case r.tmpl != nil:
+		stl = r.tmpl.SegmentTimeline
+	case r.list != nil:
+		stl = r.list.SegmentTimeline
 	}
-	if strings.Contains(t.Media, "$SubNumber$") || (t.K != nil && *t.K > 1) {
-		return true
-	}
-	if t.SegmentTimeline != nil {
-		for _, s := range t.SegmentTimeline.S {
-			if s.K != nil && *s.K > 1 {
-				return true
-			}
-		}
-	}
-	return false
+	return stl != nil && slices.ContainsFunc(stl.S, func(s *m.S) bool { return s.P != nil || s.Ssp != nil })
 }

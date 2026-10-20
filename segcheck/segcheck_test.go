@@ -1,6 +1,7 @@
 package segcheck
 
 import (
+	"bytes"
 	"math"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
+	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/report"
 )
@@ -123,6 +125,75 @@ func TestMediaTimingErrors(t *testing.T) {
 	f = CheckContinuity(m2, m4, init, video, segs[3])
 	if got := ruleIDs(f); !slices.Equal(got, []string{"SEG-CONTINUITY"}) {
 		t.Errorf("continuity: got %v", f)
+	}
+}
+
+// nonSyncStart returns a media segment with its first sample marked as a
+// non-sync sample.
+func nonSyncStart(t *testing.T, data []byte) []byte {
+	t.Helper()
+	mf, err := mp4.DecodeFile(bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	trun := mf.Segments[0].Fragments[0].Moof.Traf.Trun
+	if flags, ok := trun.FirstSampleFlags(); ok {
+		trun.SetFirstSampleFlags(flags | mp4.NonSyncSampleFlags)
+	} else if trun.HasSampleFlags() {
+		trun.Samples[0].Flags |= mp4.NonSyncSampleFlags
+	} else {
+		t.Fatal("no sample flags in trun")
+	}
+	var buf bytes.Buffer
+	if err := mf.Encode(&buf); err != nil {
+		t.Fatal(err)
+	}
+	return buf.Bytes()
+}
+
+// TestPartialSegments checks the rules that apply differently to Partial
+// Segments of a Segment Sequence: @startWithSAP only to the first, and only
+// the start of a sequence in a SegmentTimeline is exact.
+func TestPartialSegments(t *testing.T) {
+	video := reps(t)[1]
+	init, _ := CheckInit(read(t, "V300/init.mp4"), video, video.Loc())
+	segs, _ := video.Segments(0, video.PeriodDur)
+	seg2 := read(t, "V300/2.m4s")
+	partial := func(sub uint64) addressing.Segment {
+		s := segs[1]
+		s.Partial, s.SubNumber = true, sub
+		return s
+	}
+	noSync := nonSyncStart(t, seg2)
+	tl := *video
+	tl.Kind = addressing.KindTimelineNumber
+	shift := func(s addressing.Segment, time, dur uint64) addressing.Segment {
+		s.Time += time
+		s.Dur += dur
+		return s
+	}
+	cases := []struct {
+		name string
+		rep  *addressing.Rep
+		data []byte
+		seg  addressing.Segment
+		want []string
+	}{
+		{"segment without sync start", video, noSync, segs[1], []string{"SEG-SAP"}},
+		{"first Partial Segment without sync start", video, noSync, partial(0), []string{"SEG-SAP"}},
+		{"later Partial Segment without sync start", video, noSync, partial(1), nil},
+		{"timeline segment one tick long", &tl, seg2, shift(segs[1], 0, 1), []string{"SEG-DURATION"}},
+		{"timeline Partial Segment one tick long", &tl, seg2, shift(partial(1), 0, 1), nil},
+		{"timeline sequence start one tick late", &tl, seg2, shift(partial(0), 1, 0), []string{"SEG-EPT"}},
+		{"timeline Partial Segment one tick late", &tl, seg2, shift(partial(1), 1, 0), nil},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, f := CheckMedia(c.data, init, c.rep, c.seg, false)
+			if got := ruleIDs(f); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", f, c.want)
+			}
+		})
 	}
 }
 

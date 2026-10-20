@@ -1,8 +1,11 @@
 package addressing
 
 import (
+	"errors"
+	"fmt"
 	"math"
 	"os"
+	"slices"
 	"testing"
 	"time"
 
@@ -10,7 +13,7 @@ import (
 )
 
 func TestSubstitute(t *testing.T) {
-	v := Values{RepresentationID: "V300", Number: 7, Time: 180000, Bandwidth: 300000}
+	v := Values{RepresentationID: "V300", Number: 7, SubNumber: 3, Time: 180000, Bandwidth: 300000}
 	cases := []struct {
 		tmpl, want string
 		wantErr    bool
@@ -20,6 +23,8 @@ func TestSubstitute(t *testing.T) {
 		{"seg-$Time$-$Bandwidth$.mp4", "seg-180000-300000.mp4", false},
 		{"cost$$-$Number%3d$", "cost$-007", false},
 		{"$Number%x$", "7", false},
+		{"$Number$_$SubNumber$.m4s", "7_3.m4s", false},
+		{"$Time$-$SubNumber%02d$", "180000-03", false},
 		{"$RepresentationID%05d$", "", true},
 		{"$Foo$", "", true},
 		{"$Number", "", true},
@@ -191,5 +196,107 @@ func TestUseOnlyProfiles(t *testing.T) {
 	ll.UseOnlyProfiles()
 	if !ll.LowLatency {
 		t.Error("the low-latency profile no longer makes the Representation low latency")
+	}
+}
+
+// sequenceReps returns the Representations of a static 8 s MPD with the
+// given SegmentTemplate attributes and content.
+func sequenceReps(t *testing.T, tmpl string) []*Rep {
+	t.Helper()
+	s := `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT8S" minBufferTime="PT2S" profiles="x">
+<Period><AdaptationSet>` + tmpl + `<Representation id="r" bandwidth="1"/></AdaptationSet></Period></MPD>`
+	reps, findings := Reps(mustReadMPD(t, s), "https://example.com/m.mpd")
+	if len(findings) != 0 {
+		t.Fatal(findings)
+	}
+	return reps
+}
+
+// segmentList summarizes segments as "number.sub@time+dur" or "number@time+dur".
+func segmentList(segs []Segment) []string {
+	var out []string
+	for _, s := range segs {
+		id := fmt.Sprintf("%d", s.Number)
+		if s.Partial {
+			id += fmt.Sprintf(".%d", s.SubNumber)
+		}
+		out = append(out, fmt.Sprintf("%s@%d+%d", id, s.Time, s.Dur))
+	}
+	return out
+}
+
+func TestSegmentSequences(t *testing.T) {
+	cases := []struct {
+		name     string
+		tmpl     string
+		from, to float64
+		want     []string
+		url      string // of the last segment
+	}{
+		{"duration with k and SubNumber",
+			`<SegmentTemplate media="$RepresentationID$/$Number$_$SubNumber$.m4s" duration="4000" k="4" startNumber="0" timescale="1000"/>`,
+			0, 3, []string{"0.0@0+1000", "0.1@1000+1000", "0.2@2000+1000"}, "https://example.com/r/0_2.m4s"},
+		{"next sequence",
+			`<SegmentTemplate media="$RepresentationID$/$Number$_$SubNumber$.m4s" duration="4000" k="4" startNumber="0" timescale="1000"/>`,
+			3.5, 4.5, []string{"0.3@3000+1000", "1.0@4000+1000"}, "https://example.com/r/1_0.m4s"},
+		{"duration with k numbers each Partial Segment",
+			`<SegmentTemplate media="$Number$.m4s" duration="4000" k="4" timescale="1000"/>`,
+			3.5, 5.5, []string{"4.3@3000+1000", "5.0@4000+1000", "6.1@5000+1000"}, "https://example.com/6.m4s"},
+		{"uneven split",
+			`<SegmentTemplate media="$Number$_$SubNumber$.m4s" duration="1000" k="3" timescale="1000"/>`,
+			0, 1, []string{"1.0@0+333", "1.1@333+333", "1.2@666+334"}, "https://example.com/1_2.m4s"},
+		{"endNumber and endSubNumber",
+			`<SegmentTemplate media="$Number$_$SubNumber$.m4s" duration="4000" k="4" startNumber="0" endNumber="1" endSubNumber="1" timescale="1000"/>`,
+			3.5, 8, []string{"0.3@3000+1000", "1.0@4000+1000", "1.1@5000+1000"}, "https://example.com/1_1.m4s"},
+		{"SubNumber without k",
+			`<SegmentTemplate media="$Number$_$SubNumber$.m4s" duration="2000" timescale="1000"/>`,
+			0, 2, []string{"1.0@0+2000"}, "https://example.com/1_0.m4s"},
+		{"timeline with k and SubNumber",
+			`<SegmentTemplate media="$Time$_$SubNumber$.m4s" timescale="1000"><SegmentTimeline><S t="0" d="4000" r="1" k="2"/></SegmentTimeline></SegmentTemplate>`,
+			3, 6, []string{"1.1@2000+2000", "2.0@4000+2000"}, "https://example.com/4000_0.m4s"},
+		{"timeline with k numbers each Partial Segment",
+			`<SegmentTemplate media="$Number$.m4s" startNumber="10" timescale="1000"><SegmentTimeline><S t="0" d="4000" r="1" k="2"/></SegmentTimeline></SegmentTemplate>`,
+			0, 8, []string{"10.0@0+2000", "11.1@2000+2000", "12.0@4000+2000", "13.1@6000+2000"}, "https://example.com/13.m4s"},
+		{"segment list with k",
+			`<SegmentList duration="4000" k="2" timescale="1000"><SegmentURL media="a.m4s"/><SegmentURL media="b.m4s"/><SegmentURL media="c.m4s"/></SegmentList>`,
+			0, 8, []string{"1.0@0+2000", "2.1@2000+2000", "3.0@4000+2000"}, "https://example.com/c.m4s"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			r := sequenceReps(t, c.tmpl)[0]
+			if !r.SegmentSequences {
+				t.Error("SegmentSequences not set")
+			}
+			segs, err := r.Segments(c.from, c.to)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := segmentList(segs); !slices.Equal(got, c.want) {
+				t.Fatalf("got %v, want %v", got, c.want)
+			}
+			if u := segs[len(segs)-1].URL; u != c.url {
+				t.Errorf("URL %s, want %s", u, c.url)
+			}
+		})
+	}
+	if id := (Segment{Number: 3, SubNumber: 1, Partial: true, sub: true}).ID(KindNumber); id != "3.1" {
+		t.Errorf("ID %s", id)
+	}
+}
+
+func TestSegmentSequenceErrors(t *testing.T) {
+	// $Time$ alone cannot address the Partial Segments of a sequence.
+	s := `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT8S" minBufferTime="PT2S" profiles="x">
+<Period><AdaptationSet><SegmentTemplate media="$Time$.m4s" timescale="1000"><SegmentTimeline><S t="0" d="4000" r="1" k="2"/></SegmentTimeline></SegmentTemplate>
+<Representation id="r" bandwidth="1"/></AdaptationSet></Period></MPD>`
+	reps, findings := Reps(mustReadMPD(t, s), "https://example.com/m.mpd")
+	if len(findings) != 1 || findings[0].Rule != "ADDR-TEMPLATE" || reps[0].Kind != KindUnknown {
+		t.Errorf("$Time$ without $SubNumber$: %v", findings)
+	}
+	// Duration patterns are not supported yet.
+	r := sequenceReps(t, `<SegmentTemplate media="$Number$_$SubNumber$.m4s" timescale="1000"><SegmentTimeline>
+<Pattern id="1"><P d="1000" r="1" k="2"/></Pattern><S t="0" ssp="1"/></SegmentTimeline></SegmentTemplate>`)[0]
+	if _, err := r.Segments(0, 8); !errors.Is(err, ErrDurationPatterns) {
+		t.Errorf("duration pattern: %v", err)
 	}
 }

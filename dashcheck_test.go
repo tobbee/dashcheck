@@ -231,3 +231,33 @@ func TestHLSBitrateOnDemand(t *testing.T) {
 		}
 	}
 }
+
+func TestSegmentSequences(t *testing.T) {
+	// The four 2 s video segments served as two Segment Sequences of two
+	// Partial Segments each.
+	data, err := os.ReadFile(testDir + "/Manifest.mpd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mpd := strings.Replace(string(data), `maxFrameRate="60/2">`,
+		`maxFrameRate="60/2"><EssentialProperty schemeIdUri="urn:mpeg:dash:ssr:2023"/>`, 1)
+	mpd = strings.Replace(mpd,
+		`duration="2" media="$RepresentationID$/$Number$.m4s"/>
+         <Representation id="V300"`,
+		`duration="4" k="2" media="$RepresentationID$/$Number$_$SubNumber$.m4s"/>
+         <Representation id="V300"`, 1)
+	if !strings.Contains(mpd, `k="2"`) || !strings.Contains(mpd, "ssr:2023") {
+		t.Fatal("test MPD not modified")
+	}
+	ts := server(t, mpd, map[string]string{
+		"/V300/1_0.m4s": "/V300/1.m4s", "/V300/1_1.m4s": "/V300/2.m4s",
+		"/V300/2_0.m4s": "/V300/3.m4s", "/V300/2_1.m4s": "/V300/4.m4s",
+	})
+	rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", Options{Fetcher: fetch.NewNative(5 * time.Second), MaxSegments: -1})
+	if got := ruleSet(rpt.Findings, report.Info); len(got) > 0 {
+		t.Errorf("got %v\n%v", got, rpt.Findings)
+	}
+	if rpt.Segments != 8 {
+		t.Errorf("%d segments checked, want 8", rpt.Segments)
+	}
+}

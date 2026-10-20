@@ -93,8 +93,8 @@ func llMediaRules(rep *addressing.Rep, media *Media, mf *mp4.File, mediaTS float
 	dur := float64(media.Duration) / mediaTS
 	target := rep.TargetLatency
 	if llChunked(rep) {
-		// LL-14
-		if moofs < 2 && !last {
+		// LL-14; a Partial Segment of a Segment Sequence is itself a chunk.
+		if moofs < 2 && !last && !media.Partial {
 			f = append(f, RuleLLChunks.New(loc, "chunked segment with %d chunk", moofs))
 		}
 		// LL-18: segments within the target latency are one of two options; the

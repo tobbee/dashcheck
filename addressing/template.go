@@ -7,21 +7,23 @@ import (
 	"strings"
 )
 
-// ErrSegmentSequences reports Segment Sequences (ISO/IEC 23009-1 5.3.9.7:
-// @k and $SubNumber$), which dashcheck cannot address yet.
-var ErrSegmentSequences = errors.New("segment sequences (@k, $SubNumber$) are not supported yet")
+// ErrDurationPatterns reports SegmentTimeline duration patterns (ISO/IEC
+// 23009-1 5.3.9.6.5: S@p and S@ssp), which dashcheck cannot address yet.
+var ErrDurationPatterns = errors.New("duration patterns (S@p, S@ssp) are not supported yet")
 
 // Values are the substitutions for SegmentTemplate identifiers.
 type Values struct {
 	RepresentationID string
 	Number           uint64
+	SubNumber        uint64
 	Time             uint64
 	Bandwidth        uint32
 }
 
-// Substitute replaces the identifiers $RepresentationID$, $Number$, $Time$,
-// $Bandwidth$ and $$ in a SegmentTemplate string (ISO/IEC 23009-1 5.3.9.4.4).
-// $Number$, $Time$ and $Bandwidth$ may carry a format tag like %05d.
+// Substitute replaces the identifiers $RepresentationID$, $Number$,
+// $SubNumber$, $Time$, $Bandwidth$ and $$ in a SegmentTemplate string
+// (ISO/IEC 23009-1 5.3.9.4.4). All but $RepresentationID$ may carry a format
+// tag like %05d.
 func Substitute(tmpl string, v Values) (string, error) {
 	var b strings.Builder
 	rest := tmpl
@@ -59,7 +61,7 @@ func Substitute(tmpl string, v Values) (string, error) {
 		case "Bandwidth":
 			val = uint64(v.Bandwidth)
 		case "SubNumber":
-			return "", ErrSegmentSequences
+			val = v.SubNumber
 		default:
 			return "", fmt.Errorf("unknown identifier $%s$ in %q", ident, tmpl)
 		}

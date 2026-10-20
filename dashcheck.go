@@ -95,7 +95,7 @@ var (
 	})
 	RuleSegmentSequences = report.Register(report.Rule{
 		ID: "ADDR-UNSUPPORTED", Severity: report.Info,
-		Desc: "Segment Sequences (@k, $SubNumber$) are not supported yet, so their segments are not checked",
+		Desc: "SegmentTimeline duration patterns (S@p, S@ssp) are not supported yet, so their segments are not checked",
 	})
 	RuleSegmentList = report.Register(report.Rule{
 		ID: "ADDR-SEGMENTS", Severity: report.Error,
@@ -295,7 +295,7 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		}
 	}
 	if err != nil {
-		if errors.Is(err, addressing.ErrSegmentSequences) {
+		if errors.Is(err, addressing.ErrDurationPatterns) {
 			rc.add(RuleSegmentSequences.New(rep.Loc(), "%v", err))
 		} else {
 			rc.add(RuleSegmentList.New(rep.Loc(), "%v", err))
@@ -322,7 +322,8 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 	var prevSeg addressing.Segment
 	var prev, first *segcheck.Media
 	// Segment sizes for SEG-HLS-BITRATE, while every segment is checked.
-	hlsBitrate := rc.opts.HLSInterop && rep.Kind != addressing.KindSegmentBase && init.Timescale > 0
+	// A CMAF fragment is a segment here, but a whole Segment Sequence with Partial Segments.
+	hlsBitrate := rc.opts.HLSInterop && rep.Kind != addressing.KindSegmentBase && !rep.SegmentSequences && init.Timescale > 0
 	var frags []segcheck.Fragment
 	for i, seg := range segs {
 		media := rc.checkSegment(ctx, init, seg, seg == last)
@@ -381,7 +382,11 @@ func isISOBMFF(mimeType string) bool {
 }
 
 func consecutive(a, b addressing.Segment) bool {
-	return a.Time+a.Dur == b.Time || (a.Number != 0 && a.Number+1 == b.Number)
+	if a.Time+a.Dur == b.Time {
+		return true
+	}
+	// Partial Segments of a Segment Sequence can share a number.
+	return !a.Partial && a.Number != 0 && a.Number+1 == b.Number
 }
 
 // selectStatic picks the first MaxSegments-1 segments and the last one,

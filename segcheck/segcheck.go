@@ -19,6 +19,7 @@ const (
 	refStartWithSAP = "ISO/IEC 23009-1 5.3.7 (@startWithSAP)"
 	refTimeline     = "ISO/IEC 23009-1 5.3.9.6"
 	refNumber       = "DASH-IF Timing Model 18.4"
+	refSequence     = "ISO/IEC 23009-1 5.3.9.7.1"
 )
 
 var (
@@ -98,7 +99,8 @@ var (
 	})
 	RuleSegSAP = report.Register(report.Rule{
 		ID: "SEG-SAP", Severity: report.Error,
-		Desc: "With @startWithSAP 1 or 2, every segment must start with a sync sample", SpecRef: refStartWithSAP,
+		Desc:    "With @startWithSAP 1 or 2, every segment, or the first Partial Segment of each Segment Sequence, must start with a sync sample",
+		SpecRef: refStartWithSAP,
 	})
 )
 
@@ -282,9 +284,13 @@ type Media struct {
 	Duration       uint64  // sum of sample durations, media timescale
 	EPT            float64 // earliest presentation time in seconds, before presentationTimeOffset
 	Samples        int
-	Size           int   // bytes
-	FirstCTO       int32 // composition time offset of the first sample
-	FirstSync      bool  // the first sample is a sync sample
+	Size           int // bytes
+	// Partial is set for a Partial Segment of a Segment Sequence, and
+	// SubNumber is its position in the sequence, from 0.
+	Partial   bool
+	SubNumber uint64
+	FirstCTO  int32 // composition time offset of the first sample
+	FirstSync bool  // the first sample is a sync sample
 	// Event messages before the first moof and later in the segment, as
 	// "scheme value id" keys.
 	EarlyEmsgs, LateEmsgs []string
@@ -305,7 +311,7 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	if len(mf.Segments) == 0 || len(mf.Segments[0].Fragments) == 0 {
 		return nil, append(f, RuleSegStructure.New(loc, "no moof box"))
 	}
-	media := &Media{Size: len(data)}
+	media := &Media{Size: len(data), Partial: seg.Partial, SubNumber: seg.SubNumber}
 	minCT := int64(math.MaxInt64)
 	firstSample := true
 	wrongTrack := false
@@ -367,7 +373,8 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 					firstSample = false
 					media.FirstCTO = s.CompositionTimeOffset
 					media.FirstSync = isSync(s.Flags)
-					sapRequired := rep.StartWithSAP == 1 || rep.StartWithSAP == 2
+					// @startWithSAP applies to the first Partial Segment of a Segment Sequence (ISO/IEC 23009-1 5.3.5.7).
+					sapRequired := (rep.StartWithSAP == 1 || rep.StartWithSAP == 2) && seg.SubNumber == 0
 					if sapRequired && init.Handler == "vide" && !isSync(s.Flags) {
 						f = append(f, RuleSegSAP.New(loc, "first sample is not a sync sample (startWithSAP=%d)", rep.StartWithSAP))
 					}
@@ -409,21 +416,38 @@ func isSync(flags uint32) bool {
 	return flags&mp4.NonSyncSampleFlags == 0
 }
 
-// checkTiming compares segment time and duration with the MPD.
+// checkTiming compares segment time and duration with the MPD. A
+// SegmentTimeline gives exact times, and @duration nominal ones. The MPD
+// times of Partial Segments in a Segment Sequence are nominal, except for the
+// start of the sequence (ISO/IEC 23009-1 5.3.9.7.1).
 func checkTiming(rep *addressing.Rep, seg addressing.Segment, media *Media, mediaTS float64, last bool, loc report.Location) []report.Finding {
 	var f []report.Finding
 	mpdTS := float64(rep.Timescale)
 	wantStart := float64(seg.Time) / mpdTS
 	wantDur := float64(seg.Dur) / mpdTS
 	gotDur := float64(media.Duration) / mediaTS
+	var exactStart, exactDur bool
+	ref := refNumber
 	switch rep.Kind {
 	case addressing.KindTimelineTime, addressing.KindTimelineNumber:
-		// Exact, up to rounding to the nearest tick in each timescale.
-		tol := 0.5/mpdTS + 0.5/mediaTS
+		exactStart, exactDur = seg.SubNumber == 0, !seg.Partial
+		ref = refSequence
+	case addressing.KindNumber:
+		if seg.Partial {
+			ref = refSequence
+		}
+	default:
+		return nil
+	}
+	// Exact, up to rounding to the nearest tick in each timescale.
+	exact := 0.5/mpdTS + 0.5/mediaTS
+	// Nominal boundaries may deviate by up to half the nominal duration.
+	nominal := wantDur / 2
+	if exactStart {
 		decodeStart := float64(media.DecodeTime) / mediaTS
 		switch {
-		case math.Abs(media.EPT-wantStart) <= tol:
-		case math.Abs(decodeStart-wantStart) <= tol:
+		case math.Abs(media.EPT-wantStart) <= exact:
+		case math.Abs(decodeStart-wantStart) <= exact:
 			f = append(f, ruleWithRef(RuleSegEPTCTO, refTimeline).New(loc,
 				"tfdt matches SegmentTimeline, but the earliest presentation time is %.6fs later",
 				media.EPT-wantStart))
@@ -432,22 +456,18 @@ func checkTiming(rep *addressing.Rep, seg addressing.Segment, media *Media, medi
 				"earliest presentation time %.6fs (tfdt %d) but SegmentTimeline says %.6fs",
 				media.EPT, media.DecodeTime, wantStart))
 		}
-		if math.Abs(gotDur-wantDur) > tol {
-			f = append(f, ruleWithRef(RuleSegDuration, refTimeline).New(loc,
-				"duration %.6fs but SegmentTimeline says %.6fs", gotDur, wantDur))
-		}
-	case addressing.KindNumber:
-		// Segment boundaries may deviate by up to half the nominal duration.
-		tol := wantDur / 2
-		if math.Abs(media.EPT-wantStart) > tol {
-			f = append(f, ruleWithRef(RuleSegEPT, refNumber).New(loc,
-				"earliest presentation time %.3fs is more than 50%% of @duration from the nominal %.3fs",
-				media.EPT, wantStart))
-		}
-		if math.Abs(gotDur-wantDur) > tol && !(last && gotDur < wantDur) {
-			f = append(f, ruleWithRef(RuleSegDuration, refNumber).New(loc,
-				"duration %.3fs is more than 50%% from the nominal %.3fs", gotDur, wantDur))
-		}
+	} else if math.Abs(media.EPT-wantStart) > nominal {
+		f = append(f, ruleWithRef(RuleSegEPT, ref).New(loc,
+			"earliest presentation time %.3fs is more than 50%% of the segment duration from the nominal %.3fs",
+			media.EPT, wantStart))
+	}
+	switch {
+	case exactDur && math.Abs(gotDur-wantDur) > exact:
+		f = append(f, ruleWithRef(RuleSegDuration, refTimeline).New(loc,
+			"duration %.6fs but SegmentTimeline says %.6fs", gotDur, wantDur))
+	case !exactDur && math.Abs(gotDur-wantDur) > nominal && !(last && gotDur < wantDur):
+		f = append(f, ruleWithRef(RuleSegDuration, ref).New(loc,
+			"duration %.3fs is more than 50%% from the nominal %.3fs", gotDur, wantDur))
 	}
 	return f
 }

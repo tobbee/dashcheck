@@ -142,8 +142,9 @@ func cmafMediaRules(rep *addressing.Rep, init *Init, media *Media, mf *mp4.File,
 	var f []report.Finding
 	f = append(f, checkTopLevel(mf.Children, loc)...)
 	video := init.Handler == "vide"
-	// A segment starts with a CMAF fragment. SEG-SAP reports it with @startWithSAP 1 or 2.
-	if video && !media.FirstSync && rep.StartWithSAP != 1 && rep.StartWithSAP != 2 {
+	// A segment, or a Segment Sequence of Partial Segments (CMAF chunks),
+	// starts with a CMAF fragment. SEG-SAP reports it with @startWithSAP 1 or 2.
+	if video && media.SubNumber == 0 && !media.FirstSync && rep.StartWithSAP != 1 && rep.StartWithSAP != 2 {
 		f = append(f, RuleCMAFSAP.New(loc, "the first sample is not a sync sample"))
 	}
 	versions := map[byte]bool{}

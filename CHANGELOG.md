@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its file.
 
 ### Changed
+- Segment Sequences (ISO/IEC 23009-1 5.3.9.7, `@k` and `$SubNumber$`) are now addressed and their
+  Partial Segments checked, with @startWithSAP on the first of each sequence. Only SegmentTimeline
+  duration patterns (S@p, S@ssp) remain ADDR-UNSUPPORTED.
 - SEG-HLS-BITRATE (`-hls-interop`) also checks SegmentTemplate and SegmentList content when every
   segment is checked, and live streams whose checked segments cover an hour (at most 110%).
 
