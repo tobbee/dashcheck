@@ -22,6 +22,15 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
+      - name: Check trailing whitespace
+        if: matrix.os == 'ubuntu-latest'
+        # As the pre-commit hook; the MPEG schema files are kept as published.
+        run: |
+          if git grep -nI -E '[[:blank:]]+$' -- ':!schema/xsd'; then
+            echo "Trailing whitespace on the lines above"
+            exit 1
+          fi
+
       - name: Download dependencies
         run: go mod download
 

@@ -7,3 +7,8 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+
+# CI has no go fmt hook, so formatting is checked here.
+formatters:
+  enable:
+    - gofmt
