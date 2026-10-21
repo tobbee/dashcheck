@@ -2,9 +2,27 @@ package addressing
 
 import (
 	"cmp"
+	"net/url"
+	"strings"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
 )
+
+// SchemeMP4Protection is the MP4 protection scheme of ISO/IEC 23009-1 5.8.5.2.2.
+const SchemeMP4Protection = "urn:mpeg:dash:mp4protection:2011"
+
+// CENCSchemes are the protection schemes of ISO/IEC 23001-7.
+var CENCSchemes = map[string]bool{"cenc": true, "cens": true, "cbc1": true, "cbcs": true}
+
+// MP4ProtectionScheme returns the 4CC of an mp4protection @value, which may
+// be percent-encoded and followed by ":" and a version (ISO/IEC 23009-1 5.8.5.2.2).
+func MP4ProtectionScheme(value string) string {
+	scheme, _, _ := strings.Cut(value, ":")
+	if s, err := url.PathUnescape(scheme); err == nil {
+		return s
+	}
+	return scheme
+}
 
 // ContentProtectionSources returns the ContentProtection elements with a
 // @refId by that @refId: the "source" elements that others refer to with

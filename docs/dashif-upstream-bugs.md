@@ -68,6 +68,7 @@ yet unless stated.
 | 53 | Low Latency DASHProfile | @maxWidth and @maxHeight compared with every track; @width ignored | Verified in code and spec |
 | 54 | WaveHLSInterop Bitrate | On-demand rule applied to live and to the downloaded segments only | Verified in code and spec |
 | 55 | Low Latency DASHProfile | KIDs compared in different formats; cenc:pssh read as an attribute | Verified in code and spec |
+| 56 | SCH-55, SCH-56 | ContentProtection @value checked only by its length | Verified in code and spec |
 
 ## Manifest handling
 
@@ -922,6 +923,25 @@ compare its @value with the schm scheme type, and check that the
 cenc:default_KID of every descriptor lists the tenc KID. Read cenc:pssh as a
 child element in the urn:mpeg:cenc:2013 namespace and compare the SystemID of
 the decoded box with the UUID of the descriptor.
+
+### 56. ContentProtection @value is checked only by its length
+
+**Where:** [schematron.sch#L243-L247](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/schematron/schematron.sch#L243-L247)
+
+**Problem:** SCH-55 requires `string-length(@value) = 4` for the mp4protection
+descriptor, but ISO/IEC 23009-1 5.8.5.2.2 lets the 4CC be percent-encoded and
+followed by ":" and a version of up to 8 hex digits (`cenc:00010000`). A
+descriptor with @ref (5.8.4.1.3) inherits @value from its source and need not
+have its own. SCH-56 also checks only the length, while 5.8.5.2.3 requires 4
+lower-case hex digits for the CA_system_ID.
+
+**Effect:** Valid versioned or percent-encoded values and referencing
+descriptors fail SCH-55, and CA_descriptor values such as `0B00` or `xyz!`
+pass SCH-56.
+
+**Fix:** Match the ABNF of 5.8.5.2.2 (allowing digits in the 4CC, as in
+`cbc1`) on the @value after resolving @ref, and `[0-9a-f]{4}` for the
+CA_descriptor.
 
 ## Other projects
 

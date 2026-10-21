@@ -84,16 +84,6 @@ var (
 		ID: "MPD-PROGINFO-LANG", Severity: report.Error,
 		Desc: "With several ProgramInformation elements, each must have @lang", SpecRef: refMPD,
 	})
-	RuleContentProtectionValue = report.Register(report.Rule{
-		ID: "MPD-CP-VALUE", Severity: report.Error,
-		Desc:    "ContentProtection @value must be a 4CC for mp4protection and 4 hex digits for CA_descriptor",
-		SpecRef: "ISO/IEC 23009-1 5.8.5.2",
-	})
-	RuleCPDefaultKID = report.Register(report.Rule{
-		ID: "MPD-CP-DEFAULTKID", Severity: report.Warning,
-		Desc:    "The mp4protection descriptor of Common Encryption content should have cenc:default_KID",
-		SpecRef: "ISO/IEC 23009-1 5.8.5.2.2, ISO/IEC 23001-7 11.3.2",
-	})
 	RuleRoleValue = report.Register(report.Rule{
 		ID: "MPD-ROLE-VALUE", Severity: report.Error,
 		Desc: "Role values must be valid for their scheme", SpecRef: "ISO/IEC 23009-1 5.8.5.5",
@@ -476,32 +466,10 @@ func parseFrameRate(s string) (float64, bool) {
 	return n / d, true
 }
 
-var hex4Re = regexp.MustCompile(`^[0-9a-f]{4}$`)
-
-// cencSchemes are the protection schemes of ISO/IEC 23001-7.
-var cencSchemes = map[string]bool{"cenc": true, "cens": true, "cbc1": true, "cbcs": true}
-
 // SCH-55 to SCH-58. cps are the ContentProtection elements with @ref
-// resolved. kidRequired is set where MPD-IOP-CP reports a missing
-// cenc:default_KID, which then replaces the MPD-CP-DEFAULTKID warning.
+// resolved; for kidRequired see checkContentProtectionValues.
 func checkDescriptors(cps []*m.ContentProtectionType, roles []*m.DescriptorType, path string, kidRequired bool) []report.Finding {
-	var f []report.Finding
-	for i, cp := range cps {
-		loc := report.Location{Path: fmt.Sprintf("%s/ContentProtection[%d]", path, i)}
-		switch cp.SchemeIdUri {
-		case "urn:mpeg:dash:mp4protection:2011":
-			if len(cp.Value) != 4 {
-				f = append(f, RuleContentProtectionValue.New(loc, "mp4protection @value %q is not a 4CC like cenc or cbcs", cp.Value))
-			}
-			if scheme, _, _ := strings.Cut(cp.Value, ":"); cencSchemes[scheme] && cp.DefaultKID == "" && !kidRequired {
-				f = append(f, RuleCPDefaultKID.New(loc, "%s descriptor without cenc:default_KID", scheme))
-			}
-		case "urn:mpeg:dash:13818:1:CA_descriptor:2011":
-			if !hex4Re.MatchString(cp.Value) {
-				f = append(f, RuleContentProtectionValue.New(loc, "CA_descriptor @value %q is not 4 lower-case hex digits", cp.Value))
-			}
-		}
-	}
+	f := checkContentProtectionValues(cps, path, kidRequired)
 	for i, r := range roles {
 		loc := report.Location{Path: fmt.Sprintf("%s/Role[%d]", path, i)}
 		switch r.SchemeIdUri {

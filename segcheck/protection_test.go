@@ -29,20 +29,20 @@ func TestProtectionInitRules(t *testing.T) {
 		want []string
 	}{
 		{"clear", &Init{}, nil, nil},
-		{"cenc", cenc, []*m.ContentProtectionType{cp(mp4Protection, "cenc", testKID), cp(widevine, "", "")}, nil},
+		{"cenc", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", testKID), cp(widevine, "", "")}, nil},
 		{"no ContentProtection", cenc, nil, []string{"XCHK-CP-MISSING"}},
 		{"no mp4protection", cenc, []*m.ContentProtectionType{cp(widevine, "", testKID)}, []string{"XCHK-CP-MISSING"}},
 		{"no mp4protection, not Common Encryption", &Init{Encrypted: true, Scheme: "piff"}, []*m.ContentProtectionType{cp(widevine, "", "")}, nil},
-		{"mp4protection on a clear track", &Init{}, []*m.ContentProtectionType{cp(mp4Protection, "cenc", testKID)}, []string{"XCHK-CP-SCHEME"}},
-		{"other scheme", &Init{Encrypted: true, Scheme: "cbcs", DefaultKID: testKID}, []*m.ContentProtectionType{cp(mp4Protection, "cenc", testKID)}, []string{"XCHK-CP-SCHEME"}},
-		{"versioned value", cenc, []*m.ContentProtectionType{cp(mp4Protection, "cenc:00010000", testKID)}, nil},
-		{"percent-encoded value", cenc, []*m.ContentProtectionType{cp(mp4Protection, "c%65nc", testKID)}, nil},
-		{"no value", cenc, []*m.ContentProtectionType{cp(mp4Protection, "", testKID)}, nil},
-		{"no default_KID", cenc, []*m.ContentProtectionType{cp(mp4Protection, "cenc", "")}, nil},
-		{"upper-case default_KID", cenc, []*m.ContentProtectionType{cp(mp4Protection, "cenc", "9EB4050D-E44B-4802-932E-27D75083E266")}, nil},
-		{"default_KID list", cenc, []*m.ContentProtectionType{cp(mp4Protection, "cenc", otherKID+" "+testKID)}, nil},
-		{"other default_KID", cenc, []*m.ContentProtectionType{cp(mp4Protection, "cenc", otherKID)}, []string{"XCHK-CP-KID"}},
-		{"other default_KID on a DRM descriptor", cenc, []*m.ContentProtectionType{cp(mp4Protection, "cenc", testKID), cp(widevine, "", otherKID)}, []string{"XCHK-CP-KID"}},
+		{"mp4protection on a clear track", &Init{}, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", testKID)}, []string{"XCHK-CP-SCHEME"}},
+		{"other scheme", &Init{Encrypted: true, Scheme: "cbcs", DefaultKID: testKID}, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", testKID)}, []string{"XCHK-CP-SCHEME"}},
+		{"versioned value", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc:00010000", testKID)}, nil},
+		{"percent-encoded value", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "c%65nc", testKID)}, nil},
+		{"no value", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "", testKID)}, nil},
+		{"no default_KID", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", "")}, nil},
+		{"upper-case default_KID", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", "9EB4050D-E44B-4802-932E-27D75083E266")}, nil},
+		{"default_KID list", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", otherKID+" "+testKID)}, nil},
+		{"other default_KID", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", otherKID)}, []string{"XCHK-CP-KID"}},
+		{"other default_KID on a DRM descriptor", cenc, []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", testKID), cp(widevine, "", otherKID)}, []string{"XCHK-CP-KID"}},
 	}
 	for _, c := range cases {
 		rep := &addressing.Rep{ContentProtections: c.cps}
@@ -75,9 +75,9 @@ func TestProtectedInit(t *testing.T) {
 		cps  []*m.ContentProtectionType
 		want []string
 	}{
-		{"matching", []*m.ContentProtectionType{cp(mp4Protection, "cbcs", testKID)}, nil},
+		{"matching", []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cbcs", testKID)}, nil},
 		{"no ContentProtection", nil, []string{"XCHK-CP-MISSING"}},
-		{"other scheme and KID", []*m.ContentProtectionType{cp(mp4Protection, "cenc", otherKID)}, []string{"XCHK-CP-SCHEME", "XCHK-CP-KID"}},
+		{"other scheme and KID", []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", otherKID)}, []string{"XCHK-CP-SCHEME", "XCHK-CP-KID"}},
 	}
 	for _, c := range cases {
 		video := *reps(t)[1]

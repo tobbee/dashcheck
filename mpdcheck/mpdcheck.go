@@ -132,6 +132,7 @@ func CheckWith(data []byte, mpdURL string, sel spec.Selection) (*m.MPD, []report
 	findings = append(findings, structureRules(md)...)
 	findings = append(findings, profileRules(md)...)
 	findings = append(findings, descriptorRules(md)...)
+	findings = append(findings, protectionRules(md)...)
 	findings = append(findings, dolbyRules(md)...)
 	findings = append(findings, lowLatencyRules(md, !sel.Only)...)
 	raw := parseRaw(data)

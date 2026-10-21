@@ -1,7 +1,6 @@
 package segcheck
 
 import (
-	"net/url"
 	"slices"
 	"strings"
 
@@ -12,11 +11,6 @@ import (
 
 // Cross-checks of the ContentProtection descriptors in the MPD with the
 // protection of the track in the initialization segment.
-
-const mp4Protection = "urn:mpeg:dash:mp4protection:2011"
-
-// cencSchemes are the protection schemes of ISO/IEC 23001-7.
-var cencSchemes = map[string]bool{"cenc": true, "cens": true, "cbc1": true, "cbcs": true}
 
 var (
 	RuleCPMissing = report.Register(report.Rule{
@@ -40,7 +34,7 @@ func protectionInitRules(rep *addressing.Rep, init *Init, loc report.Location) [
 	var f []report.Finding
 	var mp4p []*m.ContentProtectionType
 	for _, cp := range rep.ContentProtections {
-		if cp.SchemeIdUri == mp4Protection {
+		if cp.SchemeIdUri == addressing.SchemeMP4Protection {
 			mp4p = append(mp4p, cp)
 		}
 	}
@@ -48,15 +42,15 @@ func protectionInitRules(rep *addressing.Rep, init *Init, loc report.Location) [
 	switch {
 	case init.Encrypted && len(rep.ContentProtections) == 0:
 		f = append(f, RuleCPMissing.New(loc, "encrypted track (scheme %q) without ContentProtection in the MPD", init.Scheme))
-	case init.Encrypted && cencSchemes[init.Scheme] && len(mp4p) == 0:
-		f = append(f, RuleCPMissing.New(loc, "%s-encrypted track without the %s descriptor", init.Scheme, mp4Protection))
+	case init.Encrypted && addressing.CENCSchemes[init.Scheme] && len(mp4p) == 0:
+		f = append(f, RuleCPMissing.New(loc, "%s-encrypted track without the %s descriptor", init.Scheme, addressing.SchemeMP4Protection))
 	}
 	for _, cp := range mp4p {
 		switch {
 		case cp.Value == "": // MPD-CP-VALUE
 		case !init.Encrypted:
 			f = append(f, RuleCPScheme.New(loc, "mp4protection @value %q, but the track is not encrypted", cp.Value))
-		case init.Scheme != "" && mp4ProtectionScheme(cp.Value) != init.Scheme:
+		case init.Scheme != "" && addressing.MP4ProtectionScheme(cp.Value) != init.Scheme:
 			f = append(f, RuleCPScheme.New(loc, "mp4protection @value %q, but the schm scheme type is %q", cp.Value, init.Scheme))
 		}
 	}
@@ -73,16 +67,6 @@ func protectionInitRules(rep *addressing.Rep, init *Init, loc report.Location) [
 		}
 	}
 	return f
-}
-
-// mp4ProtectionScheme returns the 4CC of an mp4protection @value, which may
-// be percent-encoded and followed by ":" and a version (ISO/IEC 23009-1 5.8.5.2.2).
-func mp4ProtectionScheme(value string) string {
-	scheme, _, _ := strings.Cut(value, ":")
-	if s, err := url.PathUnescape(scheme); err == nil {
-		return s
-	}
-	return scheme
 }
 
 // normalizeKID returns a KID in lower case without hyphens, so that the
