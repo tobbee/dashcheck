@@ -117,6 +117,24 @@ func TestCheckUpdate(t *testing.T) {
 	if f := CheckUpdate(prev, version(t, updateMPD, t0.Add(2*time.Second)), ""); len(f) > 0 {
 		t.Errorf("unchanged: %v", f)
 	}
+	// A utc:direct UTCTiming holds the time of each response, so only its
+	// value may change without a new @publishTime.
+	utc := func(scheme, value string) string {
+		return strings.Replace(updateMPD, "</MPD>", `  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:`+scheme+`:2014" value="`+value+`"/>
+</MPD>`, 1)
+	}
+	for _, c := range []struct {
+		scheme, v0, v1 string
+		want           int
+	}{
+		{"direct", "1970-01-01T00:01:00Z", "1970-01-01T00:01:02Z", 0},
+		{"http-iso", "https://time.example.com/a", "https://time.example.com/b", 1},
+	} {
+		f := CheckUpdate(version(t, utc(c.scheme, c.v0), t0), version(t, utc(c.scheme, c.v1), t0.Add(2*time.Second)), "")
+		if len(f) != c.want {
+			t.Errorf("%s: got %v, want %d findings", c.scheme, f, c.want)
+		}
+	}
 }
 
 func version(t *testing.T, data string, at time.Time) Version {

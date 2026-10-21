@@ -74,6 +74,9 @@ type Measurement struct {
 	Value  string
 	Offset time.Duration // source minus local
 	RTT    time.Duration
+	// Resolution of the source's time, 1 s for a Date header or a direct
+	// value without fractional seconds. Offset assumes the middle of it.
+	Resolution time.Duration
 }
 
 // Measure queries one UTCTiming source. mpdResp is the response that
@@ -93,7 +96,11 @@ func Measure(ctx context.Context, f fetch.Fetcher, scheme, value string, mpdResp
 		if mpdResp == nil {
 			return nil, fmt.Errorf("direct scheme needs the MPD response time")
 		}
-		meas.Offset = t.Sub(midpoint(mpdResp))
+		// The ABNF of ISO/IEC 23009-1 5.8.5.7 has whole seconds.
+		if !strings.Contains(value, ".") {
+			meas.Resolution = time.Second
+		}
+		meas.Offset = t.Add(meas.Resolution / 2).Sub(midpoint(mpdResp))
 		meas.RTT = mpdResp.End.Sub(mpdResp.Start)
 		return meas, nil
 	case SchemeHTTPXSDate, SchemeHTTPISO:
@@ -122,8 +129,8 @@ func Measure(ctx context.Context, f fetch.Fetcher, scheme, value string, mpdResp
 		if err != nil {
 			return nil, fmt.Errorf("bad Date header %q from %s: %v", date, value, err)
 		}
-		// The Date header has one-second resolution; assume the middle of that second.
-		meas.Offset = t.Add(500 * time.Millisecond).Sub(midpoint(resp))
+		meas.Resolution = time.Second
+		meas.Offset = t.Add(meas.Resolution / 2).Sub(midpoint(resp))
 		meas.RTT = resp.End.Sub(resp.Start)
 		return meas, nil
 	default:
@@ -200,10 +207,7 @@ func Sync(ctx context.Context, f fetch.Fetcher, timings []*m.DescriptorType, ref
 		for _, meas := range measured {
 			// Both offsets are relative to the local clock, so their difference is source minus reference.
 			skew := meas.Offset - ref.Offset
-			tol := MaxSkew + (meas.RTT+ref.RTT)/2
-			if meas.Scheme == SchemeHTTPHead {
-				tol += 500 * time.Millisecond
-			}
+			tol := MaxSkew + (meas.RTT+ref.RTT)/2 + meas.Resolution/2
 			if math.Abs(float64(skew)) > float64(tol) {
 				findings = append(findings, RuleSkew.New(report.Location{URL: meas.Value},
 					"UTCTiming source %s is %s the reference clock %s", meas.Value, Describe(skew), host(reference)))

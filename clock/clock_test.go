@@ -60,6 +60,20 @@ func TestSync(t *testing.T) {
 	}
 }
 
+func TestSyncDirect(t *testing.T) {
+	// A direct value has whole seconds, so it is up to 1 s behind the time
+	// the MPD was delivered.
+	at := time.Now().Truncate(time.Second).Add(900 * time.Millisecond)
+	mpdResp := &fetch.Response{Start: at, End: at}
+	ff := fakeFetcher{"https://ref": 3 * time.Second}
+	value := at.Add(3 * time.Second).UTC().Format("2006-01-02T15:04:05Z")
+	timings := []*m.DescriptorType{{SchemeIdUri: "urn:mpeg:dash:utc:direct:2014", Value: value}}
+	_, source, findings := Sync(context.Background(), ff, timings, "https://ref", mpdResp)
+	if source != value || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
+		t.Errorf("source %s, findings %v", source, findings)
+	}
+}
+
 // countingFetcher counts requests per URL.
 type countingFetcher struct {
 	fakeFetcher

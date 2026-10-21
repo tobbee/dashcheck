@@ -21,6 +21,7 @@ import (
 const (
 	refUpdate = "ISO/IEC 23009-1 5.4.1"
 	resetURN  = "urn:mpeg:dash:reset:2016"
+	directURN = "urn:mpeg:dash:utc:direct:2014"
 	// maxUpdateWindow limits the segments compared between two versions,
 	// and updateMargin keeps away from the start of the time-shift buffer.
 	maxUpdateWindow = 120.0
@@ -76,7 +77,7 @@ func CheckUpdate(prev, next Version, mpdURL string) []report.Finding {
 	}
 	var f []report.Finding
 	mpdLoc := report.Location{URL: mpdURL, Path: "MPD"}
-	changed := !bytes.Equal(prev.Data, next.Data)
+	changed := !sameVersion(prev.Data, next.Data)
 	pt0, err0 := addressing.ParseDateTime(string(prev.MPD.PublishTime))
 	pt1, err1 := addressing.ParseDateTime(string(next.MPD.PublishTime))
 	if err0 == nil && err1 == nil {
@@ -316,6 +317,40 @@ func (u *updateCheck) segments(pr, nr *addressing.Rep) {
 			return
 		}
 	}
+}
+
+// sameVersion reports whether two fetches hold the same MPD: the same
+// elements, attributes and text, apart from the time in a utc:direct
+// UTCTiming, which the server writes into each response (DASH-IF IOP 4.3
+// 4.7.2), so that it changes without a new @publishTime.
+func sameVersion(a, b []byte) bool {
+	if bytes.Equal(a, b) {
+		return true
+	}
+	ra, rb := parseRaw(a), parseRaw(b)
+	return ra != nil && rb != nil && rawEqual(ra, rb)
+}
+
+// rawEqual compares two raw trees, ignoring the value of utc:direct UTCTimings.
+func rawEqual(a, b *rawElem) bool {
+	if a.Name != b.Name || a.Text != b.Text || len(a.Children) != len(b.Children) {
+		return false
+	}
+	aa, ba := a.Attrs, b.Attrs
+	if a.Name == "UTCTiming" && aa["schemeIdUri"] == directURN && ba["schemeIdUri"] == directURN {
+		aa, ba = maps.Clone(aa), maps.Clone(ba)
+		delete(aa, "value")
+		delete(ba, "value")
+	}
+	if !maps.Equal(aa, ba) {
+		return false
+	}
+	for i := range a.Children {
+		if !rawEqual(a.Children[i], b.Children[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 func hasReset(md *m.MPD) bool {
