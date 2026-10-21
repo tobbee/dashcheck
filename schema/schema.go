@@ -92,7 +92,7 @@ func Validate(data []byte, mpdURL string) ([]report.Finding, error) {
 		return nil, nil
 	}
 	var findings []report.Finding
-	for _, e := range flatten(err) {
+	for _, e := range xsderrors.Flatten(err) {
 		var xe *xsderrors.Error
 		if !errors.As(e, &xe) {
 			findings = append(findings, RuleSchema.New(report.Location{URL: mpdURL}, "%s", e.Error()))
@@ -123,7 +123,7 @@ func Errors(data []byte, edition string) ([]string, error) {
 		return nil, nil
 	}
 	var msgs []string
-	for _, e := range flatten(err) {
+	for _, e := range xsderrors.Flatten(err) {
 		var xe *xsderrors.Error
 		if errors.As(e, &xe) {
 			msgs = append(msgs, fmt.Sprintf("line %d: %s", xe.Line(), message(xe)))
@@ -144,13 +144,4 @@ func message(xe *xsderrors.Error) string {
 		msg += c.Error()
 	}
 	return msg
-}
-
-// flatten unpacks an xsderrors.Errors aggregate into its children.
-func flatten(err error) []error {
-	var agg xsderrors.Errors
-	if errors.As(err, &agg) {
-		return agg.Unwrap()
-	}
-	return []error{err}
 }

@@ -136,14 +136,5 @@ pre-commit ships in a `venv/` directory as a package.
 - dash-mpd rejects xs:duration values with years or months.
 - dash-mpd reads absent booleans and numbers as their zero value; use the raw tree.
 - mp4ff's `Sample.IsSync` requires `sample_depends_on` = 2; use `segcheck.isSync`.
-- jacoelho/xsd (v0.6.4 and older) has built-in xlink:type, href, role,
-  arcrole, title, show and actuate attributes typed xs:string or xs:anyURI,
-  registered before any schema loads, so they shadow the declarations of the
-  imported xlink.xsd (`internal/schema/builtin.go`, and
-  `AddGlobalAttributeComponent` skips redeclarations). XLink enumerations and
-  facets are not checked: `xlink:actuate="bogus"` validates, while fixed
-  values are, as plain strings. `TestMutations` in `schema/` skips the case
-  and fails once it is caught. Reported as
-  https://github.com/jacoelho/xsd/issues/137.
 - When editing with scripted search and replace, remember that gofmt realigns
   struct fields and composite literals after earlier edits.

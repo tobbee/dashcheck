@@ -67,42 +67,42 @@ func TestMutations(t *testing.T) {
 		old, new string
 		wantMsg  string // "" for a valid MPD
 		wantPath string
-		// knownGap marks an error that jacoelho/xsd misses (jacoelho/xsd#137, see CLAUDE.md).
-		knownGap bool
 	}{
 		{name: "unknown element", old: period, new: period + `<Foo/>`,
-			wantMsg: "unexpected child element {urn:mpeg:dash:schema:mpd:2011}Foo", wantPath: "/MPD/Period"},
+			wantMsg: `unexpected child element "{urn:mpeg:dash:schema:mpd:2011}Foo"`, wantPath: "/MPD/Period"},
 		{name: "element order", old: `</Period>`, new: `<BaseURL>a/</BaseURL></Period>`,
-			wantMsg: "unexpected child element BaseURL", wantPath: "/MPD/Period"},
+			wantMsg: `unexpected child element "{urn:mpeg:dash:schema:mpd:2011}BaseURL"`, wantPath: "/MPD/Period"},
 		{name: "MPD child order", old: `<ProgramInformation>`,
 			new:     `<ServiceDescription id="0"><Latency target="3000"/></ServiceDescription><ProgramInformation>`,
-			wantMsg: "unexpected child element ProgramInformation", wantPath: "/MPD"},
+			wantMsg: `unexpected child element "{urn:mpeg:dash:schema:mpd:2011}ProgramInformation"`, wantPath: "/MPD"},
 		{name: "other namespace before DASH elements", old: period, new: period + `<x:Foo xmlns:x="urn:example"/>`,
-			wantMsg: "unexpected child element AdaptationSet", wantPath: "/MPD/Period"},
+			wantMsg: `unexpected child element "{urn:mpeg:dash:schema:mpd:2011}AdaptationSet"`, wantPath: "/MPD/Period"},
 		{name: "not a decimal", old: `bandwidth="48000"`, new: `bandwidth="abc"`,
-			wantMsg: "invalid attribute bandwidth: invalid decimal", wantPath: "/MPD/Period/AdaptationSet/Representation"},
+			wantMsg: `invalid attribute "bandwidth": value "abc" is not valid for xs:unsignedInt: invalid decimal`, wantPath: "/MPD/Period/AdaptationSet/Representation"},
 		{name: "not a duration", old: `mediaPresentationDuration="PT8S"`, new: `mediaPresentationDuration="8S"`,
-			wantMsg: "invalid attribute mediaPresentationDuration: invalid duration", wantPath: "/MPD"},
+			wantMsg: `invalid attribute "mediaPresentationDuration": value "8S" is not valid for xs:duration: invalid duration`, wantPath: "/MPD"},
 		{name: "not a boolean", old: `segmentAlignment="true"`, new: `segmentAlignment="maybe"`,
-			wantMsg: "invalid attribute segmentAlignment: invalid boolean", wantPath: "/MPD/Period/AdaptationSet"},
+			wantMsg: `invalid attribute "segmentAlignment": value "maybe" is not valid for xs:boolean: invalid boolean`, wantPath: "/MPD/Period/AdaptationSet"},
 		{name: "not in the enumeration", old: `type="static"`, new: `type="live"`,
-			wantMsg: "invalid attribute type: enumeration facet failed", wantPath: "/MPD"},
+			wantMsg: `invalid attribute "type": value "live" is not one of ["static", "dynamic", "list"]`, wantPath: "/MPD"},
 		{name: "above the maximum", old: `startWithSAP="1"`, new: `startWithSAP="9"`,
-			wantMsg: "invalid attribute startWithSAP: upper bound facet failed", wantPath: "/MPD/Period/AdaptationSet"},
+			wantMsg: `invalid attribute "startWithSAP": value "9" does not satisfy maxInclusive "6.0"`, wantPath: "/MPD/Period/AdaptationSet"},
 		{name: "no Representation@id", old: `<Representation id="A48" `, new: `<Representation `,
-			wantMsg: "missing required attribute id", wantPath: "/MPD/Period/AdaptationSet/Representation"},
+			wantMsg: `missing required attribute "id"`, wantPath: "/MPD/Period/AdaptationSet/Representation"},
 		{name: "no Representation@bandwidth", old: ` bandwidth="48000"`, new: ``,
-			wantMsg: "missing required attribute bandwidth", wantPath: "/MPD/Period/AdaptationSet/Representation"},
+			wantMsg: `missing required attribute "bandwidth"`, wantPath: "/MPD/Period/AdaptationSet/Representation"},
 		{name: "undeclared attribute", old: ` id="base"`, new: ` id="base" foo="bar"`,
-			wantMsg: "attribute is not declared: foo", wantPath: "/MPD"},
+			wantMsg: `attribute "foo" is not allowed`, wantPath: "/MPD"},
 		{name: "no DASH namespace", old: ` xmlns="urn:mpeg:dash:schema:mpd:2011"`, new: ``,
-			wantMsg: "root element is not declared: MPD", wantPath: ""},
+			wantMsg: `root element "MPD" has no global declaration`, wantPath: ""},
 		{name: "xlink:type not simple", old: period, new: remote + ` xlink:type="extended"/>` + period,
-			wantMsg: "fixed attribute mismatch type", wantPath: "/MPD/Period"},
+			wantMsg: `attribute "type" has value "extended"; expected fixed value "simple"`, wantPath: "/MPD/Period"},
 		{name: "xlink:show not embed", old: period, new: remote + ` xlink:show="new"/>` + period,
-			wantMsg: "fixed attribute mismatch show", wantPath: "/MPD/Period"},
+			wantMsg: `attribute "show" has value "new"; expected fixed value "embed"`, wantPath: "/MPD/Period"},
 		{name: "xlink:actuate not in the enumeration", old: period, new: remote + ` xlink:actuate="bogus"/>` + period,
-			wantMsg: "invalid attribute actuate", wantPath: "/MPD/Period", knownGap: true},
+			wantMsg: `invalid attribute "{http://www.w3.org/1999/xlink}actuate": value "bogus" is not one of`, wantPath: "/MPD/Period"},
+		{name: "empty xlink:role", old: period, new: remote + ` xlink:role=""/>` + period,
+			wantMsg: `invalid wildcard attribute "{http://www.w3.org/1999/xlink}role": value "" has length 0 characters; expected at least 1`, wantPath: "/MPD/Period"},
 
 		{name: "valid", old: ``, new: ``},
 		{name: "other namespace after DASH elements", old: `</Period>`, new: `<x:Foo xmlns:x="urn:example"/></Period>`},
@@ -110,6 +110,7 @@ func TestMutations(t *testing.T) {
 		{name: "DVB BaseURL attributes", old: period,
 			new: period + `<BaseURL xmlns:dvb="urn:dvb:dash-extensions:2014-1" dvb:priority="1" dvb:weight="1">a/</BaseURL>`},
 		{name: "remote Period", old: period, new: remote + ` xlink:actuate="onLoad"/>` + period},
+		{name: "xlink:type with whitespace", old: period, new: remote + ` xlink:type=" simple "/>` + period},
 		{name: "ServiceDescription", old: period,
 			new: `<ServiceDescription id="0"><Latency target="3000"/></ServiceDescription>` + period},
 	}
@@ -121,12 +122,6 @@ func TestMutations(t *testing.T) {
 			findings, err := Validate([]byte(strings.Replace(valid, c.old, c.new, 1)), "test.mpd")
 			if err != nil {
 				t.Fatal(err)
-			}
-			if c.knownGap {
-				if len(findings) > 0 {
-					t.Fatalf("jacoelho/xsd reports this now (%v): remove knownGap and the note in CLAUDE.md", findings)
-				}
-				t.Skip("known gap of jacoelho/xsd, see CLAUDE.md")
 			}
 			if c.wantMsg == "" {
 				if len(findings) > 0 {

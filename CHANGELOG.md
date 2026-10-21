@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SEG-CMAF-SENC no longer reports clear-lead fragments, or audio with constant IVs, which has no
   sample auxiliary information. A track's protection comes from its first protected sample entry.
 - `file:` URLs: a byte range that ends after the file is cut at its end, as over HTTP.
+- MPD-XSD checks the XLink attributes against xlink.xsd (such as the `xlink:actuate` values), and its
+  messages give the invalid value and what was expected (jacoelho/xsd v0.6.7).
 
 ## [0.1.2] - 2026-10-19
 
