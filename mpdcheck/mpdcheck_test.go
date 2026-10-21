@@ -53,6 +53,11 @@ func TestRules(t *testing.T) {
 		{"duplicate rep id", `id="v2"`, `id="v1"`, []string{"MPD-REP-ID"}},
 		{"no mimeType", ` mimeType="video/mp4"`, "", []string{"MPD-MIMETYPE", "MPD-MIMETYPE"}},
 		{"no codecs", ` codecs="avc1.64001e"`, "", []string{"MPD-CODECS", "MPD-CODECS"}},
+		{"image without codecs", `</Period>`, `<AdaptationSet id="2" contentType="image" mimeType="image/jpeg">
+      <SegmentTemplate duration="2" media="$RepresentationID$/$Number$.jpg"/>
+      <Representation id="t" bandwidth="1000" width="320" height="180"/>
+    </AdaptationSet>
+  </Period>`, nil},
 		{"contentType mismatch", `contentType="video"`, `contentType="audio"`, []string{"MPD-CONTENTTYPE"}},
 		{"shared media", `media="$RepresentationID$/$Time$.m4s"`, `media="$Time$.m4s"`, []string{"MPD-TEMPLATE-REPID"}},
 		{"timeline overlap", `<S d="180000"/>`, `<S t="360000" d="180000"/>`, []string{"MPD-TIMELINE-ORDER"}},

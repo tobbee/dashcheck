@@ -3,6 +3,7 @@
 package mpdcheck
 
 import (
+	"cmp"
 	"fmt"
 	"regexp"
 	"strings"
@@ -72,7 +73,7 @@ var (
 	})
 	RuleCodecs = report.Register(report.Rule{
 		ID: "MPD-CODECS", Severity: report.Warning,
-		Desc: "@codecs should be present on the AdaptationSet or the Representation", SpecRef: "DASH-IF IOP",
+		Desc: "@codecs should be present on the AdaptationSet or the Representation, except for images", SpecRef: "DASH-IF IOP",
 	})
 	RuleContentType = report.Register(report.Rule{
 		ID: "MPD-CONTENTTYPE", Severity: report.Warning,
@@ -231,7 +232,9 @@ func Rules(md *m.MPD) []report.Finding {
 				if rep.MimeType == "" && as.MimeType == "" {
 					f = append(f, RuleMimeType.New(rLoc, "no @mimeType on Representation or AdaptationSet"))
 				}
-				if rep.Codecs == "" && as.Codecs == "" {
+				// Images, such as thumbnail tiles, have no codecs parameter (DASH-IF IOP 4.3 6.2.6).
+				isImage := strings.HasPrefix(cmp.Or(rep.MimeType, as.MimeType), "image/")
+				if rep.Codecs == "" && as.Codecs == "" && !isImage {
 					f = append(f, RuleCodecs.New(rLoc, "no @codecs on Representation or AdaptationSet"))
 				}
 				if rep.SegmentTemplate != nil && rep.SegmentTemplate.SegmentTimeline != nil {

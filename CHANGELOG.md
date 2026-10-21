@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - MPD-UPDATE-PUBLISHTIME no longer reports MPDs that differ only in the time of a
   `urn:mpeg:dash:utc:direct:2014` UTCTiming, and CLOCK-SKEW allows for its whole seconds.
+- MPD-CODECS no longer warns about images such as thumbnail tiles, which have no codecs parameter.
 
 ## [0.2.0] - 2026-10-21
 
