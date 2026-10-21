@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-21
+
 ### Added
 - SEG-CONTINUITY-FRAGMENT: each chunk or fragment in a segment must start at the previous one's
   tfdt plus its sample durations (ISO/IEC 23000-19 7.3.2.2, 7.3.2.3).
@@ -32,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ContentProtection rules: XCHK-CP-MISSING, XCHK-CP-SCHEME and XCHK-CP-KID against the init segment,
   MPD-CP-CENC, MPD-CP-ROBUSTNESS, MPD-CP-REF, MPD-CP-CLEARKEY and MPD-CP-DEFAULTKID, and per profile
   SEG-AS-KID, SEG-IOP-PSSH, SEG-IOP-PSSH-INIT, MPD-IOP-CP-DRM and MPD-DVB-CP-DRM.
-
 - `docs/rules.md` documents all rules with the DASH-IF checks each covers, and marks the rules that
   the DASH-IF Conformance tool does not have.
 
@@ -84,7 +85,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The browser tool, published on GitHub Pages for each release, counts visits and checks with
   GoatCounter, without cookies or MPD URLs.
 
-[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/tobbee/dashcheck/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/tobbee/dashcheck/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/tobbee/dashcheck/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/tobbee/dashcheck/releases/tag/v0.1.0
