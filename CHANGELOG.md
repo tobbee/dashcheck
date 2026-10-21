@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   MPD-SSR-PROPERTIES.
 - SEG-SSR-SAP: the Partial Segments that SegmentSequenceProperties@cadence selects must start with
   a sync sample when @sapType is 1 or 2.
+- SEG-CMAF-SINF: every sample entry of an encrypted CMAF track must be protected (no clear sample
+  entry for a clear lead), with tenc default_isProtected 1.
 - ContentProtection rules: XCHK-CP-MISSING, XCHK-CP-SCHEME and XCHK-CP-KID against the init segment,
   MPD-CP-CENC, MPD-CP-ROBUSTNESS, MPD-CP-REF, MPD-CP-CLEARKEY and MPD-CP-DEFAULTKID, and per profile
   SEG-AS-KID, SEG-IOP-PSSH, SEG-IOP-PSSH-INIT, MPD-IOP-CP-DRM and MPD-DVB-CP-DRM.
@@ -46,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ContentProtection@ref is resolved, so MPD-CP-VALUE, MPD-IOP-CP and SEG-DVB-PSSH see the @value,
   cenc:default_KID and cenc:pssh that a descriptor inherits from its source.
 - MPD-CP-VALUE accepts a version (`cenc:1`) and a percent-encoded 4CC in the mp4protection @value.
+- SEG-CMAF-SENC no longer reports clear-lead fragments, or audio with constant IVs, which has no
+  sample auxiliary information. A track's protection comes from its first protected sample entry.
 - `file:` URLs: a byte range that ends after the file is cut at its end, as over HTTP.
 
 ## [0.1.2] - 2026-10-19

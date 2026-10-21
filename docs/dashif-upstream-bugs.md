@@ -69,6 +69,7 @@ yet unless stated.
 | 54 | WaveHLSInterop Bitrate | On-demand rule applied to live and to the downloaded segments only | Verified in code and spec |
 | 55 | Low Latency DASHProfile | KIDs compared in different formats; cenc:pssh read as an attribute | Verified in code and spec |
 | 56 | SCH-55, SCH-56 | ContentProtection @value checked only by its length | Verified in code and spec |
+| 57 | CMAF LegacyInitialization | Counts senc boxes against moof boxes | Verified in code and spec |
 
 ## Manifest handling
 
@@ -943,6 +944,29 @@ pass SCH-56.
 `cbc1`) on the @value after resolving @ref, and `[0-9a-f]{4}` for the
 CA_descriptor.
 
+### 57. CMAF-15 counts senc boxes against moof boxes
+
+**Where:** [LegacyInitialization.php#L50-L81](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/app/Modules/CMAF/Segments/LegacyInitialization.php#L50-L81)
+
+**Problem:** ISO/IEC 23000-19 7.3.2.4 b requires each CMAF fragment, with its
+CMAF header and keys, to carry enough metadata to be decrypted on its own. The
+check instead requires as many senc boxes as moof boxes, whenever the MPD has a
+ContentProtection element, and only with the dash264 profile. But 8.2.2.1 makes
+senc a SHOULD: the sample auxiliary information may be in another box, such as
+a PIFF uuid box, and with constant IVs and no subsample encryption there is
+none, so senc "should be omitted". The clear fragments of an encrypted track
+(a clear lead), which use a sample entry without sinf or a seig sample group
+with isProtected 0, need none either.
+
+**Effect:** cbcs audio with constant IVs and clear-lead segments fail, and
+DASH-IF IOP content without the dash264 profile is not checked (CMAF-15).
+
+**Fix:** For each fragment, find whether its samples are encrypted from the
+sample entry that its sample description index selects and from its seig
+sample group, and require sample auxiliary information (senc, a uuid box or
+saio) when decrypting needs it: for subsample-encrypted video, or per-sample
+IVs.
+
 ## Other projects
 
 Found during the same work in projects that dashcheck builds on or tests with.
@@ -962,4 +986,5 @@ Found during the same work in projects that dashcheck builds on or tests with.
 | livesim2 | With Segment Sequences, the SSR AdaptationSet always has `<SegmentSequenceProperties sapType="1" cadence="1">`, whatever the Partial Segment duration. `testpic_2s_low_delay` has an IDR picture every second, so with `chunkdurssr_2,0.5` Partial Segments 1 and 3 of each sequence start with a non-IDR picture, contrary to the signalled SAP type (ISO/IEC 23009-1 5.3.5.7). |
 | livesim2 | With `continuous_1`, the period-continuity descriptors have `value="1"` instead of the @id of the earlier Period, and the AdaptationSets have no @id (ISO/IEC 23009-1 5.3.2.4 needs both). The first Period also carries the descriptor. |
 | CTA WAVE test content | The cenc vectors (for example `clg1_sets/12.5_25_50/t41-cenc/2025-01-15`) use 16-byte IVs; ISO/IEC 23000-19 8.2.3.1 (DIS text) limits cenc IVs to 8 bytes. |
+| Shaka demo assets | `angel-one-widevine` has the CMAF brand cmfc, but its initialization segments have a clear sample entry (avc1, mp4a) after the protected one, and the clear-lead fragments select it with their sample description index. ISO/IEC 23000-19 7.5.10 requires every sample entry of an encrypted CMAF track to be protected, and 8.2.3.2 signals clear samples with sample groups. |
 | BBC test card | The live test card's subtitle initialization segments (`testcard2020/*-subs/IS.mp4`) have an 8-byte 'sthd' box without the FullBox version and flags, so mp4ff cannot parse them. |

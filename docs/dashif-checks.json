@@ -1849,7 +1849,7 @@
    "rules": [
     "SEG-CMAF-SENC"
    ],
-   "note": "upstream only checks with the dash264 profile; dashcheck checks all encrypted CMAF tracks"
+   "note": "dashcheck checks every encrypted CMAF track, fragment by fragment: a fragment is clear when its sample entry has no sinf or a seig group marks it unprotected, and needs sample auxiliary information (senc, a PIFF uuid box or saio) only for subsample-encrypted video or per-sample IVs (ISO/IEC 23000-19 8.2.2.1); upstream checks only with the dash264 profile and counts senc boxes against moof boxes (bug 57)"
   },
   {
    "id": "CMAF-16",

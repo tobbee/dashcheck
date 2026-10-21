@@ -104,6 +104,12 @@ var (
 	})
 )
 
+// sampleEntry is the type of a sample entry and whether it is protected (has sinf).
+type sampleEntry struct {
+	fourCC    string
+	protected bool
+}
+
 // Init holds what is needed from an initialization segment to check media segments.
 type Init struct {
 	TrackID     uint32
@@ -125,9 +131,11 @@ type Init struct {
 	tkhdHeight  uint32
 	cmafBrand   string // the highest CMAF media profile brand of the track
 	trex        *mp4.TrexBox
-	aac         *audioConfig   // AAC AudioSpecificConfig, if any
-	tenc        *mp4.TencBox   // track encryption defaults, if encrypted
-	pssh        []*mp4.PsshBox // pssh boxes in moov
+	aac         *audioConfig                // AAC AudioSpecificConfig, if any
+	tenc        *mp4.TencBox                // track encryption defaults, if encrypted
+	pssh        []*mp4.PsshBox              // pssh boxes in moov
+	entries     []sampleEntry               // by sample description index minus one
+	seig        []*mp4.SeigSampleGroupEntry // seig sample group entries in stbl
 	dac4        *mp4.Dac4Box
 	kinds       []*mp4.KindBox
 	// HLSInterop turns on the CTA-5005 checks in CheckMedia; the runner sets it.
@@ -203,6 +211,12 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	init.Codec = info.codec
 	init.Video = info.video
 	init.Encrypted = info.encrypted
+	if stbl.Stsd != nil {
+		for _, c := range stbl.Stsd.Children {
+			init.entries = append(init.entries, sampleEntry{c.Type(), entrySinf(c) != nil})
+		}
+	}
+	init.seig = seigEntries(stbl.Sgpds)
 	init.Scheme = info.scheme
 	if ftyp := mf.Init.Ftyp; ftyp != nil {
 		init.Brands = append([]string{ftyp.MajorBrand()}, ftyp.CompatibleBrands()...)

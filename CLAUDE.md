@@ -121,9 +121,10 @@ pre-commit ships in a `venv/` directory as a package.
   and `.../testcard/simulcast/manifests/avc-full.mpd` (live).
 - DASH-IF IOP: `https://dash.akamaized.net/dash264/TestCasesIOP41/MultiTrack/alternative_content/1/manifest_alternative_content_live.mpd`.
 - Encrypted: `https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey-MultiPeriod/Manifest_1080p.mpd`
-  (also `v7-MultiDRM-SingleKey/`, `v9-MultiFormat/Encrypted_Cbcs/`), livesim2 Clear Key
-  `eccp_cbcs/testpic_2s/Manifest.mpd` and `eccp_cenc/`, and the Widevine
-  `https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine/dash.mpd`. Faulty:
+  (also `v7-MultiDRM-SingleKey/`, `v9-MultiFormat/Encrypted_Cbcs/`), and livesim2 Clear Key
+  `eccp_cbcs/testpic_2s/Manifest.mpd` and `eccp_cenc/`. Faulty:
+  `https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine/dash.mpd` has the cmfc
+  brand, but a clear sample entry for its clear lead (SEG-CMAF-SINF; the first subsegment is clear),
   `https://storage.googleapis.com/wvmedia/cenc/h264/tears/tears.mpd` gives one
   cenc:default_KID for Representations with different keys (XCHK-CP-KID), and
   `https://test.playready.microsoft.com/media/dash/APPLEENC_CBCS_BBB_1080p/1080p.mpd`

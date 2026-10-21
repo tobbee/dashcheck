@@ -63,6 +63,29 @@ type audioConfig struct {
 	objectType, sampleRate, channels int
 }
 
+// setProtection records the protection scheme and defaults of a protected sample entry.
+func (info *sampleEntryInfo) setProtection(sinf *mp4.SinfBox) {
+	info.encrypted = true
+	if sinf.Schm != nil {
+		info.scheme = sinf.Schm.SchemeType
+	}
+	if sinf.Schi != nil && sinf.Schi.Tenc != nil {
+		info.defaultKID = sinf.Schi.Tenc.DefaultKID.String()
+		info.tenc = sinf.Schi.Tenc
+	}
+}
+
+// entrySinf returns the sinf box of a protected sample entry, or nil.
+func entrySinf(b mp4.Box) *mp4.SinfBox {
+	switch se := b.(type) {
+	case *mp4.VisualSampleEntryBox:
+		return se.Sinf
+	case *mp4.AudioSampleEntryBox:
+		return se.Sinf
+	}
+	return nil
+}
+
 func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 	if stsd == nil || len(stsd.Children) == 0 {
 		return sampleEntryInfo{}, fmt.Errorf("no sample entry")
@@ -74,14 +97,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 		info.width, info.height = se.Width, se.Height
 		if se.Sinf != nil && se.Sinf.Frma != nil {
 			info.fourCC = se.Sinf.Frma.DataFormat
-			info.encrypted = true
-			if se.Sinf.Schm != nil {
-				info.scheme = se.Sinf.Schm.SchemeType
-			}
-			if se.Sinf.Schi != nil && se.Sinf.Schi.Tenc != nil {
-				info.defaultKID = se.Sinf.Schi.Tenc.DefaultKID.String()
-				info.tenc = se.Sinf.Schi.Tenc
-			}
+			info.setProtection(se.Sinf)
 		}
 		for _, c := range se.Children {
 			if colr, ok := c.(*mp4.ColrBox); ok && colr.ColorType == "nclx" {
@@ -96,14 +112,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 		info.channels = se.ChannelCount
 		if se.Sinf != nil && se.Sinf.Frma != nil {
 			info.fourCC = se.Sinf.Frma.DataFormat
-			info.encrypted = true
-			if se.Sinf.Schm != nil {
-				info.scheme = se.Sinf.Schm.SchemeType
-			}
-			if se.Sinf.Schi != nil && se.Sinf.Schi.Tenc != nil {
-				info.defaultKID = se.Sinf.Schi.Tenc.DefaultKID.String()
-				info.tenc = se.Sinf.Schi.Tenc
-			}
+			info.setProtection(se.Sinf)
 		}
 		info.codec, info.derived = audioCodec(info.fourCC, se)
 		info.aac = describeAAC(se)
@@ -125,6 +134,17 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 	default:
 		info.fourCC = stsd.Children[0].Type()
 		info.codec = info.fourCC
+	}
+	// The protection of the track comes from its first protected sample
+	// entry. A track with a clear lead may also have a clear sample entry,
+	// before or after it.
+	if !info.encrypted {
+		for _, c := range stsd.Children[1:] {
+			if sinf := entrySinf(c); sinf != nil && sinf.Frma != nil {
+				info.setProtection(sinf)
+				break
+			}
+		}
 	}
 	return info, nil
 }

@@ -2,7 +2,7 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 260 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 59 rules marked **dashcheck** have no counterpart in that tool.
+All 261 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 60 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
@@ -13,14 +13,14 @@ All 260 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [Segments](#segments) | 29 | 12 |
 | [Live timing and HTTP](#live-timing-and-http) | 12 | 12 |
 | [DASH-IF IOP](#dash-if-iop) | 21 | 3 |
-| [CMAF](#cmaf) | 18 | 1 |
+| [CMAF](#cmaf) | 19 | 2 |
 | [Low latency](#low-latency) | 25 | 0 |
 | [DVB-DASH](#dvb-dash) | 56 | 1 |
 | [HbbTV](#hbbtv) | 3 | 0 |
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **260** | **59** |
+| **Total** | **261** | **60** |
 
 ## MPD syntax
 
@@ -211,8 +211,9 @@ All 260 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | SEG-CMAF-MINORVERSION | error | With a structural CMAF brand (cmfc or cmf2) as major_brand, ftyp and styp must have minor_version 0 | ISO/IEC 23000-19 7.2 | **dashcheck** |
 | SEG-CMAF-PRESENTATIONPROFILE | error | With the cmfhd presentation profile, video switching sets need a cfhd track and audio switching sets a caac track | ISO/IEC 23000-19 A.1.2 | CMAF-2, CMAF-23, WAVE-3, WAVE-16, WAVE-20 |
 | SEG-CMAF-SAP | error | Each video CMAF fragment must start with a sync sample (SAP type 1 or 2) | ISO/IEC 23000-19 9.2.8 | LL-12 |
-| SEG-CMAF-SENC | error | Each encrypted CMAF fragment must carry its sample encryption information | ISO/IEC 23000-19 7.3.2.4 | CMAF-15 |
+| SEG-CMAF-SENC | error | Each encrypted CMAF fragment must carry the sample auxiliary information that decrypting it needs: subsamples for video, or per-sample IVs | ISO/IEC 23000-19 7.3.2.4, 8.2.2.1 | CMAF-15 |
 | SEG-CMAF-SIDX | error | Each subsegment referenced by a CMAF sidx box must be a single media fragment | ISO/IEC 23000-19 7.3.3.3 | CMAF-19, LL-48 |
+| SEG-CMAF-SINF | error | Every sample entry of an encrypted CMAF track must be protected (sinf), with tenc default_isProtected 1; sample groups mark clear samples | ISO/IEC 23000-19 7.5.10, 8.2.3.2 | **dashcheck** |
 | SEG-CMAF-SUBS | error | Each fragment of an im1i subtitle track must contain a subs box | ISO/IEC 23000-19 7.5.20 | CMAF-21 |
 | SEG-CMAF-SUBTITLEPROFILE | error | All subtitle tracks of a CMAF switching set must conform to one media profile | ISO/IEC 23000-19 7.3.4.1 | CMAF-20, WAVE-14 |
 | SEG-CMAF-SWITCHINGSET | error | All tracks of a CMAF switching set must have the same media type | ISO/IEC 23000-19 7.3.9.1 | CMAF-18 |
