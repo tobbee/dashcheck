@@ -100,7 +100,10 @@ make serve PORT=8090                   # browser UI on http://localhost:8090
 
 Add user-visible changes to CHANGELOG.md under [Unreleased]. The version comes
 from the git tag (`internal.Version`); a release is a CHANGELOG section and a
-`vX.Y.Z` tag. The pre-commit hook (`make pre-commit-install`) runs gofmt,
+`vX.Y.Z` tag, with the section as the GitHub release notes. In CHANGELOG.md, PR
+descriptions and release notes, write attributes as code (`@width`): GitHub
+reads a bare @width as a mention, notifies that user and lists them as a
+contributor of the release. The pre-commit hook (`make pre-commit-install`) runs gofmt,
 golangci-lint and the tests; its venv is `.venv`, since Go would see the Go file
 pre-commit ships in a `venv/` directory as a package.
 

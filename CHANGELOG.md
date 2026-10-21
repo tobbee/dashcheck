@@ -20,15 +20,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Signal/Binary element.
 - SEG-CMAF-CHUNK (one traf with one trun per moof) and SEG-CMAF-SAP (video CMAF fragments start
   with a sync sample). The CMAF rules now also apply to low-latency chunked Representations.
-- XCHK-CMAF-SIZE: in the DASH profile for CMAF content, @maxWidth and @maxHeight (or @width and
-  @height) must be the tkhd size of the largest track.
+- XCHK-CMAF-SIZE: in the DASH profile for CMAF content, `@maxWidth` and `@maxHeight` (or `@width`
+  and `@height`) must be the tkhd size of the largest track.
 - SEG-SIDX-SPAN: the sidx box of a SegmentBase Representation must index every movie fragment of
   its file.
 - Segment Sequence MPD rules: MPD-SSR-SIGNAL (a profile that allows them or the
   `urn:mpeg:dash:ssr:2023` EssentialProperty), MPD-SSR-TIMELINE, MPD-SSR-ATTRIBUTES and
   MPD-SSR-PROPERTIES.
 - SEG-SSR-SAP: the Partial Segments that SegmentSequenceProperties@cadence selects must start with
-  a sync sample when @sapType is 1 or 2.
+  a sync sample when `@sapType` is 1 or 2.
 - SEG-CMAF-SINF: every sample entry of an encrypted CMAF track must be protected (no clear sample
   entry for a clear lead), with tenc default_isProtected 1.
 - ContentProtection rules: XCHK-CP-MISSING, XCHK-CP-SCHEME and XCHK-CP-KID against the init segment,
@@ -39,16 +39,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Segment Sequences (ISO/IEC 23009-1 5.3.9.7, `@k` and `$SubNumber$`) are now addressed and their
-  Partial Segments checked, with @startWithSAP on the first of each sequence. Only SegmentTimeline
+  Partial Segments checked, with `@startWithSAP` on the first of each sequence. Only SegmentTimeline
   duration patterns (S@p, S@ssp) remain ADDR-UNSUPPORTED.
 - XCHK-CP-MISSING replaces SEG-LL-PROTECTION and checks all encrypted tracks, not only low latency.
 - SEG-HLS-BITRATE (`-hls-interop`) also checks SegmentTemplate and SegmentList content when every
   segment is checked, and live streams whose checked segments cover an hour (at most 110%).
 
 ### Fixed
-- ContentProtection@ref is resolved, so MPD-CP-VALUE, MPD-IOP-CP and SEG-DVB-PSSH see the @value,
+- ContentProtection@ref is resolved, so MPD-CP-VALUE, MPD-IOP-CP and SEG-DVB-PSSH see the `@value`,
   cenc:default_KID and cenc:pssh that a descriptor inherits from its source.
-- MPD-CP-VALUE accepts a version (`cenc:1`) and a percent-encoded 4CC in the mp4protection @value.
+- MPD-CP-VALUE accepts a version (`cenc:1`) and a percent-encoded 4CC in the mp4protection `@value`.
 - SEG-CMAF-SENC no longer reports clear-lead fragments, or audio with constant IVs, which has no
   sample auxiliary information. A track's protection comes from its first protected sample entry.
 - `file:` URLs: a byte range that ends after the file is cut at its end, as over HTTP.
