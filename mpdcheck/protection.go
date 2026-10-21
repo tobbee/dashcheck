@@ -16,7 +16,10 @@ import (
 // ContentProtection rules of ISO/IEC 23009-1 5.8.4.1 and 5.8.5.2, and of the
 // cenc namespace of ISO/IEC 23001-7 11.
 
-const schemeCADescriptor = "urn:mpeg:dash:13818:1:CA_descriptor:2011"
+const (
+	schemeCADescriptor = "urn:mpeg:dash:13818:1:CA_descriptor:2011"
+	schemeClearKey     = "urn:uuid:e2719d58-a985-b3c9-781a-b030af78d30e"
+)
 
 var (
 	RuleContentProtectionValue = report.Register(report.Rule{
@@ -39,6 +42,11 @@ var (
 		Desc:    "The mp4protection and CA_descriptor ContentProtection must not have @robustness",
 		SpecRef: "ISO/IEC 23009-1 5.8.5.2.2, 5.8.5.2.3",
 	})
+	RuleCPClearKey = report.Register(report.Rule{
+		ID: "MPD-CP-CLEARKEY", Severity: report.Error,
+		Desc:    "The Clear Key ContentProtection must have @value ClearKey1.0 and no Clear Key initialization data (cenc:pssh)",
+		SpecRef: "DASH-IF IOP 7.6.2.4",
+	})
 	RuleCPRef = report.Register(report.Rule{
 		ID: "MPD-CP-REF", Severity: report.Error,
 		Desc:    "ContentProtection on the MPD or a Period needs @refId, @ref excludes @refId, and the source of a @ref must not be in a later Period",
@@ -58,7 +66,8 @@ var (
 // SCH-55, SCH-56. cps are the ContentProtection elements of an
 // AdaptationSet or Representation with @ref resolved. kidRequired is set
 // where MPD-IOP-CP reports a missing cenc:default_KID, which then replaces
-// the MPD-CP-DEFAULTKID warning.
+// the MPD-CP-DEFAULTKID warning. The Clear Key rules apply to every MPD, as
+// they define the use of the DASH-IF Clear Key SystemID.
 func checkContentProtectionValues(cps []*m.ContentProtectionType, path string, kidRequired bool) []report.Finding {
 	var f []report.Finding
 	for i, cp := range cps {
@@ -74,6 +83,14 @@ func checkContentProtectionValues(cps []*m.ContentProtectionType, path string, k
 		case schemeCADescriptor:
 			if !hex4Re.MatchString(cp.Value) {
 				f = append(f, RuleContentProtectionValue.New(loc, "CA_descriptor @value %q is not 4 lower-case hex digits", cp.Value))
+			}
+		}
+		if strings.EqualFold(string(cp.SchemeIdUri), schemeClearKey) {
+			if cp.Value != "ClearKey1.0" {
+				f = append(f, RuleCPClearKey.New(loc, "Clear Key @value %q, not ClearKey1.0", cp.Value))
+			}
+			if cp.Pssh != nil {
+				f = append(f, RuleCPClearKey.New(loc, "Clear Key initialization data in cenc:pssh"))
 			}
 		}
 	}

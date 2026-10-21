@@ -2,7 +2,9 @@ package segcheck
 
 import (
 	"bytes"
+	"fmt"
 	"slices"
+	"strings"
 	"testing"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
@@ -85,6 +87,71 @@ func TestProtectedInit(t *testing.T) {
 		_, f := CheckInit(buf.Bytes(), &video, video.Loc())
 		if got := ruleIDs(f); !slices.Equal(got, c.want) {
 			t.Errorf("%s: got %v, want %v", c.name, f, c.want)
+		}
+	}
+}
+
+func psshBox(t *testing.T, systemID string, kids ...string) *mp4.PsshBox {
+	t.Helper()
+	p, err := mp4.NewPsshBox(systemID, kids, []byte("data"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p
+}
+
+func TestProtectionAdaptationSetRules(t *testing.T) {
+	const iop, dvb = "http://dashif.org/guidelines/dash-if-simple", "urn:dvb:dash:profile:dvb-dash:2014"
+	wvID := strings.TrimPrefix(widevine, "urn:uuid:")
+	enc := func(kid string, pssh ...*mp4.PsshBox) *Init {
+		return &Init{Encrypted: true, Scheme: "cenc", DefaultKID: kid, pssh: pssh}
+	}
+	cases := []struct {
+		name     string
+		profiles []string
+		inits    []*Init
+		want     []string
+	}{
+		{"same KID", []string{iop}, []*Init{enc(testKID), enc(testKID), nil}, nil},
+		{"different KIDs", []string{iop}, []*Init{enc(testKID), enc(otherKID)}, []string{"SEG-AS-KID"}},
+		{"clear and encrypted", []string{iop}, []*Init{enc(testKID), {}}, []string{"SEG-AS-KID"}},
+		{"different KIDs in CMAF", nil, []*Init{{CMAF: true, Encrypted: true, DefaultKID: testKID}, {CMAF: true, Encrypted: true, DefaultKID: otherKID}},
+			[]string{"SEG-AS-KID"}},
+		{"different KIDs without a profile", nil, []*Init{enc(testKID), enc(otherKID)}, nil},
+		{"different KIDs in DVB", []string{iop, dvb}, []*Init{enc(testKID), enc(otherKID)}, []string{"SEG-DVB-SWITCHABLE"}},
+		{"same pssh", []string{iop}, []*Init{enc(testKID, psshBox(t, wvID)), enc(testKID, psshBox(t, wvID))}, nil},
+		{"different pssh", []string{iop}, []*Init{enc(testKID, psshBox(t, wvID)), enc(testKID, psshBox(t, wvID, testKID))}, []string{"SEG-IOP-PSSH"}},
+		{"missing pssh", []string{iop}, []*Init{enc(testKID, psshBox(t, wvID)), enc(testKID)}, []string{"SEG-IOP-PSSH"}},
+	}
+	for _, c := range cases {
+		var reps []*addressing.Rep
+		for i := range c.inits {
+			reps = append(reps, &addressing.Rep{ID: fmt.Sprintf("r%d", i), ASPath: "Period[0]/AdaptationSet[0]", Profiles: c.profiles})
+		}
+		if got := ruleIDs(CheckAdaptationSet(reps, c.inits)); !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
+		}
+	}
+}
+
+func TestIOPPsshInit(t *testing.T) {
+	wvID := strings.TrimPrefix(widevine, "urn:uuid:")
+	rep := &addressing.Rep{Profiles: []string{"http://dashif.org/guidelines/dash-if-simple"},
+		ContentProtections: []*m.ContentProtectionType{cp(addressing.SchemeMP4Protection, "cenc", testKID)}}
+	cases := []struct {
+		name string
+		pssh []*mp4.PsshBox
+		want []string
+	}{
+		{"no pssh", nil, nil},
+		{"pssh", []*mp4.PsshBox{psshBox(t, wvID)}, []string{"SEG-IOP-PSSH-INIT"}},
+		{"common pssh", []*mp4.PsshBox{psshBox(t, systemCommon, testKID)}, []string{"SEG-IOP-PSSH-INIT"}},
+		{"common pssh with another KID", []*mp4.PsshBox{psshBox(t, systemCommon, testKID, otherKID)}, []string{"SEG-IOP-PSSH-INIT", "SEG-IOP-PSSH"}},
+	}
+	for _, c := range cases {
+		init := &Init{Encrypted: true, Scheme: "cenc", DefaultKID: testKID, pssh: c.pssh}
+		if got := ruleIDs(protectionInitRules(rep, init, rep.Loc())); !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
 		}
 	}
 }
