@@ -155,3 +155,107 @@ func TestIOPPsshInit(t *testing.T) {
 		}
 	}
 }
+
+// TestCMAFSenc checks SEG-CMAF-SENC on a clear video segment, with
+// initialization segments that make its fragment encrypted or clear.
+func TestCMAFSenc(t *testing.T) {
+	video := *reps(t)[1]
+	protected := []sampleEntry{{"encv", true}}
+	clearLead := []sampleEntry{{"encv", true}, {"avc1", false}}
+	cbcs := &mp4.TencBox{DefaultIsProtected: 1, DefaultConstantIV: make([]byte, 16)}
+	cenc := &mp4.TencBox{DefaultIsProtected: 1, DefaultPerSampleIVSize: 8}
+	seig := func(isProtected byte) func(*mp4.TrafBox) {
+		return func(traf *mp4.TrafBox) {
+			_ = traf.AddChild(&mp4.SbgpBox{GroupingType: "seig", SampleCounts: []uint32{1}, GroupDescriptionIndices: []uint32{0x10001}})
+			_ = traf.AddChild(&mp4.SgpdBox{GroupingType: "seig", SampleGroupEntries: []mp4.SampleGroupEntry{
+				&mp4.SeigSampleGroupEntry{IsProtected: isProtected, PerSampleIVSize: 8}}})
+		}
+	}
+	cases := []struct {
+		name    string
+		handler string
+		entries []sampleEntry
+		tenc    *mp4.TencBox
+		modify  func(*mp4.TrafBox)
+		want    []string
+	}{
+		{"clear", "vide", []sampleEntry{{"avc1", false}}, nil, nil, nil},
+		{"encrypted video", "vide", protected, cbcs, nil, []string{"SEG-CMAF-SENC"}},
+		{"clear lead", "vide", clearLead, cbcs, func(traf *mp4.TrafBox) {
+			traf.Tfhd.Flags |= mp4.TfhdSampleDescriptionIndexPresentFlag
+			traf.Tfhd.SampleDescriptionIndex = 2
+		}, nil},
+		{"clear by seig", "vide", protected, cbcs, seig(0), nil},
+		{"protected by seig", "vide", protected, cbcs, seig(1), []string{"SEG-CMAF-SENC"}},
+		{"auxiliary information elsewhere", "vide", protected, cbcs, func(traf *mp4.TrafBox) { _ = traf.AddChild(&mp4.SaioBox{}) }, nil},
+		{"audio with constant IVs", "soun", protected, cbcs, nil, nil},
+		{"audio with per-sample IVs", "soun", protected, cenc, nil, []string{"SEG-CMAF-SENC"}},
+	}
+	for _, c := range cases {
+		mf, err := mp4.DecodeFile(bytes.NewReader(read(t, "V300/1.m4s")))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if c.modify != nil {
+			c.modify(mf.Segments[0].Fragments[0].Moof.Traf)
+		}
+		init := &Init{CMAF: true, Handler: c.handler, HasEditList: true, Encrypted: c.tenc != nil, tenc: c.tenc, entries: c.entries}
+		var got []string
+		for _, id := range ruleIDs(cmafMediaRules(&video, init, &Media{FirstSync: true}, mf, video.Loc())) {
+			if id == "SEG-CMAF-SENC" {
+				got = append(got, id)
+			}
+		}
+		if !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
+		}
+	}
+}
+
+func TestCMAFSinf(t *testing.T) {
+	video := *reps(t)[1]
+	info := sampleEntryInfo{fourCC: "avc1", width: 1, height: 1, video: videoConfig{codec: "avc", hasConfig: true}}
+	cases := []struct {
+		name    string
+		entries []sampleEntry
+		tenc    *mp4.TencBox
+		want    []string
+	}{
+		{"protected", []sampleEntry{{"encv", true}}, &mp4.TencBox{DefaultIsProtected: 1}, nil},
+		{"clear sample entry", []sampleEntry{{"encv", true}, {"avc1", false}}, &mp4.TencBox{DefaultIsProtected: 1}, []string{"SEG-CMAF-SINF"}},
+		{"not protected by default", []sampleEntry{{"encv", true}}, &mp4.TencBox{}, []string{"SEG-CMAF-SINF"}},
+	}
+	for _, c := range cases {
+		init := &Init{CMAF: true, Handler: "vide", Encrypted: true, Scheme: "cbcs", tenc: c.tenc, entries: c.entries}
+		if got := ruleIDs(cmafInitRules(&video, init, info, nil, video.Loc())); !slices.Equal(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
+		}
+	}
+}
+
+// TestClearEntryFirst checks that the protection of a track comes from its
+// first protected sample entry, also after a clear one.
+func TestClearEntryFirst(t *testing.T) {
+	clear, err := mp4.DecodeFile(bytes.NewReader(read(t, "V300/init.mp4")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	protected, err := mp4.DecodeFile(bytes.NewReader(read(t, "V300/init.mp4")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	kid, _ := mp4.NewUUIDFromString(testKID)
+	if _, err := mp4.InitProtect(protected.Init, make([]byte, 16), make([]byte, 16), "cbcs", kid, nil); err != nil {
+		t.Fatal(err)
+	}
+	stsd := &mp4.StsdBox{}
+	stsd.AddChild(clear.Init.Moov.Trak.Mdia.Minf.Stbl.Stsd.Children[0])
+	stsd.AddChild(protected.Init.Moov.Trak.Mdia.Minf.Stbl.Stsd.Children[0])
+	info, err := describeSampleEntry(stsd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.fourCC != "avc1" || !info.encrypted || info.scheme != "cbcs" || info.defaultKID != testKID {
+		t.Errorf("got fourCC %s, encrypted %v, scheme %q, KID %s", info.fourCC, info.encrypted, info.scheme, info.defaultKID)
+	}
+}

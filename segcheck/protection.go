@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
+	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/addressing"
 	"github.com/tobbee/dashcheck/report"
 )
@@ -184,6 +185,75 @@ func iopPsshRules(reps []*addressing.Rep, inits []*Init, loc report.Location) []
 		}
 	}
 	return f
+}
+
+// seigEntries returns the seig sample group entries of sgpd boxes, in order.
+func seigEntries(sgpds []*mp4.SgpdBox) []*mp4.SeigSampleGroupEntry {
+	var entries []*mp4.SeigSampleGroupEntry
+	for _, sgpd := range sgpds {
+		if sgpd.GroupingType != "seig" {
+			continue
+		}
+		for _, e := range sgpd.SampleGroupEntries {
+			s, _ := e.(*mp4.SeigSampleGroupEntry)
+			entries = append(entries, s) // nil keeps the index of an entry that is not seig
+		}
+	}
+	return entries
+}
+
+// fragmentProtection reports whether the samples of a track fragment are
+// encrypted, and their Per_Sample_IV_Size. They are clear when the sample
+// description index of the fragment selects a sample entry without sinf, as
+// in the clear lead of Shaka Packager, or when the seig sample group of the
+// first samples marks them as not protected (ISO/IEC 23001-7 6, ISO/IEC
+// 23000-19 8.2.3.2, which requires all samples of a fragment to be alike).
+func fragmentProtection(init *Init, traf *mp4.TrafBox) (encrypted bool, ivSize byte) {
+	sdi := uint32(1)
+	switch {
+	case traf.Tfhd != nil && traf.Tfhd.HasSampleDescriptionIndex():
+		sdi = traf.Tfhd.SampleDescriptionIndex
+	case init.trex != nil:
+		sdi = init.trex.DefaultSampleDescriptionIndex
+	}
+	if sdi == 0 || int(sdi) > len(init.entries) || !init.entries[sdi-1].protected {
+		return false, 0
+	}
+	encrypted = true
+	if init.tenc != nil {
+		encrypted, ivSize = init.tenc.DefaultIsProtected == 1, init.tenc.DefaultPerSampleIVSize
+	}
+	// mp4ff keeps one sbgp and one sgpd box per traf, so look at them all.
+	var sbgp *mp4.SbgpBox
+	var sgpds []*mp4.SgpdBox
+	for _, c := range traf.Children {
+		switch b := c.(type) {
+		case *mp4.SbgpBox:
+			if b.GroupingType == "seig" && sbgp == nil {
+				sbgp = b
+			}
+		case *mp4.SgpdBox:
+			sgpds = append(sgpds, b)
+		}
+	}
+	if sbgp == nil || len(sbgp.GroupDescriptionIndices) == 0 {
+		return encrypted, ivSize
+	}
+	// Indices above 0x10000 refer to the fragment's own sgpd box, and 0 to
+	// no group (ISO/IEC 14496-12 8.9.4).
+	var seig *mp4.SeigSampleGroupEntry
+	switch i := int(sbgp.GroupDescriptionIndices[0]); {
+	case i > 0x10000:
+		if local := seigEntries(sgpds); i-0x10001 < len(local) {
+			seig = local[i-0x10001]
+		}
+	case i > 0 && i <= len(init.seig):
+		seig = init.seig[i-1]
+	}
+	if seig != nil {
+		encrypted, ivSize = seig.IsProtected == 1, seig.PerSampleIVSize
+	}
+	return encrypted, ivSize
 }
 
 // normalizeKID returns a KID in lower case without hyphens, so that the

@@ -236,7 +236,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | CMAF-12 | `Section 7.3.5`: Each HEVC CMAF Fragment SHALL be independently accessible | done | SEG-CMAF-INIT | like upstream, checks that the decoder configuration and size are present |
 | CMAF-13 | `Section 7.3.5`: Each Audio CMAF Fragment SHALL be independently accessible | done | SEG-CMAF-INIT | like upstream, checks that sample rate and channel count are present |
 | CMAF-14 | `Section 7.3.2.4`: The HEVCSampleEntry SHALL contain a 'colr' box with type 'nclx' | done | SEG-CMAF-COLR | dashcheck checks hvc1 and hev1, upstream only hev1 |
-| CMAF-15 | `Section 7.3.2.4`: Each encrypted Fragment SHALL be independently decryptable | done | SEG-CMAF-SENC | upstream only checks with the dash264 profile; dashcheck checks all encrypted CMAF tracks |
+| CMAF-15 | `Section 7.3.2.4`: Each encrypted Fragment SHALL be independently decryptable | done | SEG-CMAF-SENC | dashcheck checks every encrypted CMAF track, fragment by fragment: a fragment is clear when its sample entry has no sinf or a seig group marks it unprotected, and needs sample auxiliary information (senc, a PIFF uuid box or saio) only for subsample-encrypted video or per-sample IVs (ISO/IEC 23000-19 8.2.2.1); upstream checks only with the dash264 profile and counts senc boxes against moof boxes (bug 57) |
 | CMAF-16 | `Section 7.5.2`: When metadata is carried in a 'meta' box, it SHALL NOT occur at the file level | done | SEG-CMAF-TOPLEVEL |  |
 | CMAF-17 | `Section 7.5.2`: When metadata is carried in a 'udta' box, it SHALL NOT occur at the file level | done | SEG-CMAF-TOPLEVEL |  |
 | CMAF-18 | `Section 7.3.9.1`: A CMAF switching set SHALL have only media type | done | SEG-CMAF-SWITCHINGSET |  |

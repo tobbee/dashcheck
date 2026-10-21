@@ -45,7 +45,7 @@ func TestCMAFRules(t *testing.T) {
 	// Encryption profiles: a clear track with the cmfhdc profile is fine, an encrypted cmfhd is not.
 	video.Profiles = append(video.Profiles, "urn:mpeg:cmaf:representation_profile:cmfhd:2017")
 	enc := *vInit
-	enc.Encrypted, enc.Scheme = true, "cbcs"
+	enc.Encrypted, enc.Scheme, enc.entries = true, "cbcs", []sampleEntry{{"encv", true}}
 	if f := cmafInitRules(&video, &enc, sampleEntryInfo{fourCC: "avc1", width: 1, height: 1, video: videoConfig{codec: "avc", hasConfig: true}}, nil, video.Loc()); len(f) != 1 || f[0].Rule != "SEG-CMAF-ENCRYPTION" {
 		t.Errorf("encryption profile: got %v", f)
 	}

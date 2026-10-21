@@ -46,8 +46,13 @@ var (
 	})
 	RuleCMAFSenc = report.Register(report.Rule{
 		ID: "SEG-CMAF-SENC", Severity: report.Error,
-		Desc:    "Each encrypted CMAF fragment must carry its sample encryption information",
-		SpecRef: refCMAF + " 7.3.2.4",
+		Desc:    "Each encrypted CMAF fragment must carry the sample auxiliary information that decrypting it needs: subsamples for video, or per-sample IVs",
+		SpecRef: refCMAF + " 7.3.2.4, 8.2.2.1",
+	})
+	RuleCMAFSinf = report.Register(report.Rule{
+		ID: "SEG-CMAF-SINF", Severity: report.Error,
+		Desc:    "Every sample entry of an encrypted CMAF track must be protected (sinf), with tenc default_isProtected 1; sample groups mark clear samples",
+		SpecRef: refCMAF + " 7.5.10, 8.2.3.2",
 	})
 	RuleCMAFSidx = report.Register(report.Rule{
 		ID: "SEG-CMAF-SIDX", Severity: report.Error,
@@ -113,6 +118,16 @@ func cmafInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, top []
 	}
 	// CMAF-16, CMAF-17
 	f = append(f, checkTopLevel(top, loc)...)
+	if init.Encrypted {
+		for i, e := range init.entries {
+			if !e.protected {
+				f = append(f, RuleCMAFSinf.New(loc, "sample entry %d (%s) of an encrypted track is not protected", i+1, e.fourCC))
+			}
+		}
+		if init.tenc != nil && init.tenc.DefaultIsProtected != 1 {
+			f = append(f, RuleCMAFSinf.New(loc, "tenc default_isProtected %d, not 1", init.tenc.DefaultIsProtected))
+		}
+	}
 	// CMAF-6, CMAF-7, CMAF-8
 	switch {
 	case rep.HasProfile("urn:mpeg:cmaf:representation_profile:cmfhd:2017") && init.Encrypted:
@@ -187,9 +202,11 @@ func cmafMediaRules(rep *addressing.Rep, init *Init, media *Media, mf *mp4.File,
 				if traf.Tfhd != nil && !traf.Tfhd.DefaultBaseIfMoof() {
 					f = append(f, RuleCMAFDataOffset.New(loc, "tfhd in fragment %d without default-base-is-moof", fi))
 				}
-				// CMAF-15
-				if init.Encrypted && traf.Senc == nil && traf.UUIDSenc == nil {
-					f = append(f, RuleCMAFSenc.New(loc, "encrypted fragment %d without senc box", fi))
+				// CMAF-15. Video is subsample encrypted (8.2.3.1). With constant
+				// IVs, audio has no sample auxiliary information (8.2.2.1).
+				encrypted, ivSize := fragmentProtection(init, traf)
+				if encrypted && (video || ivSize > 0) && traf.Senc == nil && traf.UUIDSenc == nil && traf.Saio == nil {
+					f = append(f, RuleCMAFSenc.New(loc, "encrypted fragment %d without sample auxiliary information (senc)", fi))
 				}
 				// CMAF-21
 				if strings.Contains(rep.Codecs, "im1i") && !slices.ContainsFunc(traf.Children, func(b mp4.Box) bool { return b.Type() == "subs" }) {
