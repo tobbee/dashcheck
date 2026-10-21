@@ -29,6 +29,7 @@ const iopMPD = `<?xml version="1.0" encoding="UTF-8"?>
 </MPD>`
 
 func TestProfileRules(t *testing.T) {
+	mp4p := `<ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc" cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266"/>`
 	cases := []struct {
 		name     string
 		old, new string
@@ -51,6 +52,11 @@ func TestProfileRules(t *testing.T) {
 		{"bad mimeType", `mimeType="audio/mp4"`, `mimeType="audio/aac"`, []string{"MPD-IOP-MIMETYPE"}},
 		{"two codecs", `codecs="mp4a.40.2"`, `codecs="mp4a.40.2,ec-3"`, []string{"MPD-IOP-CODECS"}},
 		{"cp without default_KID", ` cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266"`, "", []string{"MPD-IOP-CP"}},
+		{"drm descriptor", mp4p, mp4p + `<ContentProtection schemeIdUri="urn:uuid:` + widevineID + `" value="Widevine 1.0"><cenc:pssh>` +
+			psshBase64(t, widevineID, nil) + `</cenc:pssh></ContentProtection>`, nil},
+		{"drm descriptor without pssh and value", mp4p, mp4p + `<ContentProtection schemeIdUri="urn:uuid:` + widevineID + `"/>`,
+			[]string{"MPD-IOP-CP-DRM", "MPD-IOP-CP-DRM"}},
+		{"clear key descriptor", mp4p, mp4p + `<ContentProtection schemeIdUri="urn:uuid:e2719d58-a985-b3c9-781a-b030af78d30e" value="ClearKey1.0"/>`, nil},
 		{"cp on representation", `<Representation id="v1" bandwidth="1000000" width="640" height="360"/>`,
 			`<Representation id="v1" bandwidth="1000000" width="640" height="360"><ContentProtection schemeIdUri="urn:x" value="y"/></Representation>`,
 			[]string{"MPD-IOP-CP"}},

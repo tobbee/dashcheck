@@ -109,6 +109,11 @@ var (
 		Desc:    "IOP ContentProtection must be on the AdaptationSet, and mp4protection must have cenc:default_KID",
 		SpecRef: "DASH-IF IOP 7",
 	})
+	RuleIOPDRM = report.Register(report.Rule{
+		ID: "MPD-IOP-CP-DRM", Severity: report.Warning,
+		Desc:    "IOP DRM ContentProtection descriptors (urn:uuid) should have cenc:pssh and a @value with the DRM name and version",
+		SpecRef: "DASH-IF IOP 7.7.2",
+	})
 	RuleAudioChannelConfig = report.Register(report.Rule{
 		ID: "MPD-AUDIO-CHANNELCONFIG", Severity: report.Error,
 		Desc:    "AudioChannelConfiguration must use the scheme required by the AC-4 or MPEG-H profile",
@@ -291,11 +296,21 @@ func adaptationSetProfileRules(p *m.Period, ai int, as *m.AdaptationSetType, asP
 		}
 		// SCH-90
 		f = append(f, checkSwitchingAlignment(p, ai, as, loc)...)
-		// SCH-115, SCH-116, SCH-117
 		for i, cp := range addressing.ResolveContentProtections(as.ContentProtections, cpSources) {
+			cpLoc := report.Location{Path: fmt.Sprintf("%s/ContentProtection[%d]", asPath, i)}
+			// SCH-115, SCH-116, SCH-117
 			if cp.SchemeIdUri == "urn:mpeg:dash:mp4protection:2011" && cp.DefaultKID == "" {
-				f = append(f, RuleIOPContentProtection.New(report.Location{Path: fmt.Sprintf("%s/ContentProtection[%d]", asPath, i)},
-					"mp4protection ContentProtection without cenc:default_KID"))
+				f = append(f, RuleIOPContentProtection.New(cpLoc, "mp4protection ContentProtection without cenc:default_KID"))
+			}
+			// MPD-CP-CLEARKEY forbids cenc:pssh in the Clear Key descriptor.
+			if !strings.HasPrefix(strings.ToLower(string(cp.SchemeIdUri)), "urn:uuid:") || strings.EqualFold(string(cp.SchemeIdUri), schemeClearKey) {
+				continue
+			}
+			if cp.Pssh == nil {
+				f = append(f, RuleIOPDRM.New(cpLoc, "%s descriptor without cenc:pssh", cp.SchemeIdUri))
+			}
+			if cp.Value == "" {
+				f = append(f, RuleIOPDRM.New(cpLoc, "%s descriptor without @value", cp.SchemeIdUri))
 			}
 		}
 	}

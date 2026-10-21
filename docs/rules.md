@@ -2,25 +2,25 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 254 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 53 rules marked **dashcheck** have no counterpart in that tool.
+All 260 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 59 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
 | [MPD syntax](#mpd-syntax) | 3 | 1 |
-| [MPD](#mpd) | 61 | 19 |
+| [MPD](#mpd) | 62 | 20 |
 | [MPD updates](#mpd-updates) | 5 | 3 |
 | [Segment addressing](#segment-addressing) | 7 | 6 |
-| [Segments](#segments) | 28 | 11 |
+| [Segments](#segments) | 29 | 12 |
 | [Live timing and HTTP](#live-timing-and-http) | 12 | 12 |
-| [DASH-IF IOP](#dash-if-iop) | 18 | 0 |
+| [DASH-IF IOP](#dash-if-iop) | 21 | 3 |
 | [CMAF](#cmaf) | 18 | 1 |
 | [Low latency](#low-latency) | 25 | 0 |
-| [DVB-DASH](#dvb-dash) | 55 | 0 |
+| [DVB-DASH](#dvb-dash) | 56 | 1 |
 | [HbbTV](#hbbtv) | 3 | 0 |
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **254** | **53** |
+| **Total** | **260** | **59** |
 
 ## MPD syntax
 
@@ -47,6 +47,7 @@ All 254 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-CONTENTCOMPONENT | error | ContentComponent ids must be unique and must not repeat AdaptationSet attributes | ISO/IEC 23009-1 5.3.4 | SCH-21, SCH-33 |
 | MPD-CONTENTTYPE | warning | AdaptationSet@contentType should agree with @mimeType | ISO/IEC 23009-1 5.3.3 | **dashcheck** |
 | MPD-CP-CENC | error | cenc:default_KID must be a list of UUIDs, and cenc:pssh a base64 pssh box with the SystemID of its ContentProtection | ISO/IEC 23001-7 11.2 | **dashcheck** |
+| MPD-CP-CLEARKEY | error | The Clear Key ContentProtection must have @value ClearKey1.0 and no Clear Key initialization data (cenc:pssh) | DASH-IF IOP 7.6.2.4 | **dashcheck** |
 | MPD-CP-DEFAULTKID | warning | The mp4protection descriptor of Common Encryption content should have cenc:default_KID | ISO/IEC 23009-1 5.8.5.2.2, ISO/IEC 23001-7 11.3.2 | **dashcheck** |
 | MPD-CP-REF | error | ContentProtection on the MPD or a Period needs @refId, @ref excludes @refId, and the source of a @ref must not be in a later Period | ISO/IEC 23009-1 5.3.1.2, 5.3.2.2, 5.8.4.1.3, 5.8.4.1.4 | **dashcheck** |
 | MPD-CP-ROBUSTNESS | error | The mp4protection and CA_descriptor ContentProtection must not have @robustness | ISO/IEC 23009-1 5.8.5.2.2, 5.8.5.2.3 | **dashcheck** |
@@ -126,6 +127,7 @@ All 254 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | INIT-PARSE | error | The initialization segment must be a parseable ISOBMFF file |  | COMMON-5 |
 | INIT-SAMPLES | warning | The initialization segment should not describe any samples | ISO/IEC 23000-19 | **dashcheck** |
 | INIT-STRUCTURE | error | The initialization segment must have ftyp and moov with mvex and a track | ISO/IEC 23000-19 | **dashcheck** |
+| SEG-AS-KID | error | All Representations of an IOP or CMAF AdaptationSet must be encrypted with the same tenc default_KID | DASH-IF IOP 7.7.1, 7.7.5, ISO/IEC 23000-19 8.2.3.1 | **dashcheck** |
 | SEG-CMF2-DEFAULTS | error | Each chunk of a CMAF track with the cmf2 brand must set sample durations, sizes and flags in tfhd or trun, not only in trex | ISO/IEC 23000-19 7.7.3 | **dashcheck** |
 | SEG-CMF2-ELST | error | A video CMAF track with the cmf2 brand must not have an edit list | ISO/IEC 23000-19 7.7.2 | **dashcheck** |
 | SEG-CMF2-TRUN | error | A video CMAF track with the cmf2 brand must use trun version 1, except in a CMAF track file | ISO/IEC 23000-19 7.7.3 | **dashcheck** |
@@ -175,6 +177,7 @@ All 254 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-IOP-AUDIO | error | IOP audio must signal @lang, @audioSamplingRate and AudioChannelConfiguration | DASH-IF IOP 3.2.4 | SCH-93, SCH-108 |
 | MPD-IOP-CODECS | error | IOP @codecs must have a single value | DASH-IF IOP 3.2.13 | SCH-109 |
 | MPD-IOP-CP | error | IOP ContentProtection must be on the AdaptationSet, and mp4protection must have cenc:default_KID | DASH-IF IOP 7 | SCH-115, SCH-116, SCH-117 |
+| MPD-IOP-CP-DRM | warning | IOP DRM ContentProtection descriptors (urn:uuid) should have cenc:pssh and a @value with the DRM name and version | DASH-IF IOP 7.7.2 | **dashcheck** |
 | MPD-IOP-DEPENDENCY | error | A Dolby Vision enhancement layer @dependencyId must refer to an earlier Representation | DASH-IF IOP 10 | SCH-110 |
 | MPD-IOP-LIVE | error | A dynamic IOP MPD must use the live profile, and live AdaptationSets must have @segmentAlignment true | DASH-IF IOP 3.2.2.2 | SCH-85, SCH-97 |
 | MPD-IOP-MIMETYPE | error | IOP AdaptationSets must use an allowed @mimeType, the same for all Representations | DASH-IF IOP 3.2.13 | SCH-99, SCH-104 |
@@ -189,6 +192,8 @@ All 254 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | SEG-IOP-EDITLIST | error | Video edit lists are only allowed with the on-demand profile, and then in all Representations | DASH-IF IOP 6.2.5.2 | IOP-9, IOP-14 |
 | SEG-IOP-FIRSTCT | error | With bitstream switching, the first video sample's composition and decode times must be equal | DASH-IF IOP 6.2.5.2 | IOP-15 |
 | SEG-IOP-PARAMSETS | error | With bitstream switching, avcC must hold SPS and PPS, and hvcC VPS, SPS and PPS | DASH-IF IOP 6.2.5.2 | IOP-6, IOP-11 |
+| SEG-IOP-PSSH | error | The initialization segments of an IOP AdaptationSet must have the same pssh boxes for each SystemID, and a W3C Common pssh box must list only the default_KID | DASH-IF IOP 7.7.1 | **dashcheck** |
+| SEG-IOP-PSSH-INIT | warning | IOP initialization segments should have no pssh boxes, but cenc:pssh in the MPD instead | DASH-IF IOP 7.7.1 | **dashcheck** |
 | SEG-IOP-SIDX | error | IOP on-demand Representations must have exactly one sidx box | DASH-IF IOP 3.10.3.2 | IOP-12 |
 
 ## CMAF
@@ -258,6 +263,7 @@ All 254 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-DVB-CODEC | warning | Codecs should be ones that DVB-DASH supports | ETSI TS 103 285 5, 6 | DVB-12 |
 | MPD-DVB-CONTINUITY | error | A period-continuity descriptor must name an earlier Period with an AdaptationSet of the same @id, and the two AdaptationSets must be associated: equivalent AssetIdentifier on both Periods and the same @lang, @contentType, @par, Role, Accessibility, Viewpoint and, for audio, @mimeType, @codecs, @audioSamplingRate and AudioChannelConfiguration | ETSI TS 103 285 10.5.2.2, 10.5.2.3 | DVB-79 |
 | MPD-DVB-CP | error | DVB ContentProtection descriptors must be on the AdaptationSet and include the mp4protection descriptor | ETSI TS 103 285 8.3, 8.4 | DVB-13, DVB-75 |
+| MPD-DVB-CP-DRM | error | A protected DVB AdaptationSet needs one mp4protection descriptor, with @value cenc or cbcs, and a urn:uuid descriptor for each DRM system | ETSI TS 103 285 8.4 | **dashcheck** |
 | MPD-DVB-EVENT | error | DVB TV-Anytime events need @presentationTime and valid XML data | ETSI TS 103 285 9.1.2.1 | DVB-18, DVB-19 |
 | MPD-DVB-FALLBACK | error | A fallback audio AdaptationSet must refer to an existing audio AdaptationSet | ETSI TS 103 285 6.6.3 | DVB-10 |
 | MPD-DVB-FONT | error | Downloadable font descriptors are only allowed on subtitle AdaptationSets | ETSI TS 103 285 7.2.1.1 | DVB-2, DVB-56 |

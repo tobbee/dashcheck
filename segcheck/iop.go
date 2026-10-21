@@ -113,6 +113,7 @@ func CheckAdaptationSet(reps []*addressing.Rep, inits []*Init) []report.Finding 
 	f = append(f, cmafAdaptationSetRules(reps, inits)...)
 	f = append(f, cmafSizeRules(reps, inits)...)
 	f = append(f, cmafMediaProfileSetRules(reps, inits)...)
+	f = append(f, protectionAdaptationSetRules(reps, inits)...)
 	return append(f, dvbAdaptationSetRules(reps, inits)...)
 }
 

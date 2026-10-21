@@ -27,9 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   MPD-SSR-PROPERTIES.
 - SEG-SSR-SAP: the Partial Segments that SegmentSequenceProperties@cadence selects must start with
   a sync sample when @sapType is 1 or 2.
-- ContentProtection rules: XCHK-CP-MISSING, XCHK-CP-SCHEME and XCHK-CP-KID compare the descriptors
-  with the schm and tenc boxes of the initialization segment; MPD-CP-CENC checks cenc:default_KID and
-  cenc:pssh, MPD-CP-ROBUSTNESS and MPD-CP-REF @robustness, @ref and @refId; MPD-CP-DEFAULTKID warns.
+- ContentProtection rules: XCHK-CP-MISSING, XCHK-CP-SCHEME and XCHK-CP-KID against the init segment,
+  MPD-CP-CENC, MPD-CP-ROBUSTNESS, MPD-CP-REF, MPD-CP-CLEARKEY and MPD-CP-DEFAULTKID, and per profile
+  SEG-AS-KID, SEG-IOP-PSSH, SEG-IOP-PSSH-INIT, MPD-IOP-CP-DRM and MPD-DVB-CP-DRM.
 
 - `docs/rules.md` documents all rules with the DASH-IF checks each covers, and marks the rules that
   the DASH-IF Conformance tool does not have.

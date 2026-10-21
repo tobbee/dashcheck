@@ -62,6 +62,11 @@ func TestProtectionRules(t *testing.T) {
 			`cenc:default_KID="9eb4050d-e44b-4802-932e-27d75083e266"><cenc:pssh>` + wv + `</cenc:pssh></ContentProtection>`, []string{"MPD-CP-CENC"}},
 		{"robustness on mp4protection", `value="cenc"`, `value="cenc" robustness="HW"`, []string{"MPD-CP-ROBUSTNESS"}},
 		{"robustness on a DRM", mp4p, withDRM("urn:uuid:"+widevineID, wv) + `<ContentProtection schemeIdUri="urn:uuid:` + playReadyID + `" robustness="3000"/>`, nil},
+		{"Clear Key", mp4p, mp4p + `<ContentProtection schemeIdUri="urn:uuid:E2719D58-A985-B3C9-781A-B030AF78D30E" value="ClearKey1.0"/>`, nil},
+		{"Clear Key value", mp4p, mp4p + `<ContentProtection schemeIdUri="urn:uuid:e2719d58-a985-b3c9-781a-b030af78d30e" value="ClearKey"/>`,
+			[]string{"MPD-CP-CLEARKEY"}},
+		{"Clear Key initialization data", mp4p, withDRM("urn:uuid:e2719d58-a985-b3c9-781a-b030af78d30e", psshBase64(t, "1077efec-c0b2-4d02-ace3-3c1e52e2fb4b", nil)),
+			[]string{"MPD-CP-CLEARKEY", "MPD-CP-CLEARKEY", "MPD-CP-CENC"}},
 		{"MPD level without refId", `<Period id="p0">`, `<ContentProtection schemeIdUri="urn:uuid:` + widevineID + `"/>
   <Period id="p0">`, []string{"MPD-CP-REF"}},
 		{"Period level without refId", `<Period id="p0">`, `<Period id="p0">

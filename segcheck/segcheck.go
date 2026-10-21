@@ -125,8 +125,9 @@ type Init struct {
 	tkhdHeight  uint32
 	cmafBrand   string // the highest CMAF media profile brand of the track
 	trex        *mp4.TrexBox
-	aac         *audioConfig // AAC AudioSpecificConfig, if any
-	tenc        *mp4.TencBox // track encryption defaults, if encrypted
+	aac         *audioConfig   // AAC AudioSpecificConfig, if any
+	tenc        *mp4.TencBox   // track encryption defaults, if encrypted
+	pssh        []*mp4.PsshBox // pssh boxes in moov
 	dac4        *mp4.Dac4Box
 	kinds       []*mp4.KindBox
 	// HLSInterop turns on the CTA-5005 checks in CheckMedia; the runner sets it.
@@ -219,6 +220,7 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 			}
 		}
 	}
+	init.pssh = moov.Psshs
 	for _, p := range moov.Psshs {
 		init.PsshSystems = append(init.PsshSystems, p.SystemID.String())
 	}

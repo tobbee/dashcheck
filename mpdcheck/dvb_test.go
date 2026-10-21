@@ -50,6 +50,19 @@ func TestDVBRules(t *testing.T) {
 		{"drm without generic cp", `<Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
 			`<ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"/><Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
 			[]string{"MPD-DVB-CP"}},
+		{"protected", `<Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			`<ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cbcs"/><ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"/>
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`, []string{"MPD-CP-DEFAULTKID"}},
+		{"protected without drm", `<Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			`<ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"/><Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			[]string{"MPD-CP-DEFAULTKID", "MPD-DVB-CP-DRM"}},
+		{"protected with cens", `<Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			`<ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cens"/><ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"/>
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`, []string{"MPD-CP-DEFAULTKID", "MPD-DVB-CP-DRM"}},
+		{"two mp4protection", `<Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			`<ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"/><ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cbcs"/>
+      <ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"/><Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>`,
+			[]string{"MPD-CP-DEFAULTKID", "MPD-CP-DEFAULTKID", "MPD-DVB-CP-DRM"}},
 		{"font on video", `<SegmentTemplate timescale="1000" duration="2000" media="$RepresentationID$/$Number$.m4s" initialization="$RepresentationID$/init.mp4"/>
       <Representation id="v1"`, `<SupplementalProperty schemeIdUri="urn:dvb:dash:fontdownload:2014" value="1"/>
       <SegmentTemplate timescale="1000" duration="2000" media="$RepresentationID$/$Number$.m4s" initialization="$RepresentationID$/init.mp4"/>

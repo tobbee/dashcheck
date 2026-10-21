@@ -76,6 +76,11 @@ var (
 		ID: "MPD-DVB-CP", Severity: report.Error,
 		Desc: "DVB ContentProtection descriptors must be on the AdaptationSet and include the mp4protection descriptor", SpecRef: refDVB + " 8.3, 8.4",
 	})
+	RuleDVBDRM = report.Register(report.Rule{
+		ID: "MPD-DVB-CP-DRM", Severity: report.Error,
+		Desc:    "A protected DVB AdaptationSet needs one mp4protection descriptor, with @value cenc or cbcs, and a urn:uuid descriptor for each DRM system",
+		SpecRef: refDVB + " 8.4",
+	})
 	RuleDVBSchema = report.Register(report.Rule{
 		ID: "MPD-DVB-XSD", Severity: report.Warning,
 		Desc: "A DVB MPD should validate against the schema of ISO/IEC 23009-1:2019 (4th edition with Amd 1), " +
@@ -189,6 +194,7 @@ func dvbRules(md *m.MPD, raw *rawElem, size int, mpdURL string) []report.Finding
 		}
 	}
 	reps, _ := addressing.Reps(md, mpdURL)
+	cpSources := addressing.ContentProtectionSources(md)
 	byAS := map[string][]*addressing.Rep{}
 	for _, r := range reps {
 		byAS[r.ASPath] = append(byAS[r.ASPath], r)
@@ -236,6 +242,7 @@ func dvbRules(md *m.MPD, raw *rawElem, size int, mpdURL string) []report.Finding
 			}) {
 				f = append(f, RuleDVBContentProtection.New(loc, "ContentProtection without the generic urn:mpeg:dash:mp4protection:2011 descriptor"))
 			}
+			f = append(f, dvbDRMDescriptors(addressing.ResolveContentProtections(as.ContentProtections, cpSources), loc)...)
 			switch ct {
 			case "audio":
 				f = append(f, dvbAudio(as, audioIDs, asPath)...)
@@ -707,6 +714,35 @@ func dvbSchemaRules(md *m.MPD, data []byte, mpdURL string) []report.Finding {
 			more = fmt.Sprintf(" (and %d more)", len(errs)-1)
 		}
 		f = append(f, e.rule.New(report.Location{URL: mpdURL, Path: "MPD"}, "%s%s", errs[0], more))
+	}
+	return f
+}
+
+// dvbDRMDescriptors checks the ContentProtection descriptors of a protected
+// AdaptationSet, with @ref resolved (ETSI TS 103 285 8.4). MPD-DVB-CP
+// reports a missing mp4protection descriptor.
+func dvbDRMDescriptors(cps []*m.ContentProtectionType, loc report.Location) []report.Finding {
+	if len(cps) == 0 {
+		return nil
+	}
+	var f []report.Finding
+	n, drm := 0, false
+	for _, cp := range cps {
+		switch {
+		case cp.SchemeIdUri == addressing.SchemeMP4Protection:
+			n++
+			if cp.Value != "cenc" && cp.Value != "cbcs" {
+				f = append(f, RuleDVBDRM.New(loc, "mp4protection @value %q, not cenc or cbcs", cp.Value))
+			}
+		case strings.HasPrefix(strings.ToLower(string(cp.SchemeIdUri)), "urn:uuid:"):
+			drm = true
+		}
+	}
+	if n > 1 {
+		f = append(f, RuleDVBDRM.New(loc, "%d mp4protection descriptors, not one", n))
+	}
+	if !drm {
+		f = append(f, RuleDVBDRM.New(loc, "no urn:uuid ContentProtection descriptor for a DRM system"))
 	}
 	return f
 }
