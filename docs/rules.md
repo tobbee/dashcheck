@@ -2,12 +2,12 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 251 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 50 rules marked **dashcheck** have no counterpart in that tool.
+All 254 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 53 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
 | [MPD syntax](#mpd-syntax) | 3 | 1 |
-| [MPD](#mpd) | 58 | 16 |
+| [MPD](#mpd) | 61 | 19 |
 | [MPD updates](#mpd-updates) | 5 | 3 |
 | [Segment addressing](#segment-addressing) | 7 | 6 |
 | [Segments](#segments) | 28 | 11 |
@@ -20,7 +20,7 @@ All 251 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **251** | **50** |
+| **Total** | **254** | **53** |
 
 ## MPD syntax
 
@@ -46,8 +46,11 @@ All 251 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-COMMON-BOTH | warning | Common attributes should be on the AdaptationSet or its Representations, not both | ISO/IEC 23009-1 5.3.7 | SCH-22 |
 | MPD-CONTENTCOMPONENT | error | ContentComponent ids must be unique and must not repeat AdaptationSet attributes | ISO/IEC 23009-1 5.3.4 | SCH-21, SCH-33 |
 | MPD-CONTENTTYPE | warning | AdaptationSet@contentType should agree with @mimeType | ISO/IEC 23009-1 5.3.3 | **dashcheck** |
+| MPD-CP-CENC | error | cenc:default_KID must be a list of UUIDs, and cenc:pssh a base64 pssh box with the SystemID of its ContentProtection | ISO/IEC 23001-7 11.2 | **dashcheck** |
 | MPD-CP-DEFAULTKID | warning | The mp4protection descriptor of Common Encryption content should have cenc:default_KID | ISO/IEC 23009-1 5.8.5.2.2, ISO/IEC 23001-7 11.3.2 | **dashcheck** |
-| MPD-CP-VALUE | error | ContentProtection @value must be a 4CC for mp4protection and 4 hex digits for CA_descriptor | ISO/IEC 23009-1 5.8.5.2 | SCH-55, SCH-56 |
+| MPD-CP-REF | error | ContentProtection on the MPD or a Period needs @refId, @ref excludes @refId, and the source of a @ref must not be in a later Period | ISO/IEC 23009-1 5.3.1.2, 5.3.2.2, 5.8.4.1.3, 5.8.4.1.4 | **dashcheck** |
+| MPD-CP-ROBUSTNESS | error | The mp4protection and CA_descriptor ContentProtection must not have @robustness | ISO/IEC 23009-1 5.8.5.2.2, 5.8.5.2.3 | **dashcheck** |
+| MPD-CP-VALUE | error | ContentProtection @value must be a 4CC with an optional version for mp4protection and 4 lower-case hex digits for CA_descriptor | ISO/IEC 23009-1 5.8.5.2 | SCH-55, SCH-56 |
 | MPD-DURATION-MISSING | error | Without @minimumUpdatePeriod and a last Period@duration, MPD@mediaPresentationDuration must be present | ISO/IEC 23009-1 5.3.1 | SCH-3, SCH-6 |
 | MPD-DURATION-YM | warning | xs:duration values should not use years or months, whose length varies | DASH-IF IOP | IOP-1 |
 | MPD-DYN-AST | error | A dynamic MPD must have @availabilityStartTime | ISO/IEC 23009-1 5.3.1 | SCH-1 |

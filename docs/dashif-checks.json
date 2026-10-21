@@ -606,7 +606,7 @@
    "rules": [
     "MPD-CP-VALUE"
    ],
-   "note": ""
+   "note": "dashcheck accepts the percent-encoded 4CC and :version of ISO/IEC 23009-1 5.8.5.2.2 and a @value inherited through @ref; upstream requires exactly 4 characters (bug 56)"
   },
   {
    "id": "SCH-56",
@@ -617,7 +617,7 @@
    "rules": [
     "MPD-CP-VALUE"
    ],
-   "note": ""
+   "note": "dashcheck requires 4 lower-case hex digits (ISO/IEC 23009-1 5.8.5.2.3); upstream checks only the length (bug 56)"
   },
   {
    "id": "SCH-57",
