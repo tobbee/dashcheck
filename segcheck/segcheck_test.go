@@ -128,6 +128,54 @@ func TestMediaTimingErrors(t *testing.T) {
 	}
 }
 
+// TestEditListCut checks that the media before the media time of an edit
+// list, such as AAC priming, is left out of the earliest presentation time
+// and the duration of the first segment.
+func TestEditListCut(t *testing.T) {
+	audio := reps(t)[0]
+	init, _ := CheckInit(read(t, "A48/init.mp4"), audio, audio.Loc())
+	segs, _ := audio.Segments(0, audio.PeriodDur)
+	seg1, seg2 := read(t, "A48/1.m4s"), read(t, "A48/2.m4s")
+	m1, _ := CheckMedia(seg1, init, audio, segs[0], false)
+	m2, _ := CheckMedia(seg2, init, audio, segs[1], false)
+	if m1.DecodeTime != 0 || m1.Cut != 0 {
+		t.Fatalf("segment 1 without edit list: tfdt %d, cut %d", m1.DecodeTime, m1.Cut)
+	}
+	const priming = 1024
+	elst := *init
+	elst.HasEditList, elst.EditOffset = true, priming
+	tl := *audio
+	tl.Kind, tl.Timescale = addressing.KindTimelineNumber, elst.Timescale
+	at := func(nr int, time, dur uint64) addressing.Segment {
+		s := segs[nr-1]
+		s.Time, s.Dur = time, dur
+		return s
+	}
+	cases := []struct {
+		name string
+		data []byte
+		seg  addressing.Segment
+		cut  uint64
+		want []string
+	}{
+		{"first segment from 0 with the presented duration", seg1, at(1, 0, m1.Duration-priming), priming, nil},
+		{"first segment with the priming in its duration", seg1, at(1, 0, m1.Duration), priming, []string{"SEG-DURATION"}},
+		{"second segment at tfdt minus the priming", seg2, at(2, m2.DecodeTime-priming, m2.Duration), 0, nil},
+		{"second segment at tfdt", seg2, at(2, m2.DecodeTime, m2.Duration), 0, []string{"SEG-EPT"}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			media, f := CheckMedia(c.data, &elst, &tl, c.seg, false)
+			if got := ruleIDs(f); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", f, c.want)
+			}
+			if media.Cut != c.cut {
+				t.Errorf("cut %d, want %d", media.Cut, c.cut)
+			}
+		})
+	}
+}
+
 // nonSyncStart returns a media segment with its first sample marked as a
 // non-sync sample.
 func nonSyncStart(t *testing.T, data []byte) []byte {

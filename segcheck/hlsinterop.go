@@ -320,7 +320,7 @@ func CheckHLSInteropSplice(rep *addressing.Rep, init *Init, media *Media, seg ad
 		return nil
 	}
 	ts := float64(init.Timescale)
-	end := media.EPT + float64(media.Duration)/ts - float64(rep.PTO)/float64(rep.Timescale)
+	end := media.EPT + float64(media.Presented())/ts - float64(rep.PTO)/float64(rep.Timescale)
 	sample := float64(media.Duration) / float64(media.Samples) / ts
 	if math.Abs(end-rep.PeriodDur) > sample+1e-6 {
 		return []report.Finding{RuleHLSSplice.New(rep.SegLoc(seg), "the last fragment ends at %.3fs, the Period at %.3fs (sample duration %.3fs)",

@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MPD-UPDATE-PUBLISHTIME no longer reports MPDs that differ only in the time of a
   `urn:mpeg:dash:utc:direct:2014` UTCTiming, and CLOCK-SKEW allows for its whole seconds.
 - MPD-CODECS no longer warns about images such as thumbnail tiles, which have no codecs parameter.
+- SEG-EPT and SEG-DURATION leave out media before the edit list's media time, such as audio
+  priming, so a first segment at `S@t` 0 with its presented duration passes. With an edit list,
+  an `S@t` equal to tfdt is SEG-EPT, not SEG-EPT-CTO.
 
 ## [0.2.0] - 2026-10-21
 
