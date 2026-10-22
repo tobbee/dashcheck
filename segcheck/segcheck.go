@@ -300,6 +300,7 @@ type Media struct {
 	SequenceNumber uint32
 	Duration       uint64  // sum of sample durations, media timescale
 	EPT            float64 // earliest presentation time in seconds, before presentationTimeOffset
+	Cut            uint64  // start before the media time of the edit list (audio priming), not presented
 	Samples        int
 	Size           int // bytes
 	// Partial is set for a Partial Segment of a Segment Sequence, and
@@ -315,6 +316,9 @@ type Media struct {
 
 // End returns the decode time after the last sample.
 func (m *Media) End() uint64 { return m.DecodeTime + m.Duration }
+
+// Presented returns the duration of the presented part, media timescale.
+func (m *Media) Presented() uint64 { return m.Duration - m.Cut }
 
 // CheckMedia parses and checks a media segment against the MPD and its init segment.
 // last marks the final segment of a Period, which may be shorter than nominal.
@@ -413,8 +417,14 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 		return nil, f
 	}
 	mediaTS := float64(init.Timescale)
-	media.EPT = float64(minCT-init.EditOffset) / mediaTS
-	f = append(f, checkTiming(rep, seg, media, mediaTS, last, loc)...)
+	ept := minCT - init.EditOffset
+	if init.HasEditList && ept < 0 {
+		// Media before the media time of the edit is not presented (ISO/IEC 14496-12 8.6.6.3).
+		media.Cut = min(uint64(-ept), media.Duration)
+		ept = 0
+	}
+	media.EPT = float64(ept) / mediaTS
+	f = append(f, checkTiming(rep, init, seg, media, last, loc)...)
 	f = append(f, iopMediaRules(rep, init, media, loc)...)
 	f = append(f, cmafMediaRules(rep, init, media, mf, loc)...)
 	f = append(f, ssrMediaRules(rep, init, media, loc)...)
@@ -438,12 +448,13 @@ func isSync(flags uint32) bool {
 // SegmentTimeline gives exact times, and @duration nominal ones. The MPD
 // times of Partial Segments in a Segment Sequence are nominal, except for the
 // start of the sequence (ISO/IEC 23009-1 5.3.9.7.1).
-func checkTiming(rep *addressing.Rep, seg addressing.Segment, media *Media, mediaTS float64, last bool, loc report.Location) []report.Finding {
+func checkTiming(rep *addressing.Rep, init *Init, seg addressing.Segment, media *Media, last bool, loc report.Location) []report.Finding {
 	var f []report.Finding
+	mediaTS := float64(init.Timescale)
 	mpdTS := float64(rep.Timescale)
 	wantStart := float64(seg.Time) / mpdTS
 	wantDur := float64(seg.Dur) / mpdTS
-	gotDur := float64(media.Duration) / mediaTS
+	gotDur := float64(media.Presented()) / mediaTS
 	var exactStart, exactDur bool
 	ref := refNumber
 	switch rep.Kind {
@@ -465,7 +476,7 @@ func checkTiming(rep *addressing.Rep, seg addressing.Segment, media *Media, medi
 		decodeStart := float64(media.DecodeTime) / mediaTS
 		switch {
 		case math.Abs(media.EPT-wantStart) <= exact:
-		case math.Abs(decodeStart-wantStart) <= exact:
+		case math.Abs(decodeStart-wantStart) <= exact && !init.HasEditList:
 			f = append(f, ruleWithRef(RuleSegEPTCTO, refTimeline).New(loc,
 				"tfdt matches SegmentTimeline, but the earliest presentation time is %.6fs later",
 				media.EPT-wantStart))
