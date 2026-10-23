@@ -102,15 +102,28 @@ func (rc *repChecker) liveSegments() ([]addressing.Segment, error) {
 }
 
 // checkStale reports if the SegmentTimeline ends well before the live edge,
-// which happens when the MPD is not updated or comes from a stale cache.
+// which happens when the MPD is not updated or comes from a stale cache. The
+// timeline of a Period that has ended cannot grow, so it is measured at the
+// end of the Period instead.
 func (rc *repChecker) checkStale(newest addressing.Segment, now time.Time) {
 	rep := rc.rep
 	segDur := float64(newest.Dur) / float64(rep.Timescale)
-	lag := now.Sub(rep.AvailabilityStart(newest)).Seconds()
-	// Allow one segment still being produced plus the margin.
-	if lag > 2*segDur+rc.opts.LiveMargin.Seconds() {
-		rc.add(RuleStaleTimeline.New(rep.Loc(), "newest segment in the SegmentTimeline became available %.1fs ago (segment duration %.1fs)", lag, segDur))
+	edge, ended := now, false
+	if rep.PeriodDur >= 0 {
+		if end := rep.AST.Add(time.Duration((rep.PeriodStart + rep.PeriodDur) * float64(time.Second))); end.Before(now) {
+			edge, ended = end, true
+		}
 	}
+	lag := edge.Sub(rep.AvailabilityStart(newest)).Seconds()
+	// Allow one segment still being produced plus the margin.
+	if lag <= 2*segDur+rc.opts.LiveMargin.Seconds() {
+		return
+	}
+	if ended {
+		rc.add(RuleStaleTimeline.New(rep.Loc(), "newest segment in the SegmentTimeline became available %.1fs before the end of the Period (segment duration %.1fs)", lag, segDur))
+		return
+	}
+	rc.add(RuleStaleTimeline.New(rep.Loc(), "newest segment in the SegmentTimeline became available %.1fs ago (segment duration %.1fs)", lag, segDur))
 }
 
 // selectLive picks the newest MaxSegments segments.

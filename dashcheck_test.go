@@ -4,6 +4,7 @@ package dashcheck
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -117,6 +118,63 @@ func TestLive(t *testing.T) {
 			rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", opts)
 			if got := ruleSet(rpt.Findings, report.Warning); !slices.Equal(got, c.want) {
 				t.Errorf("got %v, want %v\n%v", got, c.want, rpt.Findings)
+			}
+		})
+	}
+}
+
+// TestLiveStaleEndedPeriod checks that the SegmentTimeline of a Period that
+// has ended is measured at the end of the Period, not at the live edge.
+func TestLiveStaleEndedPeriod(t *testing.T) {
+	ast := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	period := func(id, start string, pto, startNumber int, timeline string) string {
+		return fmt.Sprintf(`<Period id="%s" start="%s">
+      <AdaptationSet contentType="video" id="1" mimeType="video/mp4" segmentAlignment="true" startWithSAP="1">
+         <SegmentTemplate timescale="90000" presentationTimeOffset="%d" startNumber="%d" initialization="$RepresentationID$/init.mp4" media="$RepresentationID$/$Number$.m4s">
+            <SegmentTimeline>%s</SegmentTimeline>
+         </SegmentTemplate>
+         <Representation id="V300" codecs="avc1.64001e" bandwidth="300000" width="640" height="360" frameRate="30" sar="1:1"/>
+      </AdaptationSet>
+   </Period>`, id, start, pto, startNumber, timeline)
+	}
+	mpd := func(periods ...string) string {
+		return `<?xml version="1.0" encoding="utf-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="dynamic" availabilityStartTime="2026-01-01T00:00:00Z" publishTime="2026-01-01T00:00:00Z" timeShiftBufferDepth="PT30S" minimumUpdatePeriod="PT2S" minBufferTime="PT2S" maxSegmentDuration="PT2S">
+   ` + strings.Join(periods, "\n   ") + `
+</MPD>`
+	}
+	cases := []struct {
+		name  string
+		mpd   string
+		at    time.Duration
+		stale bool
+	}{
+		// Period one (0-2 s) ended 7 s ago with its segment; Period two has segments 2 to 4 at 2-8 s.
+		{"timeline up to the end of an ended Period", mpd(
+			period("one", "PT0S", 0, 1, `<S t="0" d="180000"/>`),
+			period("two", "PT2S", 180000, 2, `<S t="180000" d="180000" r="2"/>`)), 9 * time.Second, false},
+		// Period one (0-8 s) ends 6 s after its only segment; segments 3 and 4 play at 8-12 s in Period two.
+		{"timeline that stops before the end of the Period", mpd(
+			period("one", "PT0S", 0, 1, `<S t="0" d="180000"/>`),
+			period("two", "PT8S", 360000, 3, `<S t="360000" d="180000" r="1"/>`)), 13 * time.Second, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ts := server(t, c.mpd, nil)
+			opts := Options{
+				Fetcher:    fetch.NewNative(5 * time.Second),
+				Clock:      fixedClock(ast.Add(c.at)),
+				MPDUpdates: -1,
+			}
+			rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", opts)
+			var stale []report.Finding
+			for _, f := range rpt.Findings {
+				if f.Rule == RuleStaleTimeline.ID {
+					stale = append(stale, f)
+				}
+			}
+			if got := len(stale) > 0; got != c.stale {
+				t.Errorf("LIVE-STALE %v, want %v\n%v", got, c.stale, rpt.Findings)
 			}
 		})
 	}
