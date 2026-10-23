@@ -118,7 +118,7 @@ All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | ADDR-SEGMENTS | error | The segment list of a Representation must be derivable |  | **dashcheck** |
 | ADDR-SINGLE | info | Representations that consist of a single segment given only by BaseURL are not checked yet |  | **dashcheck** |
 | ADDR-TEMPLATE | error | SegmentTemplate and SegmentList must have a consistent set of identifiers and timing attributes | ISO/IEC 23009-1 5.3.9.4 | SCH-41, SCH-42, SCH-46, SCH-47, SCH-48, SCH-49, IOP-2 |
-| ADDR-UNSUPPORTED | info | SegmentTimeline duration patterns (S@p, S@ssp) are not supported yet, so their segments are not checked |  | **dashcheck** |
+| ADDR-UNSUPPORTED | info | SegmentTimeline duration patterns (S@p, S@ssp) and URL parameters (Annex I) are not supported yet, so their segments are not checked |  | **dashcheck** |
 
 ## Segments
 

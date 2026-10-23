@@ -81,6 +81,29 @@ func TestStatic(t *testing.T) {
 	}
 }
 
+// TestURLParams checks that the segments of an AdaptationSet that needs the
+// URL parameters of Annex I are not fetched, since dashcheck cannot add them.
+func TestURLParams(t *testing.T) {
+	data, err := os.ReadFile(testDir + "/Manifest.mpd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	video := `maxFrameRate="60/2">`
+	mpd := strings.Replace(string(data), video, video+`
+         <EssentialProperty schemeIdUri="urn:mpeg:dash:urlparam:2014"/>`, 1)
+	// The server needs the parameters, so every request without them fails.
+	ts := server(t, mpd, map[string]string{"/V300/init.mp4": "", "/V300/1.m4s": "", "/V300/2.m4s": "", "/V300/3.m4s": "", "/V300/4.m4s": ""})
+	rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", Options{Fetcher: fetch.NewNative(5 * time.Second)})
+	if got := ruleSet(rpt.Findings, report.Warning); len(got) != 0 {
+		t.Errorf("got %v\n%v", got, rpt.Findings)
+	}
+	if !slices.ContainsFunc(rpt.Findings, func(f report.Finding) bool {
+		return f.Rule == "ADDR-UNSUPPORTED" && strings.Contains(f.Location.Path, "V300")
+	}) {
+		t.Errorf("no ADDR-UNSUPPORTED for V300: %v", rpt.Findings)
+	}
+}
+
 func liveMPD(t *testing.T) string {
 	t.Helper()
 	data, err := os.ReadFile(testDir + "/Manifest.mpd")
