@@ -186,6 +186,33 @@ func TestTemplateInheritance(t *testing.T) {
 	}
 }
 
+func TestLowLatency(t *testing.T) {
+	cases := []struct {
+		name, mpdAttrs, tmplAttrs string
+		want                      bool
+	}{
+		{"chunked", `type="dynamic" profiles="urn:mpeg:dash:profile:isoff-live:2011"`, `availabilityTimeOffset="1.5" availabilityTimeComplete="false"`, true},
+		{"early availability", `type="dynamic" profiles="urn:mpeg:dash:profile:isoff-live:2011"`, `availabilityTimeOffset="1.5"`, false},
+		{"profile", `type="dynamic" profiles="urn:mpeg:dash:profile:isoff-live:2011,` + ProfileLowLatency + `"`, ``, true},
+		{"static", `type="static" mediaPresentationDuration="PT8S" profiles="urn:mpeg:dash:profile:isoff-live:2011"`, `availabilityTimeOffset="1.5" availabilityTimeComplete="false"`, false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			s := `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" ` + c.mpdAttrs + ` availabilityStartTime="2026-01-01T00:00:00Z" minBufferTime="PT2S">
+<Period start="PT0S"><AdaptationSet><SegmentTemplate timescale="1000" duration="2000" media="$Number$.m4s" ` + c.tmplAttrs + `/>
+<Representation id="a" bandwidth="1"/>
+</AdaptationSet></Period></MPD>`
+			reps, findings := Reps(mustReadMPD(t, s), "https://example.com/m.mpd")
+			if len(findings) != 0 || len(reps) != 1 {
+				t.Fatal(findings)
+			}
+			if reps[0].LowLatency != c.want {
+				t.Errorf("LowLatency %v, want %v", reps[0].LowLatency, c.want)
+			}
+		})
+	}
+}
+
 func TestUseOnlyProfiles(t *testing.T) {
 	chunked := &Rep{LowLatency: true}
 	chunked.UseOnlyProfiles()

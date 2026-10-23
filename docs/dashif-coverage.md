@@ -265,7 +265,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-13 | `9.X.4.5`: EMSG box constraints | done | SEG-EMSG-REPEAT | item 6 of 9.X.4.5: an emsg between moof and mdat fails parsing (SEG-PARSE); an emsg after the first moof must be repeated before the first moof of the next segment; upstream always passes |
 | LL-14 | `9.X.4.5`: Each Segment MAY (and typically SHOULD) contain more than one CMAF chunk | done | SEG-LL-CHUNKS |  |
 | LL-15 | `9.X.4.5`: A Resync element SHOULD be assigned to each Representation | done | MPD-LL-RESYNC |  |
-| LL-16 | `9.X.4.5`: @availabilityTimeOffset SHALL be present for each represention | done | MPD-LL-CHUNKED |  |
+| LL-16 | `9.X.4.5`: @availabilityTimeOffset SHALL be present for each represention | done | MPD-LL-CHUNKED | without the low-latency profile, dashcheck applies the low-latency rules only when a Representation has `@availabilityTimeComplete` false, since `@availabilityTimeOffset` alone makes complete Segments available earlier (ISO/IEC 23009-1 5.3.9.5.3) |
 | LL-17 | `9.X.4.5`: @availabilityTimeComple SHALL be present and set to 'FALSE' for each representation | done | MPD-LL-CHUNKED | upstream compares with FALSE and always fails |
 | LL-18 | `9.X.4.5`: One of the following should hold | done | SEG-LL-DURATION-RECOMMENDED | upstream's second option is a stub that returns false; dashcheck warns when a chunked segment exceeds the target latency |
 | LL-19 | `9.X.4.5 =&gt; MPEG-DASH 8.X.4`: @contentType shall correspond with the hdlr type | done | XCHK-HANDLER |  |

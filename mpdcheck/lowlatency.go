@@ -101,7 +101,10 @@ var (
 )
 
 // isLowLatency reports whether a dynamic MPD uses low-latency features: it
-// has the low-latency profile or, if chunked is set, chunked Representations.
+// has the low-latency profile or, if chunked is set, Representations with
+// @availabilityTimeComplete false. Without the profile, @availabilityTimeOffset
+// alone is not low latency: complete Segments are available earlier
+// (ISO/IEC 23009-1 5.3.9.5.3).
 func isLowLatency(md *m.MPD, reps []*addressing.Rep, chunked bool) bool {
 	if md.GetType() != "dynamic" {
 		return false
@@ -109,10 +112,11 @@ func isLowLatency(md *m.MPD, reps []*addressing.Rep, chunked bool) bool {
 	if profiles(splitProfiles(string(md.Profiles))).has(profileLowLatency) {
 		return true
 	}
-	return chunked && slices.ContainsFunc(reps, isChunked)
+	return chunked && slices.ContainsFunc(reps, func(r *addressing.Rep) bool { return r.ATC != nil && !*r.ATC })
 }
 
-// isChunked reports whether a Representation is offered in chunks.
+// isChunked reports whether a Representation of a low-latency MPD is offered
+// in chunks.
 func isChunked(r *addressing.Rep) bool {
 	return r.ATO > 0 || (r.ATC != nil && !*r.ATC)
 }

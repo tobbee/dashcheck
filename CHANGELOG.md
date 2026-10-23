@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an `S@t` equal to tfdt is SEG-EPT, not SEG-EPT-CTO.
 - LIVE-STALE measures the SegmentTimeline of a Period that has ended at the end of the Period,
   so earlier Periods of a multi-Period live MPD are no longer reported.
+- Without the low-latency profile, only `@availabilityTimeComplete` false turns on the low-latency
+  rules, not `@availabilityTimeOffset` alone, which makes complete segments available earlier.
 
 ## [0.2.0] - 2026-10-21
 

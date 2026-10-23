@@ -31,6 +31,23 @@ const llMPD = `<?xml version="1.0" encoding="UTF-8"?>
   <LeapSecondInformation availabilityStartLeapOffset="37"/>
 </MPD>`
 
+// TestEarlyAvailability checks that without the low-latency profile,
+// @availabilityTimeOffset alone does not turn on the low-latency rules: it
+// makes complete Segments available earlier.
+func TestEarlyAvailability(t *testing.T) {
+	data := strings.Replace(llMPD, `,http://www.dashif.org/guidelines/low-latency-live-v5`, "", 1)
+	data = strings.Replace(data, ` availabilityTimeComplete="false"`, "", 1)
+	md, findings := Check([]byte(data), "https://example.com/ll.mpd")
+	if md == nil {
+		t.Fatalf("MPD not parsed: %v", findings)
+	}
+	for _, f := range findings {
+		if strings.HasPrefix(f.Rule, "MPD-LL-") {
+			t.Errorf("unexpected %s: %s", f.Rule, f.Message)
+		}
+	}
+}
+
 func TestLowLatencyRules(t *testing.T) {
 	cases := []struct {
 		name     string
