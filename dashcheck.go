@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -95,7 +96,7 @@ var (
 	})
 	RuleSegmentSequences = report.Register(report.Rule{
 		ID: "ADDR-UNSUPPORTED", Severity: report.Info,
-		Desc: "SegmentTimeline duration patterns (S@p, S@ssp) are not supported yet, so their segments are not checked",
+		Desc: "SegmentTimeline duration patterns (S@p, S@ssp) and URL parameters (Annex I) are not supported yet, so their segments are not checked",
 	})
 	RuleSegmentList = report.Register(report.Rule{
 		ID: "ADDR-SEGMENTS", Severity: report.Error,
@@ -278,6 +279,13 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		rc.add(RuleUnsupported.New(rep.Loc(), "segments with @mimeType %q are not checked", rep.MimeType))
 		return rc.findings, rc.checked
 	}
+	// A client that does not support an EssentialProperty ignores its element
+	// (ISO/IEC 23009-1 5.8.4.8), so segments without the parameters may fail.
+	if i := slices.IndexFunc(rep.Essentials, isURLParams); i >= 0 {
+		rc.add(RuleSegmentSequences.New(rep.Loc(), "URL parameters (%s, ISO/IEC 23009-1 Annex I) are not supported, so the segments are not checked",
+			rep.Essentials[i].SchemeIdUri))
+		return rc.findings, rc.checked
+	}
 	var segs []addressing.Segment
 	var last addressing.Segment // last segment of the Period, for duration tolerance
 	var err error
@@ -372,6 +380,12 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 }
 
 // isISOBMFF reports whether the media type is ISOBMFF based (mp4).
+// isURLParams reports whether a descriptor asks for the URL parameters of
+// ISO/IEC 23009-1 Annex I, the baseline (I.2) or the extended (I.3) scheme.
+func isURLParams(d *m.DescriptorType) bool {
+	return d.SchemeIdUri == "urn:mpeg:dash:urlparam:2014" || d.SchemeIdUri == "urn:mpeg:dash:urlparam:2016"
+}
+
 func isISOBMFF(mimeType string) bool {
 	t, _, _ := strings.Cut(mimeType, ";")
 	switch strings.TrimSpace(t) {

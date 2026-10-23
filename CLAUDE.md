@@ -57,7 +57,7 @@ Rules for specifications that MPDs do not signal, and conventions that no spec
 requires, are opt-in options (`-hls-interop` for CTA-5005, `-sequence-numbers`).
 Segment Sequences (@k, $SubNumber$) are addressed as Partial Segments
 (`Segment.Partial`, `SubNumber`); SegmentTimeline duration patterns (S@p,
-S@ssp) are not addressed yet (ADDR-UNSUPPORTED).
+S@ssp) and the URL parameters of Annex I are not addressed yet (ADDR-UNSUPPORTED).
 `docs/dashif-coverage.md` has the current numbers.
 
 ## Standards

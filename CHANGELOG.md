@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - MPD-XLINK-UNRESOLVED (info) for remote Periods, which dashcheck does not resolve. They are
   no longer reported as MPD-SEGINFO-NONE.
+- ADDR-UNSUPPORTED (info) for Representations that need the URL parameters of Annex I
+  (EssentialProperty `urn:mpeg:dash:urlparam:2014` or `2016`), whose segments are no longer
+  fetched without the parameters.
 
 ### Fixed
 - MPD-UPDATE-PUBLISHTIME no longer reports MPDs that differ only in the time of a
