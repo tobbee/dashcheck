@@ -38,6 +38,10 @@ var (
 		ID: "MPD-SEGINFO-NONE", Severity: report.Error,
 		Desc: "A Period needs a BaseURL, SegmentTemplate or SegmentList at some level", SpecRef: "ISO/IEC 23009-1 5.3.9.1",
 	})
+	RuleXlinkUnresolved = report.Register(report.Rule{
+		ID: "MPD-XLINK-UNRESOLVED", Severity: report.Info,
+		Desc: "Remote Periods (@xlink:href) are not resolved, so their content is not checked", SpecRef: "ISO/IEC 23009-1 5.5",
+	})
 	RulePeriodZeroDuration = report.Register(report.Rule{
 		ID: "MPD-PERIOD-ZERO", Severity: report.Warning,
 		Desc: "A Period with @duration 0 should have at most one AdaptationSet", SpecRef: refPeriod,
@@ -189,8 +193,12 @@ func structureRules(md *m.MPD) []report.Finding {
 		f = append(f, checkTemplateInit(p.SegmentTemplate, pLoc)...)
 		f = append(f, checkSegInfoAttrs(p.SegmentBase, p.SegmentTemplate, p.SegmentList, mpdTSBD, pLoc)...)
 		f = append(f, checkChaining(p.SupplementalProperties, pPath, false)...)
-		// SCH-13
-		if !periodHasSegmentInfo(p) && p.XlinkHref != "urn:mpeg:dash:resolve-to-zero:2013" {
+		// SCH-13. A remote Period is replaced by the element it references (5.5.3).
+		switch {
+		case p.XlinkHref == "urn:mpeg:dash:resolve-to-zero:2013":
+		case p.XlinkHref != "":
+			f = append(f, RuleXlinkUnresolved.New(pLoc, "remote Period %s is not resolved", p.XlinkHref))
+		case !periodHasSegmentInfo(p):
 			f = append(f, RuleSegInfoNone.New(pLoc, "no BaseURL, SegmentTemplate or SegmentList in the Period"))
 		}
 		// SCH-14
