@@ -120,7 +120,9 @@ can be tested with fixed clocks and test servers.
 XSD validation uses [jacoelho/xsd](https://github.com/jacoelho/xsd), a pure Go
 validator. The schema files in `schema/xsd` come from
 [MPEGGroup/DASHSchema](https://github.com/MPEGGroup/DASHSchema), with the
-internal DTD entities expanded.
+internal DTD entities expanded. One type is changed: `ContentSteering@defaultServiceLocation`
+is a space-separated list, as in Table K.3.6-1 of ISO/IEC 23009-1 6th edition
+and in ETSI TS 103 998, not the single token of the schema.
 
 ## Status and next steps
 

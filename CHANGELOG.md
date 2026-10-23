@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LIVE-STALE measures the SegmentTimeline of a Period that has ended at the end of the Period,
   so earlier Periods of a multi-Period live MPD are no longer reported.
 - MPD-LL-MIMETYPE accepts `application/mp4` for text, the media type of CMAF text tracks.
+- MPD-XSD accepts a space-separated list in `ContentSteering@defaultServiceLocation`, as the
+  text of ISO/IEC 23009-1 and ETSI TS 103 998 define it; the MPEG schema has a single token.
 - CLOCK-SKEW also allows for whole seconds from http-iso and http-xsdate sources, such as
   `https://time.akamai.com/?iso`.
 - Without the low-latency profile, only `@availabilityTimeComplete` false turns on the low-latency
