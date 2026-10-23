@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- MPD-XLINK-UNRESOLVED (info) for remote Periods, which dashcheck does not resolve. They are
+  no longer reported as MPD-SEGINFO-NONE.
+
 ### Fixed
 - MPD-UPDATE-PUBLISHTIME no longer reports MPDs that differ only in the time of a
   `urn:mpeg:dash:utc:direct:2014` UTCTiming, and CLOCK-SKEW allows for its whole seconds.
