@@ -3835,7 +3835,7 @@
    "rules": [
     "MPD-LL-CHUNKED"
    ],
-   "note": ""
+   "note": "without the low-latency profile, dashcheck applies the low-latency rules only when a Representation has `@availabilityTimeComplete` false, since `@availabilityTimeOffset` alone makes complete Segments available earlier (ISO/IEC 23009-1 5.3.9.5.3)"
   },
   {
    "id": "LL-17",

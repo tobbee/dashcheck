@@ -305,9 +305,12 @@ func Reps(md *m.MPD, mpdURL string) ([]*Rep, []report.Finding) {
 			}
 		}
 	}
+	// Without the profile, chunks (@availabilityTimeComplete false) make the MPD
+	// low latency, but not @availabilityTimeOffset alone, which only makes
+	// complete Segments available earlier.
 	lowLatency := dynamic && slices.Contains(splitProfiles(string(md.Profiles)), ProfileLowLatency)
 	for _, r := range reps {
-		lowLatency = lowLatency || (dynamic && (r.ATO > 0 || (r.ATC != nil && !*r.ATC)))
+		lowLatency = lowLatency || (dynamic && r.ATC != nil && !*r.ATC)
 	}
 	for _, r := range reps {
 		r.LowLatency = lowLatency
