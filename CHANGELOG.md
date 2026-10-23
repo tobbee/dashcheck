@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SEG-EPT and SEG-DURATION leave out media before the edit list's media time, such as audio
   priming, so a first segment at `S@t` 0 with its presented duration passes. With an edit list,
   an `S@t` equal to tfdt is SEG-EPT, not SEG-EPT-CTO.
+- LIVE-STALE measures the SegmentTimeline of a Period that has ended at the end of the Period,
+  so earlier Periods of a multi-Period live MPD are no longer reported.
 
 ## [0.2.0] - 2026-10-21
 
