@@ -76,7 +76,7 @@ var (
 	})
 	RuleLLMimeType = report.Register(report.Rule{
 		ID: "MPD-LL-MIMETYPE", Severity: report.Error,
-		Desc: "Low-latency @mimeType must be the @contentType with /mp4", SpecRef: refLL + ".5",
+		Desc: "Low-latency @mimeType must be the @contentType with /mp4, or application/mp4 for text", SpecRef: refLL + ".5",
 	})
 	RuleLLResync = report.Register(report.Rule{
 		ID: "MPD-LL-RESYNC", Severity: report.Warning,
@@ -119,6 +119,23 @@ func isLowLatency(md *m.MPD, reps []*addressing.Rep, chunked bool) bool {
 // in chunks.
 func isChunked(r *addressing.Rep) bool {
 	return r.ATO > 0 || (r.ATC != nil && !*r.ATC)
+}
+
+// llMimeTypeOK reports whether mimeType is "<contentType>/mp4" (ISO/IEC
+// 23009-1 8.12.4), optionally with profiles='cmfc'. Text may also be
+// application/mp4, the media type of all CMAF text tracks (ISO/IEC 23000-19
+// Table 2), which 8.12.4 gives for the subt handler of TTML.
+func llMimeTypeOK(mimeType, contentType string) bool {
+	types := []string{contentType}
+	if contentType == "text" {
+		types = append(types, "application")
+	}
+	for _, t := range types {
+		if mimeType == t+"/mp4" || mimeType == t+"/mp4, profiles='cmfc'" {
+			return true
+		}
+	}
+	return false
 }
 
 func targetLatency(md *m.MPD) (ms uint32, ok bool) {
@@ -197,7 +214,7 @@ func lowLatencyRules(md *m.MPD, chunked bool) []report.Finding {
 			for _, r := range asReps {
 				rLoc := r.Loc()
 				// LL-20
-				if ct := string(as.ContentType); ct != "" && r.MimeType != ct+"/mp4" && r.MimeType != ct+"/mp4, profiles='cmfc'" {
+				if ct := string(as.ContentType); ct != "" && !llMimeTypeOK(r.MimeType, ct) {
 					f = append(f, RuleLLMimeType.New(rLoc, "@mimeType %q with @contentType %q", r.MimeType, ct))
 				}
 				// LL-16, LL-17

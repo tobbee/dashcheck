@@ -48,6 +48,34 @@ func TestEarlyAvailability(t *testing.T) {
 	}
 }
 
+func TestLowLatencyMimeType(t *testing.T) {
+	cases := []struct {
+		mimeType, codecs string
+		want             int
+	}{
+		{"application/mp4", "stpp.ttml.im1t", 0},
+		{"application/mp4", "wvtt", 0},
+		{"text/mp4", "wvtt", 0},
+		{"video/mp4", "stpp.ttml.im1t", 2},
+	}
+	for _, c := range cases {
+		t.Run(c.mimeType+" "+c.codecs, func(t *testing.T) {
+			data := strings.Replace(llMPD, `contentType="video" mimeType="video/mp4" codecs="avc1.64001e"`,
+				`contentType="text" mimeType="`+c.mimeType+`" codecs="`+c.codecs+`"`, 1)
+			_, findings := Check([]byte(data), "https://example.com/ll.mpd")
+			got := 0
+			for _, f := range findings {
+				if f.Rule == "MPD-LL-MIMETYPE" {
+					got++
+				}
+			}
+			if got != c.want {
+				t.Errorf("%d MPD-LL-MIMETYPE, want %d: %v", got, c.want, findings)
+			}
+		})
+	}
+}
+
 func TestLowLatencyRules(t *testing.T) {
 	cases := []struct {
 		name     string
