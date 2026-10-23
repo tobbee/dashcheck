@@ -7,29 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-23
+
 ### Added
 - MPD-XLINK-UNRESOLVED (info) for remote Periods, which dashcheck does not resolve. They are
-  no longer reported as MPD-SEGINFO-NONE.
-- ADDR-UNSUPPORTED (info) for Representations that need the URL parameters of Annex I
-  (EssentialProperty `urn:mpeg:dash:urlparam:2014` or `2016`), whose segments are no longer
-  fetched without the parameters.
+  no longer MPD-SEGINFO-NONE errors.
+- ADDR-UNSUPPORTED (info) for Representations that need Annex I URL parameters
+  (`urn:mpeg:dash:urlparam:2014` or `2016`). Their segments are no longer fetched.
 
 ### Fixed
-- MPD-UPDATE-PUBLISHTIME no longer reports MPDs that differ only in the time of a
-  `urn:mpeg:dash:utc:direct:2014` UTCTiming, and CLOCK-SKEW allows for its whole seconds.
+- MPD-UPDATE-PUBLISHTIME ignores the time in a `urn:mpeg:dash:utc:direct:2014` UTCTiming,
+  which changes with each response.
+- CLOCK-SKEW allows for whole seconds from utc:direct, http-iso and http-xsdate time sources.
 - MPD-CODECS no longer warns about images such as thumbnail tiles, which have no codecs parameter.
-- SEG-EPT and SEG-DURATION leave out media before the edit list's media time, such as audio
-  priming, so a first segment at `S@t` 0 with its presented duration passes. With an edit list,
-  an `S@t` equal to tfdt is SEG-EPT, not SEG-EPT-CTO.
-- LIVE-STALE measures the SegmentTimeline of a Period that has ended at the end of the Period,
-  so earlier Periods of a multi-Period live MPD are no longer reported.
+- SEG-EPT and SEG-DURATION leave out media that the edit list cuts, such as audio priming. With an
+  edit list, an `S@t` equal to the tfdt is SEG-EPT, not SEG-EPT-CTO.
+- LIVE-STALE measures a Period that has ended at its end. Earlier Periods of a multi-Period live
+  MPD are no longer reported as stale.
 - MPD-LL-MIMETYPE accepts `application/mp4` for text, the media type of CMAF text tracks.
-- MPD-XSD accepts a space-separated list in `ContentSteering@defaultServiceLocation`, as the
-  text of ISO/IEC 23009-1 and ETSI TS 103 998 define it; the MPEG schema has a single token.
-- CLOCK-SKEW also allows for whole seconds from http-iso and http-xsdate sources, such as
-  `https://time.akamai.com/?iso`.
-- Without the low-latency profile, only `@availabilityTimeComplete` false turns on the low-latency
-  rules, not `@availabilityTimeOffset` alone, which makes complete segments available earlier.
+- MPD-XSD accepts a space-separated list in `ContentSteering@defaultServiceLocation`, as
+  ISO/IEC 23009-1 and ETSI TS 103 998 define it.
+- `@availabilityTimeOffset` alone no longer turns on the low-latency rules. Without the
+  low-latency profile, `@availabilityTimeComplete` false does.
 
 ## [0.2.0] - 2026-10-21
 
@@ -109,7 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The browser tool, published on GitHub Pages for each release, counts visits and checks with
   GoatCounter, without cookies or MPD URLs.
 
-[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/tobbee/dashcheck/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/tobbee/dashcheck/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/tobbee/dashcheck/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/tobbee/dashcheck/compare/v0.1.0...v0.1.1
