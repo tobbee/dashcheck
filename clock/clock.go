@@ -74,8 +74,8 @@ type Measurement struct {
 	Value  string
 	Offset time.Duration // source minus local
 	RTT    time.Duration
-	// Resolution of the source's time, 1 s for a Date header or a direct
-	// value without fractional seconds. Offset assumes the middle of it.
+	// Resolution of the source's time, 1 s for a Date header or a time
+	// without fractional seconds. Offset assumes the middle of it.
 	Resolution time.Duration
 }
 
@@ -113,7 +113,11 @@ func Measure(ctx context.Context, f fetch.Fetcher, scheme, value string, mpdResp
 		if err != nil {
 			return nil, fmt.Errorf("response %q from %s: %v", truncate(s, 40), value, err)
 		}
-		meas.Offset = t.Sub(midpoint(resp))
+		// Some servers, such as https://time.akamai.com/?iso, send whole seconds.
+		if !strings.Contains(s, ".") {
+			meas.Resolution = time.Second
+		}
+		meas.Offset = t.Add(meas.Resolution / 2).Sub(midpoint(resp))
 		meas.RTT = resp.End.Sub(resp.Start)
 		return meas, nil
 	case SchemeHTTPHead:

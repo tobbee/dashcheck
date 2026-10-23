@@ -74,6 +74,37 @@ func TestSyncDirect(t *testing.T) {
 	}
 }
 
+// fixedFetcher serves fixed bodies, all received at the same time.
+type fixedFetcher struct {
+	at     time.Time
+	bodies map[string]string
+}
+
+func (ff fixedFetcher) Fetch(ctx context.Context, req fetch.Request) (*fetch.Response, error) {
+	body, ok := ff.bodies[req.URL]
+	if !ok {
+		return &fetch.Response{URL: req.URL, Status: 404, Start: ff.at, End: ff.at}, nil
+	}
+	return &fetch.Response{URL: req.URL, Status: 200, Body: []byte(body), Start: ff.at, End: ff.at}, nil
+}
+
+func TestSyncWholeSeconds(t *testing.T) {
+	// An http-iso or http-xsdate time without fractional seconds, such as from
+	// https://time.akamai.com/?iso, is up to 1 s behind the reference.
+	at := time.Now().Truncate(time.Second).Add(900 * time.Millisecond)
+	ff := fixedFetcher{at, map[string]string{
+		"https://ref":   at.UTC().Format("2006-01-02T15:04:05.000Z"),
+		"https://whole": at.UTC().Format("2006-01-02T15:04:05Z"),
+	}}
+	for _, scheme := range []m.AnyURI{"urn:mpeg:dash:utc:http-iso:2014", "urn:mpeg:dash:utc:http-xsdate:2014"} {
+		timings := []*m.DescriptorType{{SchemeIdUri: scheme, Value: "https://whole"}}
+		_, source, findings := Sync(context.Background(), ff, timings, "https://ref", nil)
+		if source != "https://whole" || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
+			t.Errorf("%s: source %s, findings %v", scheme, source, findings)
+		}
+	}
+}
+
 // countingFetcher counts requests per URL.
 type countingFetcher struct {
 	fakeFetcher
