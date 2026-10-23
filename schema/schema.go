@@ -3,7 +3,9 @@
 // The schema files in xsd/ are the 6th edition DASH-MPD.xsd from
 // github.com/MPEGGroup/DASHSchema with its internal DTD entities expanded
 // (xmllint --noent --dropdtd), since the validator does not support DTDs,
-// plus the W3C xlink.xsd and xml.xsd that it imports. The subdirectories
+// plus the W3C xlink.xsd and xml.xsd that it imports. ContentSteering@
+// defaultServiceLocation is a list there, as the text of the 6th edition
+// says, instead of a single token. The subdirectories
 // hold older editions from the branches 2nd-Ed+AMD1 and 4th-AMD1, which
 // other specifications reference.
 package schema

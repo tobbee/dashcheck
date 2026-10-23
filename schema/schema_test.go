@@ -113,6 +113,8 @@ func TestMutations(t *testing.T) {
 		{name: "xlink:type with whitespace", old: period, new: remote + ` xlink:type=" simple "/>` + period},
 		{name: "ServiceDescription", old: period,
 			new: `<ServiceDescription id="0"><Latency target="3000"/></ServiceDescription>` + period},
+		{name: "ContentSteering with a list of default service locations", old: `</MPD>`,
+			new: `<ContentSteering defaultServiceLocation="alpha beta">https://steering.example.com/</ContentSteering></MPD>`},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
