@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- The gopher is adapted from the Go gopher by Renée French (https://reneefrench.blogspot.com/), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). -->
   <!-- Rounded Dark Background for contrast on both light/dark browser tabs -->
   <rect width="64" height="64" rx="14" fill="#0f172a" />
 

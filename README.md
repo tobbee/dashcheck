@@ -156,3 +156,7 @@ Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 MIT, see [LICENSE](LICENSE). The XSD files in `schema/xsd` come from
 [MPEGGroup/DASHSchema](https://github.com/MPEGGroup/DASHSchema) under its own
 license.
+
+The gopher in the logo and favicon is adapted from the Go gopher, created by
+[Renée French](https://reneefrench.blogspot.com/) and licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
