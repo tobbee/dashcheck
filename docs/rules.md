@@ -232,7 +232,7 @@ All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-LL-INBAND-VALUE | error | The urn:mpeg:dash:event:2012 InbandEventStream must have @value 1 | DASH-IF Low-Latency Modes 9.X.4.2 | LL-3 |
 | MPD-LL-K | error | When each chunk is addressable ($SubNumber$), the SegmentTimeline or SegmentTemplate must give @k | DASH-IF Low-Latency Modes 9.X.4.5, ISO/IEC 23009-1 5.3.9.7 | LL-40 |
 | MPD-LL-LEAPSECOND | warning | Low-latency presentations should provide LeapSecondInformation | DASH-IF Low-Latency Modes 9.X.4.2 | LL-4 |
-| MPD-LL-MIMETYPE | error | Low-latency @mimeType must be the @contentType with /mp4 | DASH-IF Low-Latency Modes 9.X.4.5 | LL-20 |
+| MPD-LL-MIMETYPE | error | Low-latency @mimeType must be the @contentType with /mp4, or application/mp4 for text | DASH-IF Low-Latency Modes 9.X.4.5 | LL-20 |
 | MPD-LL-MODE | error | A low-latency AdaptationSet must be either chunked or segment based, not both | DASH-IF Low-Latency Modes 9.X.4.3 | LL-37 |
 | MPD-LL-PROFILE | warning | Low-latency presentations should signal the DASH-IF low-latency profile | DASH-IF Low-Latency Modes 9.X.4.1 | LL-1 |
 | MPD-LL-PRT | error | Each low-latency AdaptationSet needs a valid ProducerReferenceTime with a unique @id | DASH-IF Low-Latency Modes 9.X.4.3 | LL-5, LL-6 |
