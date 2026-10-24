@@ -71,8 +71,9 @@ func (rc *repChecker) liveSegments() ([]addressing.Segment, error) {
 	if pt < 0 {
 		return nil, nil // the Period has not started; reported by liveMPDChecks
 	}
-	if rep.PeriodDur >= 0 && pt-rep.TSBD > rep.PeriodDur {
-		return nil, nil // the Period has left the time-shift buffer
+	margin := rc.opts.LiveMargin
+	if rep.PeriodDur >= 0 && pt-rep.TSBD+margin.Seconds() >= rep.PeriodDur {
+		return nil, nil // the Period leaves the time-shift buffer within the margin
 	}
 	from := pt - rep.TSBD
 	if math.IsInf(from, -1) || from < 0 {
@@ -83,7 +84,6 @@ func (rc *repChecker) liveSegments() ([]addressing.Segment, error) {
 	if err != nil {
 		return nil, err
 	}
-	margin := rc.opts.LiveMargin
 	var avail []addressing.Segment
 	for _, s := range segs {
 		if !rep.AvailabilityStart(s).After(now.Add(-margin)) && rep.AvailabilityEnd(s).After(now.Add(margin)) {
@@ -91,6 +91,11 @@ func (rc *repChecker) liveSegments() ([]addressing.Segment, error) {
 		}
 	}
 	if len(avail) == 0 {
+		// A segment becomes available when it is complete, so a Period that
+		// has just started has none until its first segment is.
+		if from == 0 && len(segs) > 0 && rep.AvailabilityStart(segs[0]).After(now.Add(-margin)) {
+			return nil, nil
+		}
 		rc.add(RuleNoSegments.New(rep.Loc(), "no segment is in the availability window at %s",
 			now.UTC().Format(time.RFC3339)))
 		return nil, nil

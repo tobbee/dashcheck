@@ -146,12 +146,10 @@ func TestLive(t *testing.T) {
 	}
 }
 
-// TestLiveStaleEndedPeriod checks that the SegmentTimeline of a Period that
-// has ended is measured at the end of the Period, not at the live edge.
-func TestLiveStaleEndedPeriod(t *testing.T) {
-	ast := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	period := func(id, start string, pto, startNumber int, timeline string) string {
-		return fmt.Sprintf(`<Period id="%s" start="%s">
+// timelinePeriod returns a Period with the video Representation V300,
+// addressed with a SegmentTimeline.
+func timelinePeriod(id, start string, pto, startNumber int, timeline string) string {
+	return fmt.Sprintf(`<Period id="%s" start="%s">
       <AdaptationSet contentType="video" id="1" mimeType="video/mp4" segmentAlignment="true" startWithSAP="1">
          <SegmentTemplate timescale="90000" presentationTimeOffset="%d" startNumber="%d" initialization="$RepresentationID$/init.mp4" media="$RepresentationID$/$Number$.m4s">
             <SegmentTimeline>%s</SegmentTimeline>
@@ -159,13 +157,38 @@ func TestLiveStaleEndedPeriod(t *testing.T) {
          <Representation id="V300" codecs="avc1.64001e" bandwidth="300000" width="640" height="360" frameRate="30" sar="1:1"/>
       </AdaptationSet>
    </Period>`, id, start, pto, startNumber, timeline)
-	}
-	mpd := func(periods ...string) string {
-		return `<?xml version="1.0" encoding="utf-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="dynamic" availabilityStartTime="2026-01-01T00:00:00Z" publishTime="2026-01-01T00:00:00Z" timeShiftBufferDepth="PT30S" minimumUpdatePeriod="PT2S" minBufferTime="PT2S" maxSegmentDuration="PT2S">
+}
+
+// timelineMPD returns a dynamic MPD with the given @timeShiftBufferDepth and Periods.
+func timelineMPD(tsbd string, periods ...string) string {
+	return `<?xml version="1.0" encoding="utf-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="dynamic" availabilityStartTime="2026-01-01T00:00:00Z" publishTime="2026-01-01T00:00:00Z" timeShiftBufferDepth="` + tsbd + `" minimumUpdatePeriod="PT2S" minBufferTime="PT2S" maxSegmentDuration="PT2S">
    ` + strings.Join(periods, "\n   ") + `
 </MPD>`
+}
+
+// liveFindings checks mpd at the time at after its availabilityStartTime
+// and returns all findings and those of rule.
+func liveFindings(t *testing.T, mpd string, at time.Duration, rule string) (all, found []report.Finding) {
+	t.Helper()
+	ts := server(t, mpd, nil)
+	opts := Options{
+		Fetcher:    fetch.NewNative(5 * time.Second),
+		Clock:      fixedClock(time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC).Add(at)),
+		MPDUpdates: -1,
 	}
+	rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", opts)
+	for _, f := range rpt.Findings {
+		if f.Rule == rule {
+			found = append(found, f)
+		}
+	}
+	return rpt.Findings, found
+}
+
+// TestLiveStaleEndedPeriod checks that the SegmentTimeline of a Period that
+// has ended is measured at the end of the Period, not at the live edge.
+func TestLiveStaleEndedPeriod(t *testing.T) {
 	cases := []struct {
 		name  string
 		mpd   string
@@ -173,31 +196,54 @@ func TestLiveStaleEndedPeriod(t *testing.T) {
 		stale bool
 	}{
 		// Period one (0-2 s) ended 7 s ago with its segment; Period two has segments 2 to 4 at 2-8 s.
-		{"timeline up to the end of an ended Period", mpd(
-			period("one", "PT0S", 0, 1, `<S t="0" d="180000"/>`),
-			period("two", "PT2S", 180000, 2, `<S t="180000" d="180000" r="2"/>`)), 9 * time.Second, false},
+		{"timeline up to the end of an ended Period", timelineMPD("PT30S",
+			timelinePeriod("one", "PT0S", 0, 1, `<S t="0" d="180000"/>`),
+			timelinePeriod("two", "PT2S", 180000, 2, `<S t="180000" d="180000" r="2"/>`)), 9 * time.Second, false},
 		// Period one (0-8 s) ends 6 s after its only segment; segments 3 and 4 play at 8-12 s in Period two.
-		{"timeline that stops before the end of the Period", mpd(
-			period("one", "PT0S", 0, 1, `<S t="0" d="180000"/>`),
-			period("two", "PT8S", 360000, 3, `<S t="360000" d="180000" r="1"/>`)), 13 * time.Second, true},
+		{"timeline that stops before the end of the Period", timelineMPD("PT30S",
+			timelinePeriod("one", "PT0S", 0, 1, `<S t="0" d="180000"/>`),
+			timelinePeriod("two", "PT8S", 360000, 3, `<S t="360000" d="180000" r="1"/>`)), 13 * time.Second, true},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			ts := server(t, c.mpd, nil)
-			opts := Options{
-				Fetcher:    fetch.NewNative(5 * time.Second),
-				Clock:      fixedClock(ast.Add(c.at)),
-				MPDUpdates: -1,
-			}
-			rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", opts)
-			var stale []report.Finding
-			for _, f := range rpt.Findings {
-				if f.Rule == RuleStaleTimeline.ID {
-					stale = append(stale, f)
-				}
-			}
+			all, stale := liveFindings(t, c.mpd, c.at, RuleStaleTimeline.ID)
 			if got := len(stale) > 0; got != c.stale {
-				t.Errorf("LIVE-STALE %v, want %v\n%v", got, c.stale, rpt.Findings)
+				t.Errorf("LIVE-STALE %v, want %v\n%v", got, c.stale, all)
+			}
+		})
+	}
+}
+
+// TestLiveNoSegments checks that a Period whose first segment is not
+// complete yet, or whose last segment leaves the time-shift buffer, is not
+// reported as having no segments.
+func TestLiveNoSegments(t *testing.T) {
+	// Period one has segments 1 and 2 at 0-4 s, Period two segments 3 and 4 at 4-8 s.
+	twoPeriods := func(tsbd string) string {
+		return timelineMPD(tsbd,
+			timelinePeriod("one", "PT0S", 0, 1, `<S t="0" d="180000" r="1"/>`),
+			timelinePeriod("two", "PT4S", 360000, 3, `<S t="360000" d="180000" r="1"/>`))
+	}
+	cases := []struct {
+		name string
+		mpd  string
+		at   time.Duration
+		want bool
+	}{
+		// Segment 3, the first of Period two, becomes available at 6 s.
+		{"new Period before its first segment is complete", twoPeriods("PT30S"), 5 * time.Second, false},
+		{"first segment of a new Period within the margin", twoPeriods("PT30S"), 6500 * time.Millisecond, false},
+		// Segment 2, the last of Period one, leaves the 4 s time-shift buffer at 8 s.
+		{"Period leaving the time-shift buffer within the margin", twoPeriods("PT4S"), 7500 * time.Millisecond, false},
+		// The only segment (0-2 s) left the 4 s time-shift buffer at 6 s.
+		{"timeline that ends before the time-shift buffer", timelineMPD("PT4S",
+			timelinePeriod("one", "PT0S", 0, 1, `<S t="0" d="180000"/>`)), 9 * time.Second, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			all, none := liveFindings(t, c.mpd, c.at, RuleNoSegments.ID)
+			if got := len(none) > 0; got != c.want {
+				t.Errorf("LIVE-NO-SEGMENTS %v, want %v\n%v", got, c.want, all)
 			}
 		})
 	}

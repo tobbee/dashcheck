@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - References to ISO/IEC 23009-1 follow the published 6th edition (2026): SEG-SIDX-SPAN cites
   6.3.5.4 instead of the FDIS number 6.3.4.4.
 
+### Fixed
+- LIVE-NO-SEGMENTS no longer reports a live Period whose first segment is not complete yet, or
+  whose last segment leaves the time-shift buffer within the live margin.
+
 ## [0.2.1] - 2026-10-23
 
 ### Added
