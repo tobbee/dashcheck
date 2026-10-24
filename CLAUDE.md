@@ -62,27 +62,12 @@ S@ssp) and the URL parameters of Annex I are not addressed yet (ADDR-UNSUPPORTED
 
 ## Standards
 
-The user's private standards library is at
-`~/Library/Mobile Documents/com~apple~CloudDocs/standards/` (the
-`lookup-standard` skill searches it). Text extractions made with
-`pdftotext -layout` are kept in `references/text/`, which is gitignored
-and must not be committed or quoted at length:
-
-- `iso-23009-1-6ed-fdis.txt` (DASH; from `MPEG/DASH/23009_DASH/Part1/6ed_2025/`)
-- `etsi-ts-103285-v1.4.1.txt`, `etsi-ts-103285-v1.3.1.txt` (DVB-DASH; `DVB/`)
-- `etsi-ts-101154-v2.9.1.txt` (DVB codecs, annex L has the DASH player
-  conformance points and bitstream rules; `DVB/`)
-- `dashif-cr-low-latency-live-r8.txt` (DASH-IF low latency, clauses 9.X; `DASH-IF/`)
-- `cta-5001-f.txt` (CTA WAVE; `CTA/WAVE/`), `iso-23000-19-2024-amd1.txt` (CMAF amendment)
-- `iso-23000-19-2023-fdis.txt` (CMAF 3rd edition FDIS; `MPEG/23000-19 CMAF/`) and
-  `iso-14496-12-2022.txt` (ISO BMFF; `SIS/.../SS-ISO_IEC 14496-12_2022.pdf`)
-- `iso-23001-7-2022.txt` (Common Encryption, clause 11 has the MPD signalling;
-  `SIS/.../SS-ISO_IEC 23001-7_2023.pdf`)
-- `dashif-iop-v4.3.txt` (DASH-IF IOP v4.3, clause 7 is content protection) and
-  `dashif-iop-6-v5.0.0.txt` (IOP v5 part 6, Content Protection; both `DASH-IF/`)
-
-Find a clause with `grep -n` and read around it with `sed -n`. Extract more
-documents the same way when a rule needs them.
+The texts of the specifications are not part of the repository; the
+maintainer's own Claude Code instructions say where they are and how to
+search them. Never commit specification text, and do not quote it in code,
+docs, commit messages, PRs or issues: cite clause and table numbers and
+paraphrase. Clause and table numbers follow the published editions, for
+ISO/IEC 23009-1 the 6th edition of 2026.
 
 MPD update rules (`mpdcheck/update.go`) compare two fetches of a dynamic MPD;
 the runner refetches it (`update.go`, `-updates`). Put further two-version

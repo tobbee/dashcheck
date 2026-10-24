@@ -13,3 +13,6 @@ references/
 # Python virtual environments
 venv/
 .venv/
+
+# Local Claude Code instructions (not shared)
+CLAUDE.local.md
