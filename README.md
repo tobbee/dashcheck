@@ -122,7 +122,8 @@ validator. The schema files in `schema/xsd` come from
 [MPEGGroup/DASHSchema](https://github.com/MPEGGroup/DASHSchema), with the
 internal DTD entities expanded. One type is changed: `ContentSteering@defaultServiceLocation`
 is a space-separated list, as in Table K.6 of ISO/IEC 23009-1:2026
-and in ETSI TS 103 998, not the single token of the schema.
+and in ETSI TS 103 998, not the single token of the schema. Which one is intended is asked in
+[MPEGGroup/DASHSchema#171](https://github.com/MPEGGroup/DASHSchema/issues/171).
 
 ## Status and next steps
 

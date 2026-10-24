@@ -5,9 +5,9 @@
 // (xmllint --noent --dropdtd), since the validator does not support DTDs,
 // plus the W3C xlink.xsd and xml.xsd that it imports. ContentSteering@
 // defaultServiceLocation is a list there, as the text of the 6th edition
-// says, instead of a single token. The subdirectories
-// hold older editions from the branches 2nd-Ed+AMD1 and 4th-AMD1, which
-// other specifications reference.
+// says, instead of a single token (see MPEGGroup/DASHSchema#171). The
+// subdirectories hold older editions from the branches 2nd-Ed+AMD1 and
+// 4th-AMD1, which other specifications reference.
 package schema
 
 import (
