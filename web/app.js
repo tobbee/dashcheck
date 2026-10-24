@@ -106,6 +106,8 @@ async function run(msg, label) {
   $('status').hidden = false;
   $('bar').style.width = '2%';
   $('statusText').textContent = `Checking ${label}…`;
+  updatesToCheck = msg.type === 'check' ? Math.max(msg.options.mpdUpdates, 0) : 0;
+  live = false;
   try {
     await loadRules();
     current = nextID; // the id call() assigns next
@@ -135,12 +137,24 @@ function updateButtons() {
 
 $('url').addEventListener('input', updateButtons);
 
+let updatesToCheck = 0; // MPD updates asked for in the running check
+let live = false; // the running check is of a dynamic MPD
+
+// The bar covers the MPD, the clock and the segments, and for a live MPD
+// also the MPD updates, which take about a segment duration each.
 function showProgress(p) {
-  const phases = { mpd: 5, clock: 15, segments: 20 };
+  if (p.phase === 'clock') live = true; // the clock is only synchronized for dynamic MPDs
+  const segEnd = live && updatesToCheck > 0 ? 60 : 100;
+  const phases = { mpd: 5, clock: 15, segments: 20, updates: segEnd };
   let pct = phases[p.phase] || 5;
-  if (p.phase === 'segments' && p.total > 0) pct = 20 + (80 * p.done) / p.total;
+  let text = p.message;
+  if (p.phase === 'segments' && p.total > 0) pct = 20 + ((segEnd - 20) * p.done) / p.total;
+  if (p.phase === 'updates' && p.total > 0) {
+    pct = segEnd + ((100 - segEnd) * p.done) / p.total;
+    text = `Update ${p.done + 1} of ${p.total}: ${p.message}`;
+  }
   $('bar').style.width = `${pct}%`;
-  if (p.message) $('statusText').textContent = p.message;
+  if (text) $('statusText').textContent = text;
 }
 
 function el(tag, attrs = {}, ...children) {
