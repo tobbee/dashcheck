@@ -1053,7 +1053,8 @@
     <xs:simpleContent>
       <xs:extension base="xs:anyURI">
         <!-- dashcheck: StringNoWhitespaceVectorType instead of StringNoWhitespaceType, since ISO/IEC 23009-1:2026
-             Table K.6 and ETSI TS 103 998 define a space-separated list of Service Locations -->
+             Table K.6 and ETSI TS 103 998 define a space-separated list of Service Locations.
+             See https://github.com/MPEGGroup/DASHSchema/issues/171 -->
         <xs:attribute name="defaultServiceLocation" type="StringNoWhitespaceVectorType"/>
         <xs:attribute name="queryBeforeStart" type="xs:boolean" default="false"/>
         <xs:attribute name="clientRequirement" type="xs:boolean" default="true"/>
