@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - LIVE-NO-SEGMENTS no longer reports a live Period whose first segment is not complete yet, or
   whose last segment leaves the time-shift buffer within the live margin.
+- The browser tool's progress bar covers the MPD update checks and counts them; it fell back
+  to 5% while they ran.
 
 ## [0.2.1] - 2026-10-23
 
