@@ -85,7 +85,9 @@ make serve   # builds web/dashcheck.wasm and serves web/ on http://localhost:808
 
 The page runs the checker in a Web Worker. It can check a URL, or a local
 folder with packager output, which is read in the browser and never uploaded.
-A URL can be passed as `?url=...` to share a check.
+A URL can be passed as `?url=...` to share a check. The latest 20 checks are
+kept with their results in the browser's localStorage, to show them again or
+to check a URL again with the same options.
 
 Browser limits: the stream must send CORS headers (almost all DASH CDNs do,
 since players need them), and an https page cannot fetch `http://` URLs. Use

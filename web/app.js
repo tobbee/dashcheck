@@ -113,6 +113,7 @@ async function run(msg, label) {
     current = nextID; // the id call() assigns next
     const res = await call(msg);
     if (current === res.id) render(res.report);
+    addToHistory(msg, label, res.report);
   } catch (e) {
     renderError(e.message);
   } finally {
@@ -174,6 +175,7 @@ function render(rpt) {
   summary.replaceChildren();
   const add = (k, v) => summary.append(el('dt', {}, k), el('dd', {}, v));
   add('MPD', rpt.mpdURL);
+  add('Checked', localTime(rpt.started));
   if (rpt.type) {
     add('Type', rpt.type);
     const names = (rpt.profiles || []).join(', ') || 'no profile-specific rules';
@@ -192,8 +194,7 @@ function render(rpt) {
   }
 
   const findings = rpt.findings || [];
-  const counts = { error: 0, warning: 0, info: 0 };
-  for (const f of findings) counts[f.severity]++;
+  const counts = severityCounts(findings);
   $('nError').textContent = counts.error;
   $('nWarning').textContent = counts.warning;
   $('nInfo').textContent = counts.info;
@@ -219,6 +220,115 @@ function render(rpt) {
   applyFilter();
   $('results').hidden = false;
 }
+
+// localTime formats a time from Go, whose fractional seconds may have more
+// digits than Date parses everywhere.
+function localTime(s) {
+  return new Date(s.replace(/(\.\d{3})\d+/, '$1')).toLocaleString();
+}
+
+function severityCounts(findings) {
+  const counts = { error: 0, warning: 0, info: 0 };
+  for (const f of findings) counts[f.severity]++;
+  return counts;
+}
+
+// The history keeps the latest checks with their reports and options in this
+// browser's localStorage, to show them again or to check a URL again. It is
+// never sent anywhere. Storage can be full or blocked, so every access is
+// guarded and the page works without it.
+const historyKey = 'dashcheck-history';
+const historySize = 20;
+
+function loadHistory() {
+  try {
+    const list = JSON.parse(localStorage.getItem(historyKey));
+    return Array.isArray(list) ? list.filter((h) => h && h.target && h.options && h.report && h.report.started) : [];
+  } catch {
+    return [];
+  }
+}
+
+// saveHistory stores the list, dropping the oldest checks until it fits.
+function saveHistory(list) {
+  for (; list.length > 0; list = list.slice(0, -1)) {
+    try {
+      localStorage.setItem(historyKey, JSON.stringify(list));
+      return;
+    } catch {
+      // Full or blocked: try with fewer checks.
+    }
+  }
+  try {
+    localStorage.removeItem(historyKey);
+  } catch {
+    // Blocked.
+  }
+}
+
+function addToHistory(msg, label, report) {
+  const entry = { kind: msg.type === 'check' ? 'url' : 'folder', target: label, options: msg.options, report };
+  saveHistory([entry, ...loadHistory()].slice(0, historySize));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = loadHistory();
+  $('history').hidden = list.length === 0;
+  $('historyCount').textContent = ` (${list.length})`;
+  $('historyList').replaceChildren(...list.map((h, i) => {
+    const counts = severityCounts(h.report.findings || []);
+    const target = el('button', { type: 'button', class: 'link target', title: `Show the results of ${h.target}` },
+      h.kind === 'folder' ? `Folder: ${h.target}` : h.target);
+    target.addEventListener('click', () => {
+      render(h.report);
+      $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    let again = el('span'); // a folder cannot be checked again without its files
+    if (h.kind === 'url') {
+      again = el('button', { type: 'button', title: 'Check this URL again with the same options' }, 'Check again');
+      again.addEventListener('click', () => checkAgain(h));
+    }
+    const remove = el('button', { type: 'button', class: 'remove', 'aria-label': 'Remove from the history' }, '×');
+    remove.addEventListener('click', () => {
+      const rest = loadHistory();
+      rest.splice(i, 1);
+      saveHistory(rest);
+      renderHistory();
+    });
+    return el('li', { class: 'history-item' },
+      el('span', { class: 'when' }, localTime(h.report.started)),
+      el('span', { class: 'counts' },
+        mini('error', counts.error, 'errors'), mini('warning', counts.warning, 'warnings'), mini('info', counts.info, 'info')),
+      target, again, remove);
+  }));
+}
+
+// mini is a small count of findings of one severity, dimmed when zero.
+function mini(sev, n, label) {
+  return el('span', { class: n ? `mini ${sev}` : `mini ${sev} zero`, title: `${n} ${label}` }, String(n));
+}
+
+// checkAgain checks the URL of a history entry with the options it was
+// checked with, to compare after a change to the stream.
+function checkAgain(h) {
+  const o = h.options;
+  $('url').value = h.target;
+  $('maxSegments').value = o.maxSegments;
+  $('mpdUpdates').value = Math.max(o.mpdUpdates, 0);
+  $('hlsInterop').checked = o.hlsInterop;
+  $('sequenceNumbers').checked = o.sequenceNumbers;
+  $('reference').value = o.reference === 'none' ? '' : o.reference;
+  setProfileChoice(o.profiles);
+  updateButtons();
+  $('form').requestSubmit();
+}
+
+$('clearHistory').addEventListener('click', () => {
+  if (!confirm('Clear the history of checks in this browser?')) return;
+  saveHistory([]);
+  renderHistory();
+});
 
 // describeLocal describes this computer's clock relative to the clock source,
 // given offset = source minus local clock, in seconds.
@@ -381,6 +491,7 @@ $('rulesDialog').addEventListener('click', (ev) => {
 });
 
 updateButtons();
+renderHistory();
 count(location.pathname, document.title, false);
 call({ type: 'version' }).then((msg) => { $('version').textContent = msg.version; }, () => {});
 loadRules().then(() => { $('ruleCount').textContent = ` (${ruleList.length})`; }, () => {});
