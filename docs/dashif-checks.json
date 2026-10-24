@@ -4192,7 +4192,7 @@
     "SEG-CMAF-SIDX",
     "SEG-SIDX-SPAN"
    ],
-   "note": "dashcheck checks that each fetched subsegment of a CMAF track is one fragment (every subsegment with -n -1), and reads the box headers after the sidx box and after the last subsegment to find movie fragments that the sidx does not index; this applies to all indexed segments (ISO/IEC 23009-1 6.3.4.4)"
+   "note": "dashcheck checks that each fetched subsegment of a CMAF track is one fragment (every subsegment with -n -1), and reads the box headers after the sidx box and after the last subsegment to find movie fragments that the sidx does not index; this applies to all indexed segments (ISO/IEC 23009-1 6.3.5.4)"
   },
   {
    "id": "LL-49",

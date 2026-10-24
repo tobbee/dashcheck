@@ -95,7 +95,7 @@ var (
 	RuleSidxSpan = report.Register(report.Rule{
 		ID: "SEG-SIDX-SPAN", Severity: report.Error,
 		Desc:    "The sidx box of an indexed segment must index all of it: no movie fragment before its first or after its last subsegment",
-		SpecRef: "ISO/IEC 23009-1 6.3.4.4, 8.12.4.2",
+		SpecRef: "ISO/IEC 23009-1 6.3.5.4, 8.12.4.2",
 	})
 	RuleSegSAP = report.Register(report.Rule{
 		ID: "SEG-SAP", Severity: report.Error,
