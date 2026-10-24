@@ -72,6 +72,13 @@
       </form>
     </section>
 
+    <details id="history" class="card history" open hidden>
+      <summary>History<span id="historyCount" class="muted"></span></summary>
+      <ol id="historyList"></ol>
+      <p class="hint muted">The latest checks are kept in this browser only.
+        <button id="clearHistory" type="button" class="link">Clear history</button></p>
+    </details>
+
     <section id="status" class="card" hidden>
       <div class="progress"><div id="bar"></div></div>
       <p id="statusText" class="muted"></p>
