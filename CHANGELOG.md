@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- References to ISO/IEC 23009-1 follow the published 6th edition (2026): SEG-SIDX-SPAN cites
+  6.3.5.4 instead of the FDIS number 6.3.4.4.
+
 ## [0.2.1] - 2026-10-23
 
 ### Added

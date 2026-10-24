@@ -297,7 +297,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | LL-45 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box reference_ID SHALL be equal to the track id | done | SEG-LL-SIDX |  |
 | LL-46 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box timescale SHALL be identical to the one in the 'mdhd' box | done | SEG-LL-SIDX |  |
 | LL-47 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box earliest presentation time SHALL match the segment EPT | done | SEG-LL-SIDX |  |
-| LL-48 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box reference count SHALL match the number of 'mmof' boxes | done | SEG-CMAF-SIDX, SEG-SIDX-SPAN | dashcheck checks that each fetched subsegment of a CMAF track is one fragment (every subsegment with -n -1), and reads the box headers after the sidx box and after the last subsegment to find movie fragments that the sidx does not index; this applies to all indexed segments (ISO/IEC 23009-1 6.3.4.4) |
+| LL-48 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box reference count SHALL match the number of 'mmof' boxes | done | SEG-CMAF-SIDX, SEG-SIDX-SPAN | dashcheck checks that each fetched subsegment of a CMAF track is one fragment (every subsegment with -n -1), and reads the box headers after the sidx box and after the last subsegment to find movie fragments that the sidx does not index; this applies to all indexed segments (ISO/IEC 23009-1 6.3.5.4) |
 | LL-49 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box reference_type shall be set to 0 | done | SEG-LL-SIDX |  |
 | LL-50 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box startwithsap shall be set to 1 | done | SEG-LL-SIDX |  |
 | LL-51 | `9.X.4.5 =&gt; MPEG-DASH 8.X.3`: The 'sidx' box sapType shall be set to 1 or 2 | done | SEG-LL-SIDX |  |

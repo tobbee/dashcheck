@@ -140,7 +140,7 @@ All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | SEG-PARSE | error | The media segment must be parseable ISOBMFF |  | CMAF-4, COMMON-5 |
 | SEG-SAP | error | With @startWithSAP 1 or 2, every segment, or the first Partial Segment of each Segment Sequence, must start with a sync sample | ISO/IEC 23009-1 5.3.7 (@startWithSAP) | DVB-95 |
 | SEG-SEQUENCE-NUMBER | warning | The chunks of a segment should share one mfhd sequence_number, which should increase from segment to segment (a convention checked with -sequence-numbers, not a CMAF requirement) |  | **dashcheck** |
-| SEG-SIDX-SPAN | error | The sidx box of an indexed segment must index all of it: no movie fragment before its first or after its last subsegment | ISO/IEC 23009-1 6.3.4.4, 8.12.4.2 | LL-48 |
+| SEG-SIDX-SPAN | error | The sidx box of an indexed segment must index all of it: no movie fragment before its first or after its last subsegment | ISO/IEC 23009-1 6.3.5.4, 8.12.4.2 | LL-48 |
 | SEG-SSR-SAP | error | The Partial Segments that SegmentSequenceProperties@cadence selects must start with a SAP type of at most @sapType | ISO/IEC 23009-1 5.3.5.7 | **dashcheck** |
 | SEG-STRUCTURE | error | A media segment must have moof with traf, tfdt and trun, and mdat | ISO/IEC 23000-19 | LL-12 |
 | SEG-TRACKID | error | tfhd@track_ID must match the track in the initialization segment |  | **dashcheck** |
