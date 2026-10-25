@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MPD-XLINK-START (warning) for a Period without `@start` after a remote Period without
   `@duration`. This was an ADDR-PERIOD error; the segments of such a Period are now checked if
   its duration is known.
+- INIT-UNSUPPORTED (info) for audio and video sample entries that dashcheck cannot decode, such
+  as DTS (`dtsc`, `dtse`). They were SEG-CMAF-INIT errors for sample rate and channels 0.
 
 ### Changed
 - References to ISO/IEC 23009-1 follow the published 6th edition (2026): SEG-SIDX-SPAN cites

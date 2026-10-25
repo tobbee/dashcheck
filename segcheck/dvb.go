@@ -167,7 +167,7 @@ func dvbInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, loc rep
 		f = append(f, RuleHbbTVAudioConfig.New(loc, "%s sample entry without %s", fourCC, info.noAudioConfig))
 	}
 	// DVB-84 (upstream also fails when another channel configuration scheme is used)
-	if init.Handler == "soun" {
+	if init.Handler == "soun" && !info.undecoded {
 		for _, acc := range rep.AudioChannelConfigs {
 			if acc.SchemeIdUri == "urn:mpeg:dash:23003:3:audio_channel_configuration:2011" {
 				if n, err := strconv.Atoi(acc.Value); err == nil && n != int(info.channels) {

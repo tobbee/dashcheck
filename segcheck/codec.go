@@ -31,6 +31,7 @@ type sampleEntryInfo struct {
 	channels      uint16
 	video         videoConfig
 	aac           *audioConfig
+	undecoded     bool // mp4ff does not decode this type of sample entry
 }
 
 // videoConfig describes an AVC or HEVC decoder configuration record.
@@ -135,6 +136,7 @@ func describeSampleEntry(stsd *mp4.StsdBox) (sampleEntryInfo, error) {
 	default:
 		info.fourCC = stsd.Children[0].Type()
 		info.codec = info.fourCC
+		info.undecoded = true
 	}
 	// The protection of the track comes from its first protected sample
 	// entry. A track with a clear lead may also have a clear sample entry,
