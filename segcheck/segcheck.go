@@ -490,8 +490,12 @@ func checkTiming(rep *addressing.Rep, init *Init, seg addressing.Segment, media 
 			"earliest presentation time %.3fs is more than 50%% of the segment duration from the nominal %.3fs",
 			media.EPT, wantStart))
 	}
+	// The last Segment of a run with a negative S@r may end at the Period end
+	// instead, like the last Segment with @duration (ISO/IEC 23009-1 5.3.9.6.2).
+	toEnd := rep.PeriodDur - (float64(seg.Time)-float64(rep.PTO))/mpdTS
+	cut := seg.PeriodEnd && gotDur < wantDur && gotDur > toEnd-exact
 	switch {
-	case exactDur && math.Abs(gotDur-wantDur) > exact:
+	case exactDur && math.Abs(gotDur-wantDur) > exact && !cut:
 		f = append(f, ruleWithRef(RuleSegDuration, refTimeline).New(loc,
 			"duration %.6fs but SegmentTimeline says %.6fs", gotDur, wantDur))
 	case !exactDur && math.Abs(gotDur-wantDur) > nominal && !(last && gotDur < wantDur):

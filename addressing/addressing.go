@@ -60,7 +60,11 @@ type Segment struct {
 	Dur       uint64 // duration in Timescale ticks
 	URL       string
 	Range     string // byte range "first-last" for SegmentBase and SegmentList@mediaRange
-	sub       bool   // addressed with $SubNumber$
+	// PeriodEnd is set for the last Segment of an S element with a negative
+	// @r that repeats to the end of the Period. Like the last Segment with
+	// @duration, it may end there, before its MPD duration.
+	PeriodEnd bool
+	sub       bool // addressed with $SubNumber$
 }
 
 // ID returns a short segment identifier for locations.
@@ -606,12 +610,14 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 			return nil, fmt.Errorf("SegmentTimeline S[%d] has d=0", i)
 		}
 		repeat := uint64(s.R) + 1
+		toPeriodEnd := false
 		if s.R < 0 {
 			// Repeat until the next S@t, the Period end, or the end of the interval.
 			limit := endTicks
 			if i+1 < len(stl.S) && stl.S[i+1].T != nil {
 				limit = *stl.S[i+1].T
 			}
+			toPeriodEnd = limit == endTicks && endTicks != math.MaxUint64
 			if limit == math.MaxUint64 {
 				if math.IsInf(to, 1) {
 					return nil, fmt.Errorf("SegmentTimeline S[%d] has negative @r in an open-ended Period", i)
@@ -625,7 +631,7 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 		}
 		// With @k, each S describes Segment Sequences of k Partial Segments.
 		k := partials(s.K)
-		for range repeat {
+		for n := range repeat {
 			for j := range k {
 				ps, pe := t+j*s.D/k, t+(j+1)*s.D/k
 				if float64(ps) >= toTicks {
@@ -635,6 +641,7 @@ func (r *Rep) timelineSegments(stl *m.SegmentTimelineType, startNr uint64, from,
 					continue
 				}
 				seg := r.segment(nr+j, j, sub, ps, pe-ps)
+				seg.PeriodEnd = toPeriodEnd && n == repeat-1
 				if sub {
 					seg.Number = nr
 				}

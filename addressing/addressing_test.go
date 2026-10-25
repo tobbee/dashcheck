@@ -327,3 +327,36 @@ func TestSegmentSequenceErrors(t *testing.T) {
 		t.Errorf("duration pattern: %v", err)
 	}
 }
+
+func TestTimelinePeriodEnd(t *testing.T) {
+	cases := []struct {
+		name, timeline string
+		want           []bool // PeriodEnd of each segment
+	}{
+		{"negative r to the Period end", `<S d="4" r="-1"/>`, []bool{false, false, true}},
+		{"negative r to the next S@t", `<S d="4" r="-1"/><S t="8" d="2"/>`, []bool{false, false, false}},
+		{"positive r", `<S d="4" r="2"/>`, []bool{false, false, false}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			s := `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT10S" minBufferTime="PT2S" profiles="x">
+<Period><AdaptationSet><SegmentTemplate media="$Time$.m4s" timescale="1"><SegmentTimeline>` + c.timeline + `</SegmentTimeline></SegmentTemplate>
+<Representation id="r" bandwidth="1"/></AdaptationSet></Period></MPD>`
+			reps, findings := Reps(mustReadMPD(t, s), "https://example.com/m.mpd")
+			if len(findings) != 0 {
+				t.Fatal(findings)
+			}
+			segs, err := reps[0].Segments(0, reps[0].PeriodDur)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []bool
+			for _, seg := range segs {
+				got = append(got, seg.PeriodEnd)
+			}
+			if !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", got, c.want)
+			}
+		})
+	}
+}

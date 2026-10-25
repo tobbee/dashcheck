@@ -128,6 +128,45 @@ func TestMediaTimingErrors(t *testing.T) {
 	}
 }
 
+// TestTimelinePeriodEnd checks that the last segment of a run with a
+// negative S@r may end at the Period end, before its MPD duration.
+func TestTimelinePeriodEnd(t *testing.T) {
+	video := reps(t)[1]
+	init, _ := CheckInit(read(t, "V300/init.mp4"), video, video.Loc())
+	segs, _ := video.Segments(0, video.PeriodDur)
+	// A finer timescale than that of the MPD (1), to round less.
+	tl := *video
+	tl.Kind = addressing.KindTimelineNumber
+	tl.Timescale *= 1000
+	tl.PTO *= 1000
+	seg := segs[1] // 2 s of content
+	seg.Time *= 1000
+	seg.Dur *= 1500
+	start := float64(seg.Time-tl.PTO) / float64(tl.Timescale)
+	cases := []struct {
+		name      string
+		periodEnd bool
+		toEnd     float64 // from the segment start to the Period end
+		want      []string
+	}{
+		{"ends at the Period end", true, 2, nil},
+		{"ends with the media after the Period end", true, 1.5, nil},
+		{"ends before the Period end", true, 2.5, []string{"SEG-DURATION"}},
+		{"not the last of a negative S@r", false, 2, []string{"SEG-DURATION"}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			seg.PeriodEnd = c.periodEnd
+			tl.PeriodDur = start + c.toEnd
+			_, f := CheckMedia(read(t, "V300/2.m4s"), init, &tl, seg, true)
+			f = slices.DeleteFunc(f, func(x report.Finding) bool { return x.Rule != "SEG-DURATION" })
+			if got := ruleIDs(f); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", f, c.want)
+			}
+		})
+	}
+}
+
 // TestEditListCut checks that the media before the media time of an edit
 // list, such as AAC priming, is left out of the earliest presentation time
 // and the duration of the first segment.
