@@ -97,6 +97,39 @@ func TestInitCrossChecks(t *testing.T) {
 	}
 }
 
+// TestHEAACSampleRate checks that @audioSamplingRate may give the sampling
+// rate after SBR for HE-AAC (DASH-IF IOP v4.3 6.3.2), which is twice the
+// rate of the AAC core with implicit or backward-compatible signaling.
+func TestHEAACSampleRate(t *testing.T) {
+	audio := reps(t)[0] // AAC-LC at 48 kHz
+	cases := []struct {
+		codecs, rate string
+		want         []string
+	}{
+		{"mp4a.40.2", "48000", nil},
+		{"mp4a.40.2", "96000", []string{"XCHK-SAMPLERATE"}},
+		{"mp4a.40.5", "96000", nil},
+		{"mp4a.40.29", "96000", nil},
+		{"mp4a.40.5", "48000", nil},
+		{"mp4a.40.5", "44100", []string{"XCHK-SAMPLERATE"}},
+	}
+	for _, c := range cases {
+		t.Run(c.codecs+" "+c.rate, func(t *testing.T) {
+			r := *audio
+			r.Codecs, r.AudioSamplingRate = c.codecs, c.rate
+			_, f := CheckInit(read(t, "A48/init.mp4"), &r, r.Loc())
+			if got := ruleIDs(f); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", f, c.want)
+			}
+		})
+	}
+	// Explicit hierarchical signaling gives the rate after SBR.
+	explicit := sampleEntryInfo{sampleRate: 24000, aac: &audioConfig{objectType: 5, sampleRate: 22050, extRate: 44100}}
+	if got := sbrRate("mp4a.40.5", explicit); got != 44100 {
+		t.Errorf("explicit signaling: got %d Hz", got)
+	}
+}
+
 func TestMediaTimingErrors(t *testing.T) {
 	video := reps(t)[1]
 	init, _ := CheckInit(read(t, "V300/init.mp4"), video, video.Loc())

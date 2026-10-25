@@ -53,7 +53,7 @@ var (
 	})
 	RuleSampleRate = report.Register(report.Rule{
 		ID: "XCHK-SAMPLERATE", Severity: report.Warning,
-		Desc: "@audioSamplingRate should match the sample entry",
+		Desc: "@audioSamplingRate should match the sample entry, or for HE-AAC the sampling rate after SBR",
 	})
 	RuleHandler = report.Register(report.Rule{
 		ID: "XCHK-HANDLER", Severity: report.Error,
@@ -277,11 +277,33 @@ func crossCheckInit(rep *addressing.Rep, init *Init, info sampleEntryInfo, loc r
 	}
 	if info.sampleRate != 0 && rep.AudioSamplingRate != "" {
 		first, _, _ := strings.Cut(rep.AudioSamplingRate, " ")
-		if sr, err := strconv.Atoi(first); err == nil && uint32(sr) != info.sampleRate {
-			f = append(f, RuleSampleRate.New(loc, "MPD says %d Hz but sample entry has %d Hz", sr, info.sampleRate))
+		sbr := sbrRate(rep.Codecs, info)
+		if sr, err := strconv.Atoi(first); err == nil && uint32(sr) != info.sampleRate && uint32(sr) != sbr {
+			msg := fmt.Sprintf("MPD says %d Hz but sample entry has %d Hz", sr, info.sampleRate)
+			if sbr != 0 {
+				msg += fmt.Sprintf(", and %d Hz after SBR", sbr)
+			}
+			f = append(f, RuleSampleRate.New(loc, "%s", msg))
 		}
 	}
 	return f
+}
+
+// sbrRate returns the sampling rate of HE-AAC after SBR, which
+// @audioSamplingRate signals (DASH-IF IOP v4.3 6.3.2), or 0 for other audio.
+// Explicit hierarchical signaling gives the rate; otherwise SBR doubles the
+// rate of the AAC core.
+func sbrRate(codecs string, info sampleEntryInfo) uint32 {
+	if info.aac != nil && info.aac.extRate != 0 {
+		return uint32(info.aac.extRate)
+	}
+	if codecs != "mp4a.40.5" && codecs != "mp4a.40.29" {
+		return 0
+	}
+	if info.aac != nil {
+		return 2 * uint32(info.aac.sampleRate)
+	}
+	return 2 * info.sampleRate
 }
 
 func contains(list []string, s string) bool {

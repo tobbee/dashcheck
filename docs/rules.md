@@ -152,7 +152,7 @@ All 265 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | XCHK-CP-MISSING | error | Encrypted tracks need ContentProtection in the MPD, and Common Encryption the mp4protection descriptor | ISO/IEC 23009-1 5.8.4.1.1, ISO/IEC 23001-7 11.3.2 | LL-24 |
 | XCHK-CP-SCHEME | error | The mp4protection @value must be the scheme type in the schm box of the track | ISO/IEC 23009-1 5.8.5.2.2 | LL-24 |
 | XCHK-HANDLER | error | The track handler must match @contentType or @mimeType |  | DVB-82, LL-19 |
-| XCHK-SAMPLERATE | warning | @audioSamplingRate should match the sample entry |  | DVB-83 |
+| XCHK-SAMPLERATE | warning | @audioSamplingRate should match the sample entry, or for HE-AAC the sampling rate after SBR |  | DVB-83 |
 | XCHK-SIZE | warning | @width and @height should match the sample entry |  | **dashcheck** |
 
 ## Live timing and HTTP
