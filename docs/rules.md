@@ -2,7 +2,7 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 265 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 64 rules marked **dashcheck** have no counterpart in that tool.
+All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 65 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
@@ -10,7 +10,7 @@ All 265 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [MPD](#mpd) | 64 | 22 |
 | [MPD updates](#mpd-updates) | 5 | 3 |
 | [Segment addressing](#segment-addressing) | 7 | 6 |
-| [Segments](#segments) | 29 | 12 |
+| [Segments](#segments) | 30 | 13 |
 | [Live timing and HTTP](#live-timing-and-http) | 13 | 13 |
 | [DASH-IF IOP](#dash-if-iop) | 22 | 4 |
 | [CMAF](#cmaf) | 19 | 2 |
@@ -20,7 +20,7 @@ All 265 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **265** | **64** |
+| **Total** | **266** | **65** |
 
 ## MPD syntax
 
@@ -129,6 +129,7 @@ All 265 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | INIT-PARSE | error | The initialization segment must be a parseable ISOBMFF file |  | COMMON-5 |
 | INIT-SAMPLES | warning | The initialization segment should not describe any samples | ISO/IEC 23000-19 | **dashcheck** |
 | INIT-STRUCTURE | error | The initialization segment must have ftyp and moov with mvex and a track | ISO/IEC 23000-19 | **dashcheck** |
+| INIT-UNSUPPORTED | info | Audio and video sample entries that dashcheck cannot decode, such as DTS, are not checked |  | **dashcheck** |
 | SEG-AS-KID | error | All Representations of an IOP or CMAF AdaptationSet must be encrypted with the same tenc default_KID | DASH-IF IOP 7.7.1, 7.7.5, ISO/IEC 23000-19 8.2.3.1 | **dashcheck** |
 | SEG-CMF2-DEFAULTS | error | Each chunk of a CMAF track with the cmf2 brand must set sample durations, sizes and flags in tfhd or trun, not only in trex | ISO/IEC 23000-19 7.7.3 | **dashcheck** |
 | SEG-CMF2-ELST | error | A video CMAF track with the cmf2 brand must not have an edit list | ISO/IEC 23000-19 7.7.2 | **dashcheck** |

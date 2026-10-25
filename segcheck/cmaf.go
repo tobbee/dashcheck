@@ -107,7 +107,7 @@ func cmafInitRules(rep *addressing.Rep, init *Init, info sampleEntryInfo, top []
 		if info.width == 0 || info.height == 0 {
 			f = append(f, RuleCMAFInit.New(loc, "sample entry with size %dx%d", info.width, info.height))
 		}
-	case init.Handler == "soun":
+	case init.Handler == "soun" && !info.undecoded:
 		if info.sampleRate == 0 || info.channels == 0 {
 			f = append(f, RuleCMAFInit.New(loc, "audio sample entry with sample rate %d and %d channels", info.sampleRate, info.channels))
 		}

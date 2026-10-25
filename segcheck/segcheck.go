@@ -39,6 +39,10 @@ var (
 		ID: "INIT-SAMPLES", Severity: report.Warning,
 		Desc: "The initialization segment should not describe any samples", SpecRef: refCMAF,
 	})
+	RuleInitUnsupported = report.Register(report.Rule{
+		ID: "INIT-UNSUPPORTED", Severity: report.Info,
+		Desc: "Audio and video sample entries that dashcheck cannot decode, such as DTS, are not checked",
+	})
 	RuleCodecs = report.Register(report.Rule{
 		ID: "XCHK-CODECS", Severity: report.Error,
 		Desc: "@codecs must match the sample entry type",
@@ -206,6 +210,9 @@ func CheckInit(data []byte, rep *addressing.Rep, loc report.Location) (*Init, []
 	info, err := describeSampleEntry(stbl.Stsd)
 	if err != nil {
 		return init, append(f, RuleInitStructure.New(loc, "%v", err))
+	}
+	if info.undecoded && (init.Handler == "soun" || init.Handler == "vide") {
+		f = append(f, RuleInitUnsupported.New(loc, "%s sample entries are not supported, so their parameters are not checked", info.fourCC))
 	}
 	init.SampleEntry = info.fourCC
 	init.Codec = info.codec

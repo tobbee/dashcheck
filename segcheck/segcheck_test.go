@@ -130,6 +130,20 @@ func TestHEAACSampleRate(t *testing.T) {
 	}
 }
 
+// TestUndecodedSampleEntry checks that a sample entry that mp4ff does not
+// decode, such as DTS, is reported as not supported instead of as one
+// without sample rate and channels.
+func TestUndecodedSampleEntry(t *testing.T) {
+	audio := *reps(t)[0]
+	audio.Codecs = "dtsc"
+	audio.Profiles = []string{profileCMAF} // for the CMAF rules on sample rate and channels
+	data := bytes.Replace(read(t, "A48/init.mp4"), []byte("mp4a"), []byte("dtsc"), 1)
+	init, f := CheckInit(data, &audio, audio.Loc())
+	if got := ruleIDs(f); !slices.Equal(got, []string{"INIT-UNSUPPORTED"}) || !init.CMAF {
+		t.Errorf("got %v and CMAF %v, want [INIT-UNSUPPORTED] for CMAF", f, init.CMAF)
+	}
+}
+
 func TestMediaTimingErrors(t *testing.T) {
 	video := reps(t)[1]
 	init, _ := CheckInit(read(t, "V300/init.mp4"), video, video.Loc())
