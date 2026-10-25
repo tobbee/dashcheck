@@ -9,12 +9,16 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
+	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/tobbee/dashcheck/fetch"
+	"github.com/tobbee/dashcheck/report"
 )
 
 const onDemandMPD = `<?xml version="1.0" encoding="utf-8"?>
@@ -103,5 +107,50 @@ func TestSidxSpan(t *testing.T) {
 				t.Errorf("got %q, want one message with %q\n%v", got, c.want, rpt.Findings)
 			}
 		})
+	}
+}
+
+// serveTrack serves the MPD and the track file, and records the Range header
+// of each request for the track file. With ignoreRange, it answers range
+// requests with the whole file.
+func serveTrack(t *testing.T, mpd string, file []byte, ignoreRange bool) (url string, ranges *[]string) {
+	t.Helper()
+	var mu sync.Mutex
+	ranges = &[]string{}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/Manifest.mpd" {
+			_, _ = w.Write([]byte(mpd))
+			return
+		}
+		mu.Lock()
+		*ranges = append(*ranges, r.Header.Get("Range"))
+		mu.Unlock()
+		if ignoreRange {
+			_, _ = w.Write(file)
+			return
+		}
+		http.ServeContent(w, r, "track.mp4", time.Time{}, bytes.NewReader(file))
+	}))
+	t.Cleanup(ts.Close)
+	return ts.URL + "/Manifest.mpd", ranges
+}
+
+func TestSelfInitializing(t *testing.T) {
+	file, mpd := trackFile(t, []string{"1.m4s", "2.m4s", "3.m4s"}, 0, 3)
+	mpd = regexp.MustCompile(`<Initialization [^>]*/>`).ReplaceAllString(mpd, "")
+	url, ranges := serveTrack(t, mpd, file, false)
+	rpt := Check(context.Background(), url, Options{Fetcher: fetch.NewNative(5 * time.Second), MaxSegments: -1})
+	for _, f := range rpt.Findings {
+		if f.Severity == report.Error {
+			t.Errorf("unexpected error %s: %s", f.Rule, f.Message)
+		}
+	}
+	init, err := os.ReadFile(testDir + "/V300/init.mp4")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The Initialization Segment is what precedes @indexRange, not the whole file.
+	if want := fmt.Sprintf("bytes=0-%d", len(init)-1); !slices.Contains(*ranges, want) || slices.Contains(*ranges, "") {
+		t.Errorf("requested ranges %q, want %q and no request for the whole file", *ranges, want)
 	}
 }
