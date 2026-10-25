@@ -398,7 +398,9 @@ func TestSegmentSequences(t *testing.T) {
          <Representation id="V300"`,
 		`duration="4" k="2" media="$RepresentationID$/$Number$_$SubNumber$.m4s"/>
          <Representation id="V300"`, 1)
-	if !strings.Contains(mpd, `k="2"`) || !strings.Contains(mpd, "ssr:2023") {
+	// @maxSegmentDuration bounds the Segment Sequence, not its Partial Segments.
+	mpd = strings.Replace(mpd, `maxSegmentDuration="PT2S"`, `maxSegmentDuration="PT4S"`, 1)
+	if !strings.Contains(mpd, `k="2"`) || !strings.Contains(mpd, "ssr:2023") || !strings.Contains(mpd, "PT4S") {
 		t.Fatal("test MPD not modified")
 	}
 	ts := server(t, mpd, map[string]string{

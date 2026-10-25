@@ -61,7 +61,7 @@ All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-EVENTSTREAM | error | EventStream must have @schemeIdUri, and @xlink:actuate only together with @xlink:href | ISO/IEC 23009-1 5.10.2 | SCH-64, SCH-65 |
 | MPD-FRAMEPACKING | error | FramePacking must use a known scheme with a value 0 to 6 that fits the codec or container | ISO/IEC 23009-1 5.8.4.6 | SCH-59, SCH-60, SCH-61, SCH-62 |
 | MPD-INDEXRANGEEXACT | error | @indexRangeExact must not be present without @indexRange | ISO/IEC 23009-1 5.3.9.2 | SCH-43, SCH-50, SCH-51 |
-| MPD-MAXSEGDUR | error | No segment may be longer than MPD@maxSegmentDuration | ISO/IEC 23009-1 5.3.1, 5.3.9.6.2 | SCH-53 |
+| MPD-MAXSEGDUR | error | No segment or Segment Sequence may be longer than MPD@maxSegmentDuration | ISO/IEC 23009-1 5.3.1, 5.3.9.6.2 | SCH-53 |
 | MPD-MIMETYPE | error | @mimeType must be present on the AdaptationSet or the Representation | ISO/IEC 23009-1 5.3.7 | SCH-34 |
 | MPD-PERIOD-ID | error | Period@id must be present in dynamic MPDs and unique within the MPD | ISO/IEC 23009-1 5.3.2 | SCH-10, SCH-12 |
 | MPD-PERIOD-ORDER | error | Periods must be ordered by increasing start time | ISO/IEC 23009-1 5.3.2 | **dashcheck** |
