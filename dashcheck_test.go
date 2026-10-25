@@ -104,6 +104,31 @@ func TestURLParams(t *testing.T) {
 	}
 }
 
+// TestAfterRemotePeriod checks that the segments of a Period are not fetched
+// when its timing depends on a remote Period, which dashcheck does not resolve.
+func TestAfterRemotePeriod(t *testing.T) {
+	data, err := os.ReadFile(testDir + "/Manifest.mpd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mpd := strings.Replace(string(data), `<Period id="one" start="PT0S">`, `<Period id="zero" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://example.com/zero.xml"/>
+   <Period id="one">`, 1)
+	override := map[string]string{}
+	for _, rep := range []string{"A48", "V300"} {
+		for _, f := range []string{"init.mp4", "1.m4s", "2.m4s", "3.m4s", "4.m4s"} {
+			override["/"+rep+"/"+f] = ""
+		}
+	}
+	ts := server(t, mpd, override)
+	rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", Options{Fetcher: fetch.NewNative(5 * time.Second)})
+	if got := ruleSet(rpt.Findings, report.Warning); !slices.Equal(got, []string{"MPD-XLINK-START"}) {
+		t.Errorf("got %v, want [MPD-XLINK-START]\n%v", got, rpt.Findings)
+	}
+	if rpt.Segments != 0 {
+		t.Errorf("%d segments checked", rpt.Segments)
+	}
+}
+
 func liveMPD(t *testing.T) string {
 	t.Helper()
 	data, err := os.ReadFile(testDir + "/Manifest.mpd")

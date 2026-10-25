@@ -127,8 +127,8 @@ type Rep struct {
 
 	Dynamic     bool
 	AST         time.Time // MPD@availabilityStartTime (dynamic only)
-	PeriodStart float64   // seconds from the start of the presentation
-	PeriodDur   float64   // seconds, or -1 if open-ended
+	PeriodStart float64   // seconds from the start of the presentation, NaN if it depends on a remote Period
+	PeriodDur   float64   // seconds, -1 if open-ended, NaN if it depends on a remote Period
 	LastPeriod  bool      // no Period follows
 	TSBD        float64   // timeShiftBufferDepth in seconds, +Inf if absent
 	ATO         float64   // availabilityTimeOffset in seconds
@@ -755,8 +755,15 @@ func baseURLATO(levels ...[]*m.BaseURLType) float64 {
 	return ato
 }
 
+// IsRemote reports whether a Period is a remote element (ISO/IEC 23009-1
+// 5.5), which dashcheck does not resolve. One that resolves to zero is not.
+func IsRemote(p *m.Period) bool {
+	return p.XlinkHref != "" && p.XlinkHref != "urn:mpeg:dash:resolve-to-zero:2013"
+}
+
 // periodTimes returns start and duration in seconds for each Period.
-// Duration is -1 for an open-ended last Period.
+// Duration is -1 for an open-ended last Period. Both are NaN where they
+// depend on a remote Period.
 func periodTimes(md *m.MPD) (starts, durs []float64, findings []report.Finding) {
 	n := len(md.Periods)
 	starts = make([]float64, n)
@@ -769,6 +776,10 @@ func periodTimes(md *m.MPD) (starts, durs []float64, findings []report.Finding) 
 			starts[i] = 0
 		case md.Periods[i-1].Duration != nil:
 			starts[i] = starts[i-1] + time.Duration(*md.Periods[i-1].Duration).Seconds()
+		case IsRemote(md.Periods[i-1]):
+			// The start depends on the remote Period, which is not resolved
+			// (MPD-XLINK-START).
+			starts[i] = math.NaN()
 		default:
 			findings = append(findings, RulePeriodTiming.New(report.Location{Path: fmt.Sprintf("Period[%d]", i)},
 				"no @start and previous Period has no @duration"))

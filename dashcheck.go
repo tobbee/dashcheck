@@ -298,6 +298,10 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 			rep.Essentials[i].SchemeIdUri))
 		return rc.findings, rc.checked
 	}
+	if math.IsNaN(rep.PeriodDur) || (rc.dynamic && math.IsNaN(rep.PeriodStart)) {
+		rc.add(mpdcheck.RuleXlinkUnresolved.New(rep.Loc(), "the timing of the Period depends on a remote Period, so the segments are not checked"))
+		return rc.findings, rc.checked
+	}
 	var segs []addressing.Segment
 	var last addressing.Segment // last segment of the Period, for duration tolerance
 	var err error

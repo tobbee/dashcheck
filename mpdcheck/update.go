@@ -271,7 +271,7 @@ func (u *updateCheck) rep(pr, nr *addressing.Rep) {
 // version was fetched and are still in the time-shift buffer of the next one.
 func (u *updateCheck) segments(pr, nr *addressing.Rep) {
 	if pr.Kind != nr.Kind || pr.Kind == addressing.KindSegmentBase || pr.Kind == addressing.KindUnknown ||
-		pr.Timescale != nr.Timescale || pr.Timescale == 0 {
+		pr.Timescale != nr.Timescale || pr.Timescale == 0 || math.IsNaN(pr.PeriodStart) {
 		return
 	}
 	periodStart := pr.AST.Add(time.Duration(pr.PeriodStart * float64(time.Second)))
