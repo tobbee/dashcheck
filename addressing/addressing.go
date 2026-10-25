@@ -455,6 +455,16 @@ func (r *Rep) setAddressing(p *m.Period, as *m.AdaptationSetType, rep *m.Represe
 		if r.IndexRange == "" {
 			return []report.Finding{RuleTemplate.New(loc, "SegmentBase without @indexRange is not supported")}
 		}
+		// An Indexed self-initializing Media Segment is the Initialization
+		// Segment followed by an Indexed Media Segment, which starts with
+		// the index (ISO/IEC 23009-1 6.3.6.2), so the Initialization Segment
+		// is what precedes @indexRange.
+		if b.Initialization == nil {
+			first, _, _ := strings.Cut(r.IndexRange, "-")
+			if n, err := strconv.ParseUint(first, 10, 64); err == nil && n > 0 {
+				r.InitRange = fmt.Sprintf("0-%d", n-1)
+			}
+		}
 		return nil
 	case len(rep.BaseURLs)+len(as.BaseURLs)+len(p.BaseURLs) > 0:
 		return []report.Finding{RuleSingleSegment.New(loc, "single segment at %s", r.BaseURL)}

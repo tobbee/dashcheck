@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   whose last segment leaves the time-shift buffer within the live margin.
 - The browser tool's progress bar covers the MPD update checks and counts them; it fell back
   to 5% while they ran.
+- For a self-initializing on-demand file (`SegmentBase` without `Initialization`), only the
+  bytes before `@indexRange` are fetched as its Initialization Segment, not the whole file.
 
 ## [0.2.1] - 2026-10-23
 
