@@ -43,10 +43,10 @@ func TestAACMediaProfile(t *testing.T) {
 		aac audioConfig
 		n   int
 	}{
-		{audioConfig{2, 48000, 2}, 0},
-		{audioConfig{2, 96000, 2}, 1},
-		{audioConfig{2, 48000, 6}, 1},
-		{audioConfig{42, 48000, 2}, 1},
+		{audioConfig{2, 48000, 2, 0}, 0},
+		{audioConfig{2, 96000, 2, 0}, 1},
+		{audioConfig{2, 48000, 6, 0}, 1},
+		{audioConfig{42, 48000, 2, 0}, 1},
 	} {
 		a := c.aac
 		f := cmafMediaProfileRules(rep, init, sampleEntryInfo{aac: &a}, rep.Loc())

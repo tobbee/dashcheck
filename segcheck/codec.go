@@ -61,6 +61,7 @@ type videoConfig struct {
 // audioConfig describes an AAC AudioSpecificConfig.
 type audioConfig struct {
 	objectType, sampleRate, channels int
+	extRate                          int // sampling rate after SBR, with explicit hierarchical signaling
 }
 
 // setProtection records the protection scheme and defaults of a protected sample entry.
@@ -261,7 +262,8 @@ func describeAAC(se *mp4.AudioSampleEntryBox) *audioConfig {
 	if err != nil {
 		return nil
 	}
-	return &audioConfig{objectType: int(asc.ObjectType), sampleRate: asc.SamplingFrequency, channels: int(asc.ChannelConfiguration)}
+	return &audioConfig{objectType: int(asc.ObjectType), sampleRate: asc.SamplingFrequency, channels: int(asc.ChannelConfiguration),
+		extRate: asc.ExtensionFrequency}
 }
 
 func audioCodec(fourCC string, se *mp4.AudioSampleEntryBox) (string, bool) {
