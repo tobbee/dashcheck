@@ -57,8 +57,9 @@ var (
 		Desc: "ContentComponent ids must be unique and must not repeat AdaptationSet attributes", SpecRef: "ISO/IEC 23009-1 5.3.4",
 	})
 	RuleCommonAttrBoth = report.Register(report.Rule{
-		ID: "MPD-COMMON-BOTH", Severity: report.Warning,
-		Desc: "Common attributes should be on the AdaptationSet or its Representations, not both", SpecRef: refCommon,
+		ID: "MPD-COMMON-BOTH", Severity: report.Info,
+		Desc:    "A common attribute is on both the AdaptationSet and a Representation, which ISO/IEC 23009-1 allows but the DASH-IF Conformance tool reports as an error",
+		SpecRef: "ISO/IEC 23009-1 5.3.7.1",
 	})
 	RuleASMinMax = report.Register(report.Rule{
 		ID: "MPD-AS-MINMAX", Severity: report.Error,
@@ -379,7 +380,8 @@ func checkContentComponents(as *m.AdaptationSetType, loc report.Location) []repo
 	return f
 }
 
-// SCH-22
+// SCH-22. Upstream fails this, but ISO/IEC 23009-1 5.3.7.1 lets the common
+// attributes be on each level, so it is information only.
 func checkCommonBoth(as *m.AdaptationSetType, loc report.Location) []report.Finding {
 	a := &as.RepresentationBaseType
 	type attr struct {

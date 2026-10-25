@@ -97,8 +97,8 @@ var (
 		Desc: "A negative S@r must be on the last S or be followed by an S with @t", SpecRef: refTimeline,
 	})
 	RuleMaxSegDur = report.Register(report.Rule{
-		ID: "MPD-MAXSEGDUR", Severity: report.Warning,
-		Desc: "No segment may be longer than MPD@maxSegmentDuration", SpecRef: refMPD,
+		ID: "MPD-MAXSEGDUR", Severity: report.Error,
+		Desc: "No segment may be longer than MPD@maxSegmentDuration", SpecRef: "ISO/IEC 23009-1 5.3.1, 5.3.9.6.2",
 	})
 	RuleDurationYM = report.Register(report.Rule{
 		ID: "MPD-DURATION-YM", Severity: report.Warning,
