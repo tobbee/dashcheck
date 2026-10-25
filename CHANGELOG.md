@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- HTTP-RANGE (warning), and HTTP-IOP-RANGE (error) for the IOP on-demand profile, when a server
+  answers a byte range request with status 200. The ranges are then cut from the whole resource;
+  this used to give ADDR-SEGMENTS and SEG-PARSE errors.
 - The browser tool keeps the latest 20 checks with their results in the browser's localStorage,
   to show them again or to check a URL again with the same options.
 

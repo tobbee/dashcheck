@@ -5,6 +5,8 @@ package fetch
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -57,4 +59,26 @@ func Get(ctx context.Context, f Fetcher, url string) (*Response, error) {
 		return resp, &StatusError{URL: url, Status: resp.Status}
 	}
 	return resp, nil
+}
+
+// CutRange returns the part of a whole resource that the byte range
+// "first-last" or "first-" selects, and the status of a server that answers
+// the request: 206, or 416 if the range starts after the end. Like HTTP, a
+// range that ends after the resource is cut at its end.
+func CutRange(data []byte, r string) ([]byte, int, error) {
+	a, b, ok := strings.Cut(r, "-")
+	first, err := strconv.Atoi(a)
+	if !ok || err != nil || first < 0 {
+		return nil, 0, fmt.Errorf("bad range %q", r)
+	}
+	last := len(data) - 1
+	if b != "" {
+		if last, err = strconv.Atoi(b); err != nil || first > last {
+			return nil, 0, fmt.Errorf("bad range %q", r)
+		}
+	}
+	if first >= len(data) {
+		return nil, 416, nil
+	}
+	return data[first : min(last, len(data)-1)+1], 206, nil
 }

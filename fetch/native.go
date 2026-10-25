@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -74,41 +73,14 @@ func fetchFile(req Request) (*Response, error) {
 	}
 	status := 200
 	if req.Range != "" {
-		first, last, err := parseRange(req.Range, len(data))
-		if err != nil {
+		if data, status, err = CutRange(data, req.Range); err != nil {
 			return nil, err
 		}
-		if first >= len(data) {
-			return &Response{URL: req.URL, Status: 416, Start: start, End: time.Now()}, nil
-		}
-		data = data[first : last+1]
-		status = 206
 	}
 	if req.Head {
 		data = nil
 	}
 	return &Response{URL: req.URL, Status: status, Body: data, Start: start, End: time.Now()}, nil
-}
-
-func parseRange(r string, size int) (first, last int, err error) {
-	a, b, ok := strings.Cut(r, "-")
-	if !ok {
-		return 0, 0, fmt.Errorf("bad range %q", r)
-	}
-	if first, err = strconv.Atoi(a); err != nil {
-		return 0, 0, fmt.Errorf("bad range %q", r)
-	}
-	last = size - 1
-	if b != "" {
-		if last, err = strconv.Atoi(b); err != nil {
-			return 0, 0, fmt.Errorf("bad range %q", r)
-		}
-	}
-	if first > last {
-		return 0, 0, fmt.Errorf("bad range %q", r)
-	}
-	// Like HTTP, a range that ends after the file is cut at its end.
-	return first, min(last, size-1), nil
 }
 
 func lowerKeys(h map[string][]string) map[string]string {
