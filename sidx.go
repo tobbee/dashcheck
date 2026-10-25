@@ -23,7 +23,7 @@ func (rc *repChecker) sidxSegments(ctx context.Context) ([]addressing.Segment, e
 	if err != nil {
 		return nil, fmt.Errorf("@indexRange: %w", err)
 	}
-	resp, err := rc.opts.Fetcher.Fetch(ctx, fetch.Request{URL: rep.BaseURL, Range: rep.IndexRange})
+	resp, err := rc.fetchRange(ctx, fetch.Request{URL: rep.BaseURL, Range: rep.IndexRange})
 	if err != nil {
 		return nil, err
 	}
@@ -95,28 +95,15 @@ func (rc *repChecker) checkSidxSpan(ctx context.Context) {
 // pos up to end (0 for the end of the file) with small range requests, and
 // returns the position of the first moof box.
 func (rc *repChecker) findMoof(ctx context.Context, pos, end uint64) (uint64, bool) {
-	var whole []byte // the file, if the server ignores ranges
 	for range maxProbedBoxes {
 		if end != 0 && pos >= end {
 			return 0, false
 		}
-		var hdr []byte
-		if whole == nil {
-			resp, err := rc.opts.Fetcher.Fetch(ctx, fetch.Request{URL: rc.rep.BaseURL, Range: fmt.Sprintf("%d-%d", pos, pos+15)})
-			if err != nil || !resp.OK() { // 416: pos is at the end of the file
-				return 0, false
-			}
-			hdr = resp.Body
-			if resp.Status == 200 {
-				whole = resp.Body
-			}
+		resp, err := rc.fetchRange(ctx, fetch.Request{URL: rc.rep.BaseURL, Range: fmt.Sprintf("%d-%d", pos, pos+15)})
+		if err != nil || !resp.OK() { // 416: pos is at the end of the file
+			return 0, false
 		}
-		if whole != nil {
-			if pos >= uint64(len(whole)) {
-				return 0, false
-			}
-			hdr = whole[pos:]
-		}
+		hdr := resp.Body
 		if len(hdr) < 8 {
 			return 0, false
 		}

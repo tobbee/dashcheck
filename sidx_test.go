@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -83,37 +84,33 @@ func TestSidxSpan(t *testing.T) {
 		{"first fragment skipped with first_offset", 1, 2, "before the first of 2 subsegments"},
 	}
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			file, mpd := trackFile(t, segs, c.skip, c.indexed)
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == "/Manifest.mpd" {
-					_, _ = w.Write([]byte(mpd))
-					return
+		for _, badRange := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s badRange=%v", c.name, badRange), func(t *testing.T) {
+				file, mpd := trackFile(t, segs, c.skip, c.indexed)
+				url, _ := serveTrack(t, mpd, file, badRange)
+				rpt := Check(context.Background(), url, Options{Fetcher: fetch.NewNative(5 * time.Second), MaxSegments: -1})
+				var got []string
+				for _, f := range rpt.Findings {
+					if f.Rule == "SEG-SIDX-SPAN" {
+						got = append(got, f.Message)
+					}
 				}
-				http.ServeContent(w, r, "track.mp4", time.Time{}, bytes.NewReader(file))
-			}))
-			defer ts.Close()
-			rpt := Check(context.Background(), ts.URL+"/Manifest.mpd", Options{Fetcher: fetch.NewNative(5 * time.Second), MaxSegments: -1})
-			var got []string
-			for _, f := range rpt.Findings {
-				if f.Rule == "SEG-SIDX-SPAN" {
-					got = append(got, f.Message)
+				switch {
+				case c.want == "" && len(got) > 0:
+					t.Errorf("got %q", got)
+				case c.want != "" && (len(got) != 1 || !strings.Contains(got[0], c.want)):
+					t.Errorf("got %q, want one message with %q\n%v", got, c.want, rpt.Findings)
 				}
-			}
-			switch {
-			case c.want == "" && len(got) > 0:
-				t.Errorf("got %q", got)
-			case c.want != "" && (len(got) != 1 || !strings.Contains(got[0], c.want)):
-				t.Errorf("got %q, want one message with %q\n%v", got, c.want, rpt.Findings)
-			}
-		})
+			})
+		}
 	}
 }
 
 // serveTrack serves the MPD and the track file, and records the Range header
-// of each request for the track file. With ignoreRange, it answers range
-// requests with the whole file.
-func serveTrack(t *testing.T, mpd string, file []byte, ignoreRange bool) (url string, ranges *[]string) {
+// of each request for the track file. With badRange, it answers a range
+// request with status 200 and the bytes from the start of the range to the
+// end of the file, as one CDN does.
+func serveTrack(t *testing.T, mpd string, file []byte, badRange bool) (url string, ranges *[]string) {
 	t.Helper()
 	var mu sync.Mutex
 	ranges = &[]string{}
@@ -122,11 +119,14 @@ func serveTrack(t *testing.T, mpd string, file []byte, ignoreRange bool) (url st
 			_, _ = w.Write([]byte(mpd))
 			return
 		}
+		rng := r.Header.Get("Range")
 		mu.Lock()
-		*ranges = append(*ranges, r.Header.Get("Range"))
+		*ranges = append(*ranges, rng)
 		mu.Unlock()
-		if ignoreRange {
-			_, _ = w.Write(file)
+		if badRange && rng != "" {
+			first, _, _ := strings.Cut(strings.TrimPrefix(rng, "bytes="), "-")
+			n, _ := strconv.Atoi(first)
+			_, _ = w.Write(file[min(n, len(file)):])
 			return
 		}
 		http.ServeContent(w, r, "track.mp4", time.Time{}, bytes.NewReader(file))
@@ -152,5 +152,32 @@ func TestSelfInitializing(t *testing.T) {
 	// The Initialization Segment is what precedes @indexRange, not the whole file.
 	if want := fmt.Sprintf("bytes=0-%d", len(init)-1); !slices.Contains(*ranges, want) || slices.Contains(*ranges, "") {
 		t.Errorf("requested ranges %q, want %q and no request for the whole file", *ranges, want)
+	}
+}
+
+func TestRangeIgnored(t *testing.T) {
+	file, mpd := trackFile(t, []string{"1.m4s", "2.m4s", "3.m4s"}, 0, 3)
+	cases := []struct {
+		name, profiles, want string
+	}{
+		{"on-demand", "urn:mpeg:dash:profile:isoff-on-demand:2011", "HTTP-RANGE"},
+		{"IOP on-demand", "urn:mpeg:dash:profile:isoff-on-demand:2011,http://dashif.org/guidelines/dash264", "HTTP-IOP-RANGE"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mpd := strings.Replace(mpd, "urn:mpeg:dash:profile:isoff-on-demand:2011", c.profiles, 1)
+			url, _ := serveTrack(t, mpd, file, true)
+			rpt := Check(context.Background(), url, Options{Fetcher: fetch.NewNative(5 * time.Second), MaxSegments: -1})
+			var got []string
+			for _, f := range rpt.Findings {
+				if f.Severity != report.Info && !strings.HasPrefix(f.Rule, "MPD-") {
+					got = append(got, f.Rule)
+				}
+			}
+			// The segments are cut from the whole file and checked.
+			if !slices.Equal(got, []string{c.want}) || rpt.Segments != 3 {
+				t.Errorf("got %v and %d segments checked, want [%s] and 3\n%v", got, rpt.Segments, c.want, rpt.Findings)
+			}
+		})
 	}
 }

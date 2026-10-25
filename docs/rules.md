@@ -2,7 +2,7 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 61 rules marked **dashcheck** have no counterpart in that tool.
+All 264 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 63 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
@@ -11,8 +11,8 @@ All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [MPD updates](#mpd-updates) | 5 | 3 |
 | [Segment addressing](#segment-addressing) | 7 | 6 |
 | [Segments](#segments) | 29 | 12 |
-| [Live timing and HTTP](#live-timing-and-http) | 12 | 12 |
-| [DASH-IF IOP](#dash-if-iop) | 21 | 3 |
+| [Live timing and HTTP](#live-timing-and-http) | 13 | 13 |
+| [DASH-IF IOP](#dash-if-iop) | 22 | 4 |
 | [CMAF](#cmaf) | 19 | 2 |
 | [Low latency](#low-latency) | 25 | 0 |
 | [DVB-DASH](#dvb-dash) | 56 | 1 |
@@ -20,7 +20,7 @@ All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **262** | **61** |
+| **Total** | **264** | **63** |
 
 ## MPD syntax
 
@@ -164,6 +164,7 @@ All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | CLOCK-UNSUPPORTED | info | UTCTiming schemes that the checker cannot measure are skipped |  | **dashcheck** |
 | HTTP-INIT | error | The initialization segment must be fetchable |  | **dashcheck** |
 | HTTP-MPD | error | The MPD must be fetchable |  | **dashcheck** |
+| HTTP-RANGE | warning | HTTP servers should answer byte range requests with the requested range | DASH-IF IOP v4.3 3.4.2 | **dashcheck** |
 | HTTP-SEGMENT | error | Media segments must be fetchable while they are in the availability window |  | **dashcheck** |
 | LIVE-EARLY | warning | Segments should not be available before their availability start time | DASH-IF Timing Model 13.3 | **dashcheck** |
 | LIVE-NO-SEGMENTS | error | A live Representation must have segments in the availability window | DASH-IF Timing Model 13.3 | **dashcheck** |
@@ -175,6 +176,7 @@ All 262 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 
 | Rule | Severity | Description | Spec | DASH-IF checks |
 |---|---|---|---|---|
+| HTTP-IOP-RANGE | error | HTTP servers must answer byte range requests for IOP on-demand Representations with the requested range | DASH-IF IOP v4.3 3.4.2 | **dashcheck** |
 | MPD-IOP-AUDIO | error | IOP audio must signal @lang, @audioSamplingRate and AudioChannelConfiguration | DASH-IF IOP 3.2.4 | SCH-93, SCH-108 |
 | MPD-IOP-CODECS | error | IOP @codecs must have a single value | DASH-IF IOP 3.2.13 | SCH-109 |
 | MPD-IOP-CP | error | IOP ContentProtection must be on the AdaptationSet, and mp4protection must have cenc:default_KID | DASH-IF IOP 7 | SCH-115, SCH-116, SCH-117 |

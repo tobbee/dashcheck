@@ -90,6 +90,16 @@ var (
 		ID: "HTTP-SEGMENT", Severity: report.Error,
 		Desc: "Media segments must be fetchable while they are in the availability window",
 	})
+	RuleHTTPRange = report.Register(report.Rule{
+		ID: "HTTP-RANGE", Severity: report.Warning,
+		Desc:    "HTTP servers should answer byte range requests with the requested range",
+		SpecRef: "DASH-IF IOP v4.3 3.4.2",
+	})
+	RuleHTTPIOPRange = report.Register(report.Rule{
+		ID: "HTTP-IOP-RANGE", Severity: report.Error,
+		Desc:    "HTTP servers must answer byte range requests for IOP on-demand Representations with the requested range",
+		SpecRef: "DASH-IF IOP v4.3 3.4.2",
+	})
 	RuleUnsupported = report.Register(report.Rule{
 		ID: "SEG-UNSUPPORTED", Severity: report.Info,
 		Desc: "Segments in formats other than ISOBMFF are not checked",
@@ -266,6 +276,8 @@ type repChecker struct {
 	sidx     *mp4.SidxBox // index of a SegmentBase Representation
 	firstEPT float64      // presentation time of the first segment of the Period, NaN if not checked
 	nSidx    int          // number of sidx boxes in its index range
+	// whole holds resources that the server sent whole for a range request, by URL.
+	whole map[string][]byte
 	// Byte positions in the file of a SegmentBase Representation: between the
 	// sidx box and the first subsegment, and after the last subsegment.
 	gapStart, gapEnd, indexEnd uint64
@@ -422,7 +434,7 @@ func (rc *repChecker) checkInit(ctx context.Context) *segcheck.Init {
 		rc.add(RuleHTTPInit.New(loc, "no initialization segment signaled"))
 		return nil
 	}
-	resp, err := rc.opts.Fetcher.Fetch(ctx, fetch.Request{URL: rep.InitURL, Range: rep.InitRange})
+	resp, err := rc.fetchRange(ctx, fetch.Request{URL: rep.InitURL, Range: rep.InitRange})
 	if err != nil {
 		rc.add(RuleHTTPInit.New(loc, "%v", err))
 		return nil
@@ -443,9 +455,52 @@ func (rc *repChecker) checkInit(ctx context.Context) *segcheck.Init {
 	return init
 }
 
+// fetchRange fetches req. If the server answers a range request with status
+// 200, the body is not the range, and need not even be the whole resource
+// (one server sent the bytes from the start of the range to the end), so the
+// whole resource is fetched once and the ranges are cut from it.
+func (rc *repChecker) fetchRange(ctx context.Context, req fetch.Request) (*fetch.Response, error) {
+	if req.Range == "" {
+		return rc.opts.Fetcher.Fetch(ctx, req)
+	}
+	whole, ok := rc.whole[req.URL]
+	if !ok {
+		resp, err := rc.opts.Fetcher.Fetch(ctx, req)
+		if err != nil || resp.Status != 200 {
+			return resp, err
+		}
+		full, err := rc.opts.Fetcher.Fetch(ctx, fetch.Request{URL: req.URL})
+		if err != nil || !full.OK() {
+			return full, err
+		}
+		whole = full.Body
+		if rc.whole == nil {
+			rc.whole = map[string][]byte{}
+		}
+		rc.whole[req.URL] = whole
+		// A server may answer a range that starts after the end with the
+		// whole resource instead of 416 (RFC 9110 15.5.17).
+		if _, status, _ := fetch.CutRange(whole, req.Range); status != 416 {
+			rule := RuleHTTPRange
+			if segcheck.IsIOPOnDemand(rc.rep) {
+				rule = RuleHTTPIOPRange
+			}
+			loc := rc.rep.Loc()
+			loc.URL = req.URL
+			rc.add(rule.New(loc, "the request for bytes %s got status 200 and %d bytes; the ranges are cut from the whole resource of %d bytes",
+				req.Range, len(resp.Body), len(whole)))
+		}
+	}
+	body, status, err := fetch.CutRange(whole, req.Range)
+	if err != nil {
+		return nil, err
+	}
+	return &fetch.Response{URL: req.URL, Status: status, Body: body}, nil
+}
+
 func (rc *repChecker) checkSegment(ctx context.Context, init *segcheck.Init, seg addressing.Segment, last bool) *segcheck.Media {
 	rep := rc.rep
-	resp, err := rc.opts.Fetcher.Fetch(ctx, fetch.Request{URL: seg.URL, Range: seg.Range})
+	resp, err := rc.fetchRange(ctx, fetch.Request{URL: seg.URL, Range: seg.Range})
 	if err != nil {
 		rc.add(RuleHTTPSegment.New(rep.SegLoc(seg), "%v", err))
 		return nil
