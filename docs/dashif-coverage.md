@@ -45,7 +45,7 @@ Checks of the [DASH-IF Conformance tool](https://github.com/Dash-Industry-Forum/
 | SCH-19 | `dash:Period`: For ISO BMFF extended on-demand profile: "If a Period contains multiple Adaptation Sets with value of the @contentType="video" then at least one Adaptation Set shall contain a Role el-ement $&lt;$Role scheme="urn:mpeg:dash:role:2011" value="main"&gt;" | done | MPD-PROFILE-MAINROLE |  |
 | SCH-20 | `dash:AdaptationSet`: The id of each AdaptationSet within a Period shall be unique. | done | MPD-AS-ID |  |
 | SCH-21 | `dash:AdaptationSet`: Attributes from the AdaptationSet shall not be repeated in the descendanding ContentComponent elements. | done | MPD-CONTENTCOMPONENT |  |
-| SCH-22 | `dash:AdaptationSet`: Common attributes for AdaptationSet and Representation shall either be in one of the elements but not in both. | done | MPD-COMMON-BOTH | dashcheck reports a warning, upstream an error |
+| SCH-22 | `dash:AdaptationSet`: Common attributes for AdaptationSet and Representation shall either be in one of the elements but not in both. | done | MPD-COMMON-BOTH | dashcheck reports information, since ISO/IEC 23009-1 5.3.7.1 allows common attributes on both levels (upstream bug 58) |
 | SCH-23 | `dash:AdaptationSet`: Each minimum value (minWidth, minHeight, minBandwidth) shall be larger than the maximum value. | done | MPD-AS-MINMAX |  |
 | SCH-24 | `dash:AdaptationSet`: The value of the bandwidth attribute shall be in the range defined by the AdaptationSet. | done | MPD-AS-RANGE |  |
 | SCH-25 | `dash:AdaptationSet`: The value of the width attribute shall be in the range defined by the AdaptationSet. | done | MPD-AS-RANGE | dashcheck also checks @minWidth |

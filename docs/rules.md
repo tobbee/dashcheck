@@ -43,7 +43,7 @@ All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-CHAINING | error | Chaining and fallback descriptors need a @value, and fallback must be on the MPD level | ISO/IEC 23009-1 5.11 | SCH-68, SCH-69, SCH-70 |
 | MPD-CHANNEL-POSITIONS | error | outputChannelPositionList values must be space-separated lists | ISO/IEC 23009-1 5.8.4.7 | SCH-63 |
 | MPD-CODECS | warning | @codecs should be present on the AdaptationSet or the Representation, except for images | DASH-IF IOP | **dashcheck** |
-| MPD-COMMON-BOTH | warning | Common attributes should be on the AdaptationSet or its Representations, not both | ISO/IEC 23009-1 5.3.7 | SCH-22 |
+| MPD-COMMON-BOTH | info | A common attribute is on both the AdaptationSet and a Representation, which ISO/IEC 23009-1 allows but the DASH-IF Conformance tool reports as an error | ISO/IEC 23009-1 5.3.7.1 | SCH-22 |
 | MPD-CONTENTCOMPONENT | error | ContentComponent ids must be unique and must not repeat AdaptationSet attributes | ISO/IEC 23009-1 5.3.4 | SCH-21, SCH-33 |
 | MPD-CONTENTTYPE | warning | AdaptationSet@contentType should agree with @mimeType | ISO/IEC 23009-1 5.3.3 | **dashcheck** |
 | MPD-CP-CENC | error | cenc:default_KID must be a list of UUIDs, and cenc:pssh a base64 pssh box with the SystemID of its ContentProtection | ISO/IEC 23001-7 11.2 | **dashcheck** |
@@ -61,7 +61,7 @@ All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-EVENTSTREAM | error | EventStream must have @schemeIdUri, and @xlink:actuate only together with @xlink:href | ISO/IEC 23009-1 5.10.2 | SCH-64, SCH-65 |
 | MPD-FRAMEPACKING | error | FramePacking must use a known scheme with a value 0 to 6 that fits the codec or container | ISO/IEC 23009-1 5.8.4.6 | SCH-59, SCH-60, SCH-61, SCH-62 |
 | MPD-INDEXRANGEEXACT | error | @indexRangeExact must not be present without @indexRange | ISO/IEC 23009-1 5.3.9.2 | SCH-43, SCH-50, SCH-51 |
-| MPD-MAXSEGDUR | warning | No segment may be longer than MPD@maxSegmentDuration | ISO/IEC 23009-1 5.3.1 | SCH-53 |
+| MPD-MAXSEGDUR | error | No segment may be longer than MPD@maxSegmentDuration | ISO/IEC 23009-1 5.3.1, 5.3.9.6.2 | SCH-53 |
 | MPD-MIMETYPE | error | @mimeType must be present on the AdaptationSet or the Representation | ISO/IEC 23009-1 5.3.7 | SCH-34 |
 | MPD-PERIOD-ID | error | Period@id must be present in dynamic MPDs and unique within the MPD | ISO/IEC 23009-1 5.3.2 | SCH-10, SCH-12 |
 | MPD-PERIOD-ORDER | error | Periods must be ordered by increasing start time | ISO/IEC 23009-1 5.3.2 | **dashcheck** |

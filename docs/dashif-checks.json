@@ -243,7 +243,7 @@
    "rules": [
     "MPD-COMMON-BOTH"
    ],
-   "note": "dashcheck reports a warning, upstream an error"
+   "note": "dashcheck reports information, since ISO/IEC 23009-1 5.3.7.1 allows common attributes on both levels (upstream bug 58)"
   },
   {
    "id": "SCH-23",

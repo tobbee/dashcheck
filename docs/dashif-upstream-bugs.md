@@ -70,6 +70,7 @@ yet unless stated.
 | 55 | Low Latency DASHProfile | KIDs compared in different formats; cenc:pssh read as an attribute | Verified in code and spec |
 | 56 | SCH-55, SCH-56 | ContentProtection @value checked only by its length | Verified in code and spec |
 | 57 | CMAF LegacyInitialization | Counts senc boxes against moof boxes | Verified in code and spec |
+| 58 | SCH-22 | Forbids common attributes on both levels | Verified in spec |
 
 ## Manifest handling
 
@@ -966,6 +967,23 @@ sample entry that its sample description index selects and from its seig
 sample group, and require sample auxiliary information (senc, a uuid box or
 saio) when decrypting needs it: for subsample-encrypted video, or per-sample
 IVs.
+
+### 58. SCH-22 forbids common attributes on both levels
+
+**Where:** [schematron.sch#L127](https://github.com/Dash-Industry-Forum/DASH-IF-Conformance/blob/e311ec6e12b21394355fd1749101590400e31cbb/schematron/schematron.sch#L127)
+
+**Problem:** The assertion fails when a common attribute, such as @mimeType or
+@codecs, is set on both an AdaptationSet and one of its Representations.
+ISO/IEC 23009-1 5.3.7.1, in the 2022 and the 2026 editions, lets the common
+attributes be present on the AdaptationSet, the Representation and the
+SubRepresentation, and only requires that a mandatory attribute is available
+for each Representation from one of the levels.
+
+**Effect:** False errors for MPDs that repeat an attribute on their
+Representations, such as 20 of the CTA WAVE test vectors that give @mimeType on
+both levels.
+
+**Fix:** Remove the assertion, or report it as information.
 
 ## Other projects
 

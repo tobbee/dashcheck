@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as DTS (`dtsc`, `dtse`). They were SEG-CMAF-INIT errors for sample rate and channels 0.
 
 ### Changed
+- MPD-COMMON-BOTH is information instead of a warning, since ISO/IEC 23009-1 5.3.7.1 allows
+  common attributes on both levels. MPD-MAXSEGDUR is an error instead of a warning (5.3.9.6.2).
 - References to ISO/IEC 23009-1 follow the published 6th edition (2026): SEG-SIDX-SPAN cites
   6.3.5.4 instead of the FDIS number 6.3.4.4.
 
