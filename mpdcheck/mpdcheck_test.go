@@ -64,10 +64,11 @@ func TestRules(t *testing.T) {
 		{"timeline gap", `<S d="180000"/>`, `<S t="720000" d="180000"/>`, []string{"MPD-TIMELINE-GAP"}},
 		{"negative r", `r="2"`, `r="-1"`, []string{"MPD-TIMELINE-NEGR"}},
 		{"long segment", `<S d="180000"/>`, `<S d="270000"/>`, []string{"MPD-MAXSEGDUR"}},
-		// Partial Segments of 2 s within @maxSegmentDuration; the MPD does not signal SSR.
+		// @maxSegmentDuration bounds the 4 s Segment Sequence, not its 2 s Partial Segments;
+		// the MPD does not signal SSR.
 		{"segment sequence", `r="2"/>
           <S d="180000"/>`, `r="2" k="1"/>
-          <S d="360000" k="2"/>`, []string{"MPD-SSR-SIGNAL", "MPD-SSR-SIGNAL"}},
+          <S d="360000" k="2"/>`, []string{"MPD-MAXSEGDUR", "MPD-SSR-SIGNAL", "MPD-SSR-SIGNAL"}},
 		{"duration in months", `timeShiftBufferDepth="PT1M"`, `timeShiftBufferDepth="P1M"`, []string{"MPD-DURATION-YM", "MPD-PARSE"}}, // dash-mpd rejects Y and M
 	}
 	for _, c := range cases {

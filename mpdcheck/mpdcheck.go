@@ -98,7 +98,7 @@ var (
 	})
 	RuleMaxSegDur = report.Register(report.Rule{
 		ID: "MPD-MAXSEGDUR", Severity: report.Error,
-		Desc: "No segment may be longer than MPD@maxSegmentDuration", SpecRef: "ISO/IEC 23009-1 5.3.1, 5.3.9.6.2",
+		Desc: "No segment or Segment Sequence may be longer than MPD@maxSegmentDuration", SpecRef: "ISO/IEC 23009-1 5.3.1, 5.3.9.6.2",
 	})
 	RuleDurationYM = report.Register(report.Rule{
 		ID: "MPD-DURATION-YM", Severity: report.Warning,
@@ -243,11 +243,8 @@ func Rules(md *m.MPD) []report.Finding {
 				}
 				if dur := templateDuration(p.SegmentTemplate, as.SegmentTemplate, rep.SegmentTemplate); dur != nil && maxSegDur > 0 {
 					ts := timescale(p.SegmentTemplate, as.SegmentTemplate, rep.SegmentTemplate)
-					d := ticksToDur(uint64(*dur), ts)
-					if k := templateK(p.SegmentTemplate, as.SegmentTemplate, rep.SegmentTemplate); k > 1 {
-						d /= time.Duration(k) // the duration of a Segment Sequence
-					}
-					if d > maxSegDur {
+					// With @k, this is the duration of a whole Segment Sequence (ISO/IEC 23009-1 5.3.9.7).
+					if d := ticksToDur(uint64(*dur), ts); d > maxSegDur {
 						f = append(f, RuleMaxSegDur.New(rLoc, "SegmentTemplate@duration %v exceeds @maxSegmentDuration %v", d, maxSegDur))
 					}
 				}
@@ -266,18 +263,6 @@ func templateDuration(levels ...*m.SegmentTemplateType) *uint32 {
 		}
 	}
 	return d
-}
-
-// templateK returns the inherited @k (Segment Sequence length) of a chain of
-// SegmentTemplates, highest level first, or 0.
-func templateK(levels ...*m.SegmentTemplateType) uint64 {
-	var k uint64
-	for _, t := range levels {
-		if t != nil && t.K != nil {
-			k = *t.K
-		}
-	}
-	return k
 }
 
 // timescale returns the inherited @timescale of a chain of SegmentTemplates, highest level first.
@@ -368,12 +353,9 @@ func checkTimeline(stl *m.SegmentTimelineType, timescale uint32, maxSegDur time.
 		} else {
 			end += s.D * uint64(s.R+1)
 		}
-		// With Segment Sequences, @d spans @k Partial Segments (ISO/IEC 23009-1 5.3.9.7).
-		d := s.D
-		if s.K != nil && *s.K > 1 {
-			d = (s.D + *s.K - 1) / *s.K
-		}
-		maxD = max(maxD, d)
+		// With @k, @d is the duration of a whole Segment Sequence, which
+		// @maxSegmentDuration also bounds (ISO/IEC 23009-1 5.3.9.6.2).
+		maxD = max(maxD, s.D)
 	}
 	if maxSegDur > 0 && timescale > 0 {
 		if d := ticksToDur(maxD, timescale); d > maxSegDur {
