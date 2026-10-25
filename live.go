@@ -49,7 +49,7 @@ func liveMPDChecks(md *m.MPD, reps []*addressing.Rep, now time.Time) []report.Fi
 			f = append(f, RulePublishFuture.New(loc, "@publishTime %s is %.1fs in the future", md.PublishTime, pt.Sub(now).Seconds()))
 		}
 	}
-	if len(reps) > 0 && !reps[0].AST.IsZero() {
+	if len(reps) > 0 && !reps[0].AST.IsZero() && !math.IsNaN(reps[0].PeriodStart) {
 		start := reps[0].AST.Add(time.Duration(reps[0].PeriodStart * float64(time.Second)))
 		if start.After(now) {
 			f = append(f, RuleNotStarted.New(loc, "presentation starts at %s, %.1fs from now",

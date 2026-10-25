@@ -40,7 +40,13 @@ var (
 	})
 	RuleXlinkUnresolved = report.Register(report.Rule{
 		ID: "MPD-XLINK-UNRESOLVED", Severity: report.Info,
-		Desc: "Remote Periods (@xlink:href) are not resolved, so their content is not checked", SpecRef: "ISO/IEC 23009-1 5.5",
+		Desc:    "Remote Periods (@xlink:href) are not resolved, so their content is not checked, nor the segments of a Period whose timing depends on them",
+		SpecRef: "ISO/IEC 23009-1 5.5",
+	})
+	RuleXlinkStart = report.Register(report.Rule{
+		ID: "MPD-XLINK-START", Severity: report.Warning,
+		Desc:    "A Period after a remote Period should have @start, or the remote Period @duration, so that its start is known without resolving the remote Period",
+		SpecRef: "ISO/IEC 23009-1 5.3.2.1",
 	})
 	RulePeriodZeroDuration = report.Register(report.Rule{
 		ID: "MPD-PERIOD-ZERO", Severity: report.Warning,
@@ -200,6 +206,9 @@ func structureRules(md *m.MPD) []report.Finding {
 			f = append(f, RuleXlinkUnresolved.New(pLoc, "remote Period %s is not resolved", p.XlinkHref))
 		case !periodHasSegmentInfo(p):
 			f = append(f, RuleSegInfoNone.New(pLoc, "no BaseURL, SegmentTemplate or SegmentList in the Period"))
+		}
+		if pi > 0 && p.Start == nil && addressing.IsRemote(md.Periods[pi-1]) && md.Periods[pi-1].Duration == nil {
+			f = append(f, RuleXlinkStart.New(pLoc, "no @start, and the remote Period before it has no @duration"))
 		}
 		// SCH-14
 		if p.Duration != nil && *p.Duration == 0 && len(p.AdaptationSets) > 1 {

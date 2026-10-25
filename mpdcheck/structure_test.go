@@ -77,6 +77,10 @@ func TestStructureRules(t *testing.T) {
 			[]string{"MPD-EVENTSTREAM"}},
 		{"remote period", `<Period id="p0">`, `<Period id="p1" duration="PT4S" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://example.com/p1.xml" xlink:actuate="onRequest"/>
   <Period id="p0">`, []string{"MPD-XLINK-UNRESOLVED"}},
+		{"after remote period", `<Period id="p0">`, `<Period id="p1" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://example.com/p1.xml" xlink:actuate="onLoad"/>
+  <Period id="p0">`, []string{"MPD-XLINK-START", "MPD-XLINK-UNRESOLVED"}},
+		{"after remote period with start", `<Period id="p0">`, `<Period id="p1" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://example.com/p1.xml" xlink:actuate="onLoad"/>
+  <Period id="p0" start="PT4S">`, []string{"MPD-XLINK-UNRESOLVED"}},
 		{"fallback not on MPD", `<Role schemeIdUri`, `<SupplementalProperty schemeIdUri="urn:mpeg:dash:fallback:2016" value="https://b/m.mpd"/><Role schemeIdUri`,
 			[]string{"MPD-CHAINING"}},
 		{"zero duration period", `<Period id="p0">`, `<Period id="p0" duration="PT0S"><AdaptationSet id="9" mimeType="audio/mp4" codecs="mp4a.40.2"><SegmentTemplate duration="2" media="a/$Number$.m4s"/><Representation id="a" bandwidth="1"/></AdaptationSet>`,

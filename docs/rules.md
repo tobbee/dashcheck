@@ -2,12 +2,12 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 264 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 63 rules marked **dashcheck** have no counterpart in that tool.
+All 265 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 64 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
 | [MPD syntax](#mpd-syntax) | 3 | 1 |
-| [MPD](#mpd) | 63 | 21 |
+| [MPD](#mpd) | 64 | 22 |
 | [MPD updates](#mpd-updates) | 5 | 3 |
 | [Segment addressing](#segment-addressing) | 7 | 6 |
 | [Segments](#segments) | 29 | 12 |
@@ -20,7 +20,7 @@ All 264 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **264** | **63** |
+| **Total** | **265** | **64** |
 
 ## MPD syntax
 
@@ -96,7 +96,8 @@ All 264 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-TIMELINE-NEGR | error | A negative S@r must be on the last S or be followed by an S with @t | ISO/IEC 23009-1 5.3.9.6 | **dashcheck** |
 | MPD-TIMELINE-ORDER | error | SegmentTimeline entries must not overlap | ISO/IEC 23009-1 5.3.9.6 | **dashcheck** |
 | MPD-UTCTIMING-SCHEME | warning | UTCTiming should use http-xsdate, http-iso, http-head or direct (2014 schemes) | DASH-IF Timing Model 13.1 | SCH-67 |
-| MPD-XLINK-UNRESOLVED | info | Remote Periods (@xlink:href) are not resolved, so their content is not checked | ISO/IEC 23009-1 5.5 | **dashcheck** |
+| MPD-XLINK-START | warning | A Period after a remote Period should have @start, or the remote Period @duration, so that its start is known without resolving the remote Period | ISO/IEC 23009-1 5.3.2.1 | **dashcheck** |
+| MPD-XLINK-UNRESOLVED | info | Remote Periods (@xlink:href) are not resolved, so their content is not checked, nor the segments of a Period whose timing depends on them | ISO/IEC 23009-1 5.5 | **dashcheck** |
 
 ## MPD updates
 

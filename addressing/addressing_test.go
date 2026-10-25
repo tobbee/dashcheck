@@ -360,3 +360,34 @@ func TestTimelinePeriodEnd(t *testing.T) {
 		})
 	}
 }
+
+func TestPeriodAfterRemotePeriod(t *testing.T) {
+	const tmpl = `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xlink="http://www.w3.org/1999/xlink" type="static" mediaPresentationDuration="PT10S" minBufferTime="PT2S" profiles="x">
+<Period id="p0" duration="PT4S"><AdaptationSet><SegmentTemplate media="$Number$.m4s" duration="2"/><Representation id="a" bandwidth="1"/></AdaptationSet></Period>
+%s
+<Period id="p2" duration="PT4S"><AdaptationSet><SegmentTemplate media="$Number$.m4s" duration="2"/><Representation id="b" bandwidth="1"/></AdaptationSet></Period>
+</MPD>`
+	cases := []struct {
+		name, period string
+		want         []string
+		unknown      bool // the start of p2
+	}{
+		{"remote", `<Period id="p1" xlink:href="https://example.com/p1.xml"/>`, nil, true},
+		{"remote with duration", `<Period id="p1" duration="PT2S" xlink:href="https://example.com/p1.xml"/>`, nil, false},
+		{"local without duration", `<Period id="p1"><AdaptationSet><SegmentTemplate media="$Number$.m4s" duration="2"/><Representation id="c" bandwidth="1"/></AdaptationSet></Period>`,
+			[]string{"ADDR-PERIOD"}, false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			reps, findings := Reps(mustReadMPD(t, fmt.Sprintf(tmpl, c.period)), "https://example.com/m.mpd")
+			var got []string
+			for _, f := range findings {
+				got = append(got, f.Rule)
+			}
+			last := reps[len(reps)-1]
+			if !slices.Equal(got, c.want) || math.IsNaN(last.PeriodStart) != c.unknown || last.PeriodDur != 4 {
+				t.Errorf("got %v, start %v and duration %v of p2; want %v, unknown start %v", findings, last.PeriodStart, last.PeriodDur, c.want, c.unknown)
+			}
+		})
+	}
+}

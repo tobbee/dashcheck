@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   this used to give ADDR-SEGMENTS and SEG-PARSE errors.
 - The browser tool keeps the latest 20 checks with their results in the browser's localStorage,
   to show them again or to check a URL again with the same options.
+- MPD-XLINK-START (warning) for a Period without `@start` after a remote Period without
+  `@duration`. This was an ADDR-PERIOD error; the segments of such a Period are now checked if
+  its duration is known.
 
 ### Changed
 - References to ISO/IEC 23009-1 follow the published 6th edition (2026): SEG-SIDX-SPAN cites
