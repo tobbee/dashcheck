@@ -79,13 +79,15 @@ type Measurement struct {
 	Resolution time.Duration
 }
 
-// Source names the time source: its URL, or for the direct scheme, whose
-// value is a time that differs in each MPD, the scheme.
+// Source names a UTCTiming source by its scheme and URL, such as
+// "UTCTiming http-iso https://time.example.com". The value of the direct
+// scheme is a time that differs in each MPD, so it is left out.
 func (meas *Measurement) Source() string {
+	name := "UTCTiming " + strings.TrimSuffix(strings.TrimPrefix(meas.Scheme, "urn:mpeg:dash:utc:"), ":2014")
 	if meas.Scheme == SchemeDirect {
-		return SchemeDirect + " (the time in the MPD)"
+		return name + " (the time in the MPD)"
 	}
-	return meas.Value
+	return name + " " + meas.Value
 }
 
 // Measure queries one UTCTiming source. mpdResp is the response that
@@ -229,7 +231,7 @@ func Sync(ctx context.Context, f fetch.Fetcher, timings []*m.DescriptorType, ref
 					loc = locs[i]
 				}
 				findings = append(findings, RuleSkew.New(loc,
-					"UTCTiming source %s is %s the reference clock %s", meas.Source(), Describe(skew), host(reference)))
+					"%s is %s the reference clock %s", meas.Source(), Describe(skew), host(reference)))
 			}
 		}
 	}
@@ -237,7 +239,8 @@ func Sync(ctx context.Context, f fetch.Fetcher, timings []*m.DescriptorType, ref
 	case chosen != nil:
 		return &Offset{Offset: chosen.Offset, Source: chosen.Source()}, chosen.Source(), findings
 	case ref != nil:
-		return &Offset{Offset: ref.Offset, Source: ref.Value}, ref.Value, findings
+		source := "the reference clock " + ref.Value
+		return &Offset{Offset: ref.Offset, Source: source}, source, findings
 	default:
 		return System{}, LocalSource, findings
 	}
