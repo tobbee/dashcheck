@@ -47,7 +47,7 @@ func TestSync(t *testing.T) {
 		t.Errorf("got %v, want %v: %v", ids, want, findings)
 	}
 	// The first working source is followed, as a player would.
-	if source != "https://skewed" {
+	if source != "UTCTiming http-iso https://skewed" {
 		t.Errorf("source %s", source)
 	}
 	if d := time.Until(clk.Now()); d < 4900*time.Millisecond || d > 5100*time.Millisecond {
@@ -56,7 +56,7 @@ func TestSync(t *testing.T) {
 
 	// No MPD sources: follow the reference.
 	clk, source, _ = Sync(context.Background(), ff, nil, "https://ref", nil)
-	if source != "https://ref" || time.Until(clk.Now()) < 2900*time.Millisecond {
+	if source != "the reference clock https://ref" || time.Until(clk.Now()) < 2900*time.Millisecond {
 		t.Errorf("fallback: %s %v", source, time.Until(clk.Now()))
 	}
 }
@@ -72,7 +72,7 @@ func TestSyncDirect(t *testing.T) {
 		return []*m.DescriptorType{{SchemeIdUri: "urn:mpeg:dash:utc:direct:2014", Value: value}}
 	}
 	// The value is a time, so the scheme names the source.
-	const name = "urn:mpeg:dash:utc:direct:2014 (the time in the MPD)"
+	const name = "UTCTiming direct (the time in the MPD)"
 	_, source, findings := Sync(context.Background(), ff, direct(3*time.Second), "https://ref", mpdResp)
 	if source != name || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
 		t.Errorf("source %s, findings %v", source, findings)
@@ -83,7 +83,7 @@ func TestSyncDirect(t *testing.T) {
 		t.Fatalf("10 s ahead: findings %v", findings)
 	}
 	skew := findings[1]
-	if !strings.HasPrefix(skew.Message, "UTCTiming source "+name+" is ") || !strings.Contains(skew.Message, "s ahead of") ||
+	if !strings.HasPrefix(skew.Message, name+" is ") || !strings.Contains(skew.Message, "s ahead of") ||
 		skew.Location != (report.Location{Path: "MPD/UTCTiming[0]"}) {
 		t.Errorf("10 s ahead: %q at %+v", skew.Message, skew.Location)
 	}
@@ -111,10 +111,13 @@ func TestSyncWholeSeconds(t *testing.T) {
 		"https://ref":   at.UTC().Format("2006-01-02T15:04:05.000Z"),
 		"https://whole": at.UTC().Format("2006-01-02T15:04:05Z"),
 	}}
-	for _, scheme := range []m.AnyURI{"urn:mpeg:dash:utc:http-iso:2014", "urn:mpeg:dash:utc:http-xsdate:2014"} {
+	for scheme, name := range map[m.AnyURI]string{
+		"urn:mpeg:dash:utc:http-iso:2014":    "UTCTiming http-iso https://whole",
+		"urn:mpeg:dash:utc:http-xsdate:2014": "UTCTiming http-xsdate https://whole",
+	} {
 		timings := []*m.DescriptorType{{SchemeIdUri: scheme, Value: "https://whole"}}
 		_, source, findings := Sync(context.Background(), ff, timings, "https://ref", nil)
-		if source != "https://whole" || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
+		if source != name || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
 			t.Errorf("%s: source %s, findings %v", scheme, source, findings)
 		}
 	}
@@ -138,7 +141,7 @@ func TestSyncReusesReference(t *testing.T) {
 	if cf.calls["https://ref"] != 1 {
 		t.Errorf("reference fetched %d times, want 1", cf.calls["https://ref"])
 	}
-	if source != "https://ref" || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
+	if source != "UTCTiming http-xsdate https://ref" || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
 		t.Fatalf("source %s, findings %v", source, findings)
 	}
 	// The fake server truncates to milliseconds, so the offset may read 45 or 46 ms.

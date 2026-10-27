@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `dashcheck` keeps the drive letter of a local MPD on Windows, which it lost when the MPD was not on the
   current drive. Local paths with `#`, `%` or `?` work on all platforms.
-- CLOCK-SKEW and the clock line of the report name a `urn:mpeg:dash:utc:direct:2014` UTCTiming by its
-  scheme, not by the time in the MPD.
+- The clock line of the report and CLOCK-SKEW give the UTCTiming scheme of the time source (`http-iso`,
+  `direct`, ...), or say that it is the reference clock. A `direct` source was named by its time.
 
 ## [0.3.0] - 2026-10-27
 
