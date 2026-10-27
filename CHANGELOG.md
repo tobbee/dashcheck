@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `dashcheck` keeps the drive letter of a local MPD on Windows, which it lost when the MPD was not on the
+  current drive. Local paths with `#`, `%` or `?` work on all platforms.
+
 ## [0.3.0] - 2026-10-27
 
 ### Added

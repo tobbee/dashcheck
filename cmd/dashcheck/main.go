@@ -294,7 +294,7 @@ func toURL(arg string) (string, error) {
 	if _, err := os.Stat(abs); err != nil {
 		return "", err
 	}
-	return "file://" + filepath.ToSlash(abs), nil
+	return fetch.FileURL(abs), nil
 }
 
 func printReport(w io.Writer, rpt *report.Report, shown []report.Finding) {
