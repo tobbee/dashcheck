@@ -58,6 +58,19 @@ func TestRules(t *testing.T) {
       <Representation id="t" bandwidth="1000" width="320" height="180"/>
     </AdaptationSet>
   </Period>`, nil},
+		// No MPD-CODECS; the live profile of the test MPD does not allow side-loaded files.
+		{"side-loaded text without codecs", `</Period>`, `<AdaptationSet id="2" contentType="text" mimeType="application/ttml+xml" lang="en">
+      <Representation id="ttml" bandwidth="1000"><BaseURL>sub_en.ttml</BaseURL></Representation>
+    </AdaptationSet>
+    <AdaptationSet id="3" contentType="text" mimeType="text/vtt" lang="en">
+      <Representation id="vtt" bandwidth="1000"><BaseURL>sub_en.vtt</BaseURL></Representation>
+    </AdaptationSet>
+  </Period>`, []string{"MPD-PROFILE-SEGINFO", "MPD-PROFILE-SEGINFO"}},
+		{"segmented text without codecs", `</Period>`, `<AdaptationSet id="2" contentType="text" mimeType="application/mp4" lang="en">
+      <SegmentTemplate duration="2" media="$RepresentationID$/$Number$.m4s" initialization="$RepresentationID$/init.mp4"/>
+      <Representation id="stpp" bandwidth="1000"/>
+    </AdaptationSet>
+  </Period>`, []string{"MPD-CODECS"}},
 		{"contentType mismatch", `contentType="video"`, `contentType="audio"`, []string{"MPD-CONTENTTYPE"}},
 		{"shared media", `media="$RepresentationID$/$Time$.m4s"`, `media="$Time$.m4s"`, []string{"MPD-TEMPLATE-REPID"}},
 		{"timeline overlap", `<S d="180000"/>`, `<S t="360000" d="180000"/>`, []string{"MPD-TIMELINE-ORDER"}},

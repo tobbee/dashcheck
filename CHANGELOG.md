@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with SegmentTimeline and `$Time$` but no sidx), not a SEG-STRUCTURE error in all segments.
   Fragments without tfdt are now checked; SEG-START-UNKNOWN (info) marks a segment starting without one.
 - A traf without trun is a SEG-CMAF-CHUNK error in CMAF tracks only, not a SEG-STRUCTURE error in all segments.
+- MPD-CODECS no longer warns about side-loaded subtitle files (`application/ttml+xml`, `text/vtt`).
 
 ## [0.2.1] - 2026-10-23
 
