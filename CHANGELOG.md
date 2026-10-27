@@ -7,40 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-27
+
 ### Added
 - HTTP-RANGE (warning), and HTTP-IOP-RANGE (error) for the IOP on-demand profile, when a server
-  answers a byte range request with status 200. The ranges are then cut from the whole resource;
-  this used to give ADDR-SEGMENTS and SEG-PARSE errors.
-- The browser tool keeps the latest 20 checks with their results in the browser's localStorage,
-  to show them again or to check a URL again with the same options.
-- MPD-XLINK-START (warning) for a Period without `@start` after a remote Period without
-  `@duration`. This was an ADDR-PERIOD error; the segments of such a Period are now checked if
-  its duration is known.
-- INIT-UNSUPPORTED (info) for audio and video sample entries that dashcheck cannot decode, such
-  as DTS (`dtsc`, `dtse`). They were SEG-CMAF-INIT errors for sample rate and channels 0.
+  answers a byte range request with status 200. dashcheck then cuts the ranges from the whole resource.
+- The browser tool keeps the latest 20 checks with their results in localStorage, to show them
+  again or to check a URL again with the same options.
+- MPD-XLINK-START (warning) instead of an ADDR-PERIOD error for a Period without `@start` after a
+  remote Period without `@duration`. Its segments are checked if its duration is known.
+- INIT-UNSUPPORTED (info) for sample entries that dashcheck cannot decode, such as DTS (`dtsc`,
+  `dtse`), instead of SEG-CMAF-INIT errors.
 
 ### Changed
-- MPD-COMMON-BOTH is information instead of a warning, since ISO/IEC 23009-1 5.3.7.1 allows
-  common attributes on both levels. MPD-MAXSEGDUR is an error instead of a warning (5.3.9.6.2),
-  and compares a whole Segment Sequence (`@d` with `@k`) with `@maxSegmentDuration`, not its parts.
-- References to ISO/IEC 23009-1 follow the published 6th edition (2026): SEG-SIDX-SPAN cites
-  6.3.5.4 instead of the FDIS number 6.3.4.4.
+- MPD-COMMON-BOTH is information instead of a warning: ISO/IEC 23009-1 5.3.7.1 allows it.
+- MPD-MAXSEGDUR is an error instead of a warning (5.3.9.6.2), and compares a whole Segment Sequence
+  (`@d` with `@k`) with `@maxSegmentDuration`.
+- References to ISO/IEC 23009-1 follow the published 6th edition (2026); SEG-SIDX-SPAN cites 6.3.5.4.
 
 ### Fixed
 - LIVE-NO-SEGMENTS no longer reports a live Period whose first segment is not complete yet, or
   whose last segment leaves the time-shift buffer within the live margin.
-- The browser tool's progress bar covers the MPD update checks and counts them; it fell back
-  to 5% while they ran.
-- XCHK-SAMPLERATE accepts the sampling rate after SBR in `@audioSamplingRate` for HE-AAC
-  (`mp4a.40.5`, `mp4a.40.29`).
-- SEG-DURATION lets the last segment of an `S` with a negative `@r` end at the Period end, before
-  its `@d`.
-- For a self-initializing on-demand file (`SegmentBase` without `Initialization`), only the
-  bytes before `@indexRange` are fetched as its Initialization Segment, not the whole file.
-- A missing tfdt is a SEG-TFDT error only where required (CMAF, the `msdh` brand, the first fragment
-  with SegmentTimeline and `$Time$` but no sidx), not a SEG-STRUCTURE error in all segments.
-  Fragments without tfdt are now checked; SEG-START-UNKNOWN (info) marks a segment starting without one.
-- A traf without trun is a SEG-CMAF-CHUNK error in CMAF tracks only, not a SEG-STRUCTURE error in all segments.
+- The browser tool's progress bar covers the MPD update checks; it fell back to 5% while they ran.
+- XCHK-SAMPLERATE accepts the sampling rate after SBR for HE-AAC (`mp4a.40.5`, `mp4a.40.29`).
+- SEG-DURATION lets the last segment of an `S` with a negative `@r` end at the Period end.
+- For a self-initializing file (`SegmentBase` without `Initialization`), only the bytes before
+  `@indexRange` are fetched as its Initialization Segment, not the whole file.
+- A missing tfdt is a SEG-TFDT error only in CMAF, `msdh` segments and the first fragment with
+  SegmentTimeline and `$Time$` but no sidx. SEG-START-UNKNOWN (info) marks other segments starting without it.
+- A traf without trun is a SEG-CMAF-CHUNK error in CMAF tracks only, not a SEG-STRUCTURE error.
 - MPD-CODECS no longer warns about side-loaded subtitle files (`application/ttml+xml`, `text/vtt`).
 
 ## [0.2.1] - 2026-10-23
@@ -144,7 +139,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The browser tool, published on GitHub Pages for each release, counts visits and checks with
   GoatCounter, without cookies or MPD URLs.
 
-[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/tobbee/dashcheck/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/tobbee/dashcheck/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/tobbee/dashcheck/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/tobbee/dashcheck/compare/v0.1.1...v0.1.2
