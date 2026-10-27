@@ -361,8 +361,8 @@ func (rc *repChecker) run(ctx context.Context) ([]report.Finding, int) {
 		}
 		if i == 0 {
 			first = media
-			if media != nil && seg == periodFirst && rep.Timescale > 0 {
-				rc.firstEPT = media.EPT - float64(rep.PTO)/float64(rep.Timescale)
+			if media != nil && seg == periodFirst {
+				rc.firstEPT = media.PeriodEPT(rep)
 			}
 		}
 		if prev != nil && media != nil && consecutive(prevSeg, seg) {

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -69,7 +70,17 @@ var (
 	})
 	RuleSegStructure = report.Register(report.Rule{
 		ID: "SEG-STRUCTURE", Severity: report.Error,
-		Desc: "A media segment must have moof with traf, tfdt and trun, and mdat", SpecRef: refCMAF,
+		Desc: "A media segment must have moof with traf and trun, and mdat", SpecRef: "ISO/IEC 23009-1 6.3.5.2",
+	})
+	RuleSegTfdt = report.Register(report.Rule{
+		ID: "SEG-TFDT", Severity: report.Error,
+		Desc:    "A traf must have a tfdt box in a CMAF track, in a segment with the msdh brand, and in the first fragment of a segment with SegmentTimeline and $Time$ but no sidx",
+		SpecRef: refCMAF + " Table 5, ISO/IEC 23009-1 6.3.5.3, 7.3.5",
+	})
+	RuleSegStartUnknown = report.Register(report.Rule{
+		ID: "SEG-START-UNKNOWN", Severity: report.Info,
+		Desc:    "A segment whose first fragment has no tfdt box starts where the previous segment ended, so its start is not checked",
+		SpecRef: "ISO/IEC 14496-12 8.8.12",
 	})
 	RuleSegTrackID = report.Register(report.Rule{
 		ID: "SEG-TRACKID", Severity: report.Error,
@@ -325,6 +336,10 @@ func contains(list []string, s string) bool {
 // Media summarizes a checked media segment.
 type Media struct {
 	DecodeTime uint64 // tfdt of the first fragment, media timescale
+	// StartUnknown is set when the first fragment has no tfdt box. The
+	// segment then starts where the previous one ended, and DecodeTime is 0
+	// and EPT relative to the start of the segment.
+	StartUnknown bool
 	// SequenceNumber is the mfhd sequence_number of the first fragment.
 	SequenceNumber uint32
 	Duration       uint64  // sum of sample durations, media timescale
@@ -349,6 +364,15 @@ func (m *Media) End() uint64 { return m.DecodeTime + m.Duration }
 // Presented returns the duration of the presented part, media timescale.
 func (m *Media) Presented() uint64 { return m.Duration - m.Cut }
 
+// PeriodEPT returns the earliest presentation time in the Period in seconds,
+// or NaN when the start of the segment is not known.
+func (m *Media) PeriodEPT(rep *addressing.Rep) float64 {
+	if m.StartUnknown || rep.Timescale == 0 {
+		return math.NaN()
+	}
+	return m.EPT - float64(rep.PTO)/float64(rep.Timescale)
+}
+
 // CheckMedia parses and checks a media segment against the MPD and its init segment.
 // last marks the final segment of a Period, which may be shorter than nominal.
 func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Segment, last bool) (*Media, []report.Finding) {
@@ -370,11 +394,14 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	// fragment that could not be read.
 	var next uint64
 	haveNext := false
+	// With SegmentTimeline and $Time$ and without sidx, the tfdt of the first
+	// fragment gives the start of the segment (ISO/IEC 23009-1 7.3.5).
+	timeStart := rep.Kind == addressing.KindTimelineTime && seg.SubNumber == 0 && !hasSidx(mf)
 	for si, ms := range mf.Segments {
 		for fi, frag := range ms.Fragments {
 			floc := loc
 			floc.Path = fmt.Sprintf("segment[%d]/fragment[%d]", si, fi)
-			expect, check := next, haveNext
+			expect, haveExpect := next, haveNext
 			haveNext = false
 			if frag.Moof == nil || frag.Moof.Traf == nil {
 				f = append(f, RuleSegStructure.New(floc, "no traf box"))
@@ -389,34 +416,56 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 				wrongTrack = true
 				continue
 			}
-			if traf.Tfdt == nil {
-				f = append(f, RuleSegStructure.New(floc, "no tfdt box"))
-				continue
-			}
 			if traf.Trun == nil {
 				f = append(f, RuleSegStructure.New(floc, "no trun box"))
 				continue
 			}
-			tfdt := traf.Tfdt.BaseMediaDecodeTime()
-			if check && tfdt != expect {
-				diff := int64(tfdt) - int64(expect)
-				kind := "gap"
-				if diff < 0 {
-					kind = "overlap"
+			// base is the decode time of the first sample. mp4ff starts the
+			// samples of a traf without tfdt at 0, and offset moves them to base.
+			var base, offset uint64
+			known := true
+			if traf.Tfdt != nil {
+				base = traf.Tfdt.BaseMediaDecodeTime()
+				// After a relative start, the previous fragment's end is relative too.
+				if haveExpect && !media.StartUnknown && base != expect {
+					diff := int64(base) - int64(expect)
+					kind := "gap"
+					if diff < 0 {
+						kind = "overlap"
+					}
+					f = append(f, RuleSegFragmentContinuity.New(floc,
+						"%s of %d ticks (%.3fs): tfdt %d, but the previous fragment ends at %d",
+						kind, diff, float64(diff)/float64(init.Timescale), base, expect))
 				}
-				f = append(f, RuleSegFragmentContinuity.New(floc,
-					"%s of %d ticks (%.3fs): tfdt %d, but the previous fragment ends at %d",
-					kind, diff, float64(diff)/float64(init.Timescale), tfdt, expect))
+			} else {
+				ref, what := tfdtRequired(rep, init, ms.Styp, timeStart && si == 0 && fi == 0)
+				if ref != "" {
+					f = append(f, ruleWithRef(RuleSegTfdt, ref).New(floc, "no tfdt box in %s", what))
+				}
+				// Without tfdt, a fragment starts where the previous fragment of
+				// the track ended (ISO/IEC 14496-12 8.8.12). Before the first
+				// fragment of a segment, that is the end of the previous segment.
+				switch {
+				case haveExpect:
+					base, offset = expect, expect
+				case firstSample:
+					media.StartUnknown = true
+					if ref == "" {
+						f = append(f, RuleSegStartUnknown.New(loc, "the first fragment has no tfdt box"))
+					}
+				default:
+					known = false // after a fragment that could not be read
+				}
 			}
 			if firstSample {
-				media.DecodeTime = tfdt
+				media.DecodeTime = base
 			}
 			samples, err := frag.GetFullSamples(init.trex)
 			if err != nil {
 				f = append(f, RuleSegParse.New(floc, "samples: %v", err))
 				continue
 			}
-			next, haveNext = tfdt, true
+			next, haveNext = base, known
 			for _, s := range samples {
 				next += uint64(s.Dur)
 				if firstSample {
@@ -429,7 +478,9 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 						f = append(f, RuleSegSAP.New(loc, "first sample is not a sync sample (startWithSAP=%d)", rep.StartWithSAP))
 					}
 				}
-				minCT = min(minCT, int64(s.DecodeTime)+int64(s.CompositionTimeOffset))
+				if known {
+					minCT = min(minCT, int64(s.DecodeTime+offset)+int64(s.CompositionTimeOffset))
+				}
 				media.Duration += uint64(s.Dur)
 				media.Samples++
 			}
@@ -447,7 +498,8 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	}
 	mediaTS := float64(init.Timescale)
 	ept := minCT - init.EditOffset
-	if init.HasEditList && ept < 0 {
+	// Whether the edit list cuts a segment with an unknown start is not known.
+	if init.HasEditList && ept < 0 && !media.StartUnknown {
 		// Media before the media time of the edit is not presented (ISO/IEC 14496-12 8.6.6.3).
 		media.Cut = min(uint64(-ept), media.Duration)
 		ept = 0
@@ -463,6 +515,27 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 	f = append(f, hlsMediaRules(init, mf, loc)...)
 	f = append(f, ac4MediaRules(init, mf, loc)...)
 	return media, f
+}
+
+// tfdtRequired returns the reference of the requirement of a tfdt box in a
+// traf, and what it applies to, or "" when none does. The content of
+// CTA-5005-B (-hls-interop) is CMAF. timeStart marks the first fragment of a
+// segment whose tfdt gives its start.
+func tfdtRequired(rep *addressing.Rep, init *Init, styp *mp4.StypBox, timeStart bool) (ref, what string) {
+	switch {
+	case init.CMAF || init.HLSInterop:
+		return refCMAF + " Table 5", "a CMAF track"
+	case !rep.OnlyProfiles && styp != nil && (styp.MajorBrand() == "msdh" || slices.Contains(styp.CompatibleBrands(), "msdh")):
+		return "ISO/IEC 23009-1 6.3.5.3", "a segment with the msdh brand"
+	case timeStart:
+		return "ISO/IEC 23009-1 7.3.5", "the first fragment of a segment with SegmentTimeline and $Time$ but no sidx"
+	}
+	return "", ""
+}
+
+// hasSidx reports whether a media segment has a sidx box.
+func hasSidx(mf *mp4.File) bool {
+	return mf.Sidx != nil || slices.ContainsFunc(mf.Segments, func(ms *mp4.MediaSegment) bool { return ms.Sidx != nil })
 }
 
 // isSync reports whether sample flags mark a sync sample. In ISO/IEC 14496-12
@@ -501,7 +574,13 @@ func checkTiming(rep *addressing.Rep, init *Init, seg addressing.Segment, media 
 	exact := 0.5/mpdTS + 0.5/mediaTS
 	// Nominal boundaries may deviate by up to half the nominal duration.
 	nominal := wantDur / 2
-	if exactStart {
+	switch {
+	case media.StartUnknown:
+		// Without the start, it is not known whether the edit list cuts the segment.
+		if init.HasEditList {
+			return nil
+		}
+	case exactStart:
 		decodeStart := float64(media.DecodeTime) / mediaTS
 		switch {
 		case math.Abs(media.EPT-wantStart) <= exact:
@@ -514,7 +593,7 @@ func checkTiming(rep *addressing.Rep, init *Init, seg addressing.Segment, media 
 				"earliest presentation time %.6fs (tfdt %d) but SegmentTimeline says %.6fs",
 				media.EPT, media.DecodeTime, wantStart))
 		}
-	} else if math.Abs(media.EPT-wantStart) > nominal {
+	case math.Abs(media.EPT-wantStart) > nominal:
 		f = append(f, ruleWithRef(RuleSegEPT, ref).New(loc,
 			"earliest presentation time %.3fs is more than 50%% of the segment duration from the nominal %.3fs",
 			media.EPT, wantStart))
@@ -548,7 +627,9 @@ func CheckContinuity(prev, cur *Media, init *Init, rep *addressing.Rep, seg addr
 	}
 	f := emsgRepeatRules(prev, cur, init, rep, seg)
 	f = append(f, sequenceNumberContinuity(prev, cur, init, rep, seg)...)
-	if prev.End() == cur.DecodeTime {
+	// A segment without tfdt continues the previous one by definition, and
+	// the end of one with a relative start is not known.
+	if prev.StartUnknown || cur.StartUnknown || prev.End() == cur.DecodeTime {
 		return f
 	}
 	diff := int64(cur.DecodeTime) - int64(prev.End())

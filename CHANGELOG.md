@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its `@d`.
 - For a self-initializing on-demand file (`SegmentBase` without `Initialization`), only the
   bytes before `@indexRange` are fetched as its Initialization Segment, not the whole file.
+- A missing tfdt is a SEG-TFDT error only where required (CMAF, the `msdh` brand, the first fragment
+  with SegmentTimeline and `$Time$` but no sidx), not a SEG-STRUCTURE error in all segments.
+  Fragments without tfdt are now checked; SEG-START-UNKNOWN (info) marks a segment starting without one.
 
 ## [0.2.1] - 2026-10-23
 

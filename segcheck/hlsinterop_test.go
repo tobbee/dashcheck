@@ -169,6 +169,11 @@ func TestHLSInteropSplice(t *testing.T) {
 	if got := ruleIDs(CheckHLSInteropSplice(&video, init, media, addressing.Segment{})); !slices.Equal(got, []string{"SEG-HLS-SPLICE"}) {
 		t.Errorf("short of the splice: got %v", got)
 	}
+	media.StartUnknown = true
+	if f := CheckHLSInteropSplice(&video, init, media, addressing.Segment{}); len(f) > 0 {
+		t.Errorf("start unknown: %v", f)
+	}
+	media.StartUnknown = false
 	video.LastPeriod = true
 	if f := CheckHLSInteropSplice(&video, init, media, addressing.Segment{}); len(f) > 0 {
 		t.Errorf("last Period: %v", f)
