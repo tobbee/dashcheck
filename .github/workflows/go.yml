@@ -11,8 +11,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         go-version: ["1.27"]
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v7
@@ -38,7 +41,7 @@ jobs:
         run: go build ./...
 
       - name: Build wasm
-        run: GOOS=js GOARCH=wasm go build -o /dev/null ./cmd/dashcheck-wasm
+        run: GOOS=js GOARCH=wasm go build -o "$RUNNER_TEMP/dashcheck.wasm" ./cmd/dashcheck-wasm
 
       - name: Test
         run: go test ./...
