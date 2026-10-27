@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A missing tfdt is a SEG-TFDT error only where required (CMAF, the `msdh` brand, the first fragment
   with SegmentTimeline and `$Time$` but no sidx), not a SEG-STRUCTURE error in all segments.
   Fragments without tfdt are now checked; SEG-START-UNKNOWN (info) marks a segment starting without one.
+- A traf without trun is a SEG-CMAF-CHUNK error in CMAF tracks only, not a SEG-STRUCTURE error in all segments.
 
 ## [0.2.1] - 2026-10-23
 

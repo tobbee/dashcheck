@@ -70,7 +70,7 @@ var (
 	})
 	RuleSegStructure = report.Register(report.Rule{
 		ID: "SEG-STRUCTURE", Severity: report.Error,
-		Desc: "A media segment must have moof with traf and trun, and mdat", SpecRef: "ISO/IEC 23009-1 6.3.5.2",
+		Desc: "A media segment must have moof with traf, and mdat", SpecRef: "ISO/IEC 23009-1 6.3.5.2",
 	})
 	RuleSegTfdt = report.Register(report.Rule{
 		ID: "SEG-TFDT", Severity: report.Error,
@@ -416,10 +416,8 @@ func CheckMedia(data []byte, init *Init, rep *addressing.Rep, seg addressing.Seg
 				wrongTrack = true
 				continue
 			}
-			if traf.Trun == nil {
-				f = append(f, RuleSegStructure.New(floc, "no trun box"))
-				continue
-			}
+			// A traf without trun has no samples (ISO/IEC 14496-12 8.8.8); CMAF
+			// requires one (SEG-CMAF-CHUNK).
 			// base is the decode time of the first sample. mp4ff starts the
 			// samples of a traf without tfdt at 0, and offset moves them to base.
 			var base, offset uint64

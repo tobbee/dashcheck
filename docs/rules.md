@@ -145,7 +145,7 @@ All 268 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | SEG-SIDX-SPAN | error | The sidx box of an indexed segment must index all of it: no movie fragment before its first or after its last subsegment | ISO/IEC 23009-1 6.3.5.4, 8.12.4.2 | LL-48 |
 | SEG-SSR-SAP | error | The Partial Segments that SegmentSequenceProperties@cadence selects must start with a SAP type of at most @sapType | ISO/IEC 23009-1 5.3.5.7 | **dashcheck** |
 | SEG-START-UNKNOWN | info | A segment whose first fragment has no tfdt box starts where the previous segment ended, so its start is not checked | ISO/IEC 14496-12 8.8.12 | **dashcheck** |
-| SEG-STRUCTURE | error | A media segment must have moof with traf and trun, and mdat | ISO/IEC 23009-1 6.3.5.2 | LL-12 |
+| SEG-STRUCTURE | error | A media segment must have moof with traf, and mdat | ISO/IEC 23009-1 6.3.5.2 | LL-12 |
 | SEG-TFDT | error | A traf must have a tfdt box in a CMAF track, in a segment with the msdh brand, and in the first fragment of a segment with SegmentTimeline and $Time$ but no sidx | ISO/IEC 23000-19 Table 5, ISO/IEC 23009-1 6.3.5.3, 7.3.5 | LL-12 |
 | SEG-TRACKID | error | tfhd@track_ID must match the track in the initialization segment |  | **dashcheck** |
 | SEG-UNSUPPORTED | info | Segments in formats other than ISOBMFF are not checked |  | **dashcheck** |
