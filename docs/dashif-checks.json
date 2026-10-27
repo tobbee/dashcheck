@@ -3786,12 +3786,13 @@
    "status": "done",
    "rules": [
     "SEG-STRUCTURE",
+    "SEG-TFDT",
     "SEG-CMAF-CHUNK",
     "SEG-CMAF-SAP",
     "SEG-CMAF-DATAOFFSET",
     "SEG-CONTINUITY-FRAGMENT"
    ],
-   "note": "dashcheck applies the CMAF chunk and fragment rules to the segments of low-latency chunked Representations whatever their brands: one traf with one trun per moof, data offsets, decode time continuity, and a sync sample first in video; upstream always passes (bug 32)"
+   "note": "dashcheck applies the CMAF chunk and fragment rules to the segments of low-latency chunked Representations whatever their brands: one traf with one trun per moof, a tfdt in each traf, data offsets, decode time continuity, and a sync sample first in video; upstream always passes (bug 32)"
   },
   {
    "id": "LL-13",

@@ -53,6 +53,12 @@ func TestSelfInitSidx(t *testing.T) {
 	if f := CheckSelfInitSidx(rep, init, good, 1, true, first); len(f) > 0 {
 		t.Errorf("good: %v", f)
 	}
+	// The times of a first subsegment without tfdt are relative, so not checked.
+	later := *good
+	later.EarliestPresentationTime = 2000
+	if f := CheckSelfInitSidx(rep, init, &later, 1, true, &Media{StartUnknown: true}); len(f) > 0 {
+		t.Errorf("start unknown: %v", f)
+	}
 	bad := &mp4.SidxBox{ReferenceID: 2, Timescale: 90000, EarliestPresentationTime: 5,
 		SidxRefs: []mp4.SidxRef{{StartsWithSAP: 1, SAPType: 3}}}
 	f := CheckSelfInitSidx(rep, &Init{TrackID: 1, Timescale: 1000}, bad, 2, true, &Media{DecodeTime: 10})

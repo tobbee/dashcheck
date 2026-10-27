@@ -151,7 +151,7 @@ func CheckSelfInitSidx(rep *addressing.Rep, init *Init, sidx *mp4.SidxBox, nSidx
 		}
 		break
 	}
-	if first != nil {
+	if first != nil && !first.StartUnknown {
 		if first.DecodeTime != 0 {
 			add("first baseMediaDecodeTime is %d, not 0", first.DecodeTime)
 		}

@@ -416,6 +416,131 @@ func TestFragmentContinuity(t *testing.T) {
 	}
 }
 
+// withoutTfdt returns media segments with the tfdt boxes of the given
+// fragments, counted over all segments, removed, and without styp boxes if
+// noStyp is set.
+func withoutTfdt(t *testing.T, data []byte, noStyp bool, frags ...int) []byte {
+	t.Helper()
+	mf, err := mp4.DecodeFile(bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	i := 0
+	for _, ms := range mf.Segments {
+		if noStyp {
+			ms.Styp = nil
+		}
+		for _, frag := range ms.Fragments {
+			if slices.Contains(frags, i) {
+				traf := frag.Moof.Traf
+				traf.Tfdt = nil
+				traf.Children = slices.DeleteFunc(traf.Children, func(b mp4.Box) bool { return b.Type() == "tfdt" })
+			}
+			i++
+		}
+	}
+	var buf bytes.Buffer
+	if err := mf.Encode(&buf); err != nil {
+		t.Fatal(err)
+	}
+	return buf.Bytes()
+}
+
+// TestNoTfdt checks that a tfdt box is required in CMAF tracks, in segments
+// with the msdh brand, and in the first fragment of a segment with
+// SegmentTimeline and $Time$ but no sidx, and that a fragment without one
+// continues the previous fragment, while the start of a segment without one
+// is not checked.
+func TestNoTfdt(t *testing.T) {
+	video := reps(t)[1]
+	init, _ := CheckInit(read(t, "V300/init.mp4"), video, video.Loc())
+	segs, _ := video.Segments(0, video.PeriodDur)
+	seg1, seg2, seg3, seg4 := read(t, "V300/1.m4s"), read(t, "V300/2.m4s"), read(t, "V300/3.m4s"), read(t, "V300/4.m4s")
+	cat := func(parts ...[]byte) []byte { return bytes.Join(parts, nil) }
+	var sidx bytes.Buffer
+	if err := (&mp4.SidxBox{ReferenceID: 1, Timescale: 90000, SidxRefs: []mp4.SidxRef{{}}}).Encode(&sidx); err != nil {
+		t.Fatal(err)
+	}
+	cmaf := *init
+	cmaf.CMAF = true
+	hls := *init
+	hls.HLSInterop = true
+	elst := *init
+	elst.HasEditList = true
+	chosen := *video
+	chosen.OnlyProfiles = true
+	tl := *video
+	tl.Kind = addressing.KindTimelineNumber
+	tt := *video
+	tt.Kind = addressing.KindTimelineTime
+	longer := segs[1]
+	longer.Dur++
+	part := segs[1]
+	part.Partial, part.SubNumber = true, 1
+	cases := []struct {
+		name string
+		init *Init
+		rep  *addressing.Rep
+		data []byte
+		seg  addressing.Segment
+		want []string
+	}{
+		{"msdh brand", init, video, withoutTfdt(t, seg2, false, 0), segs[1], []string{"SEG-TFDT"}},
+		{"no styp", init, video, withoutTfdt(t, seg2, true, 0), segs[1], []string{"SEG-START-UNKNOWN"}},
+		{"msdh brand with chosen profiles", init, &chosen, withoutTfdt(t, seg2, false, 0), segs[1], []string{"SEG-START-UNKNOWN"}},
+		{"CMAF track", &cmaf, video, withoutTfdt(t, seg2, true, 0), segs[1], []string{"SEG-TFDT"}},
+		{"CTA-5005 content", &hls, video, withoutTfdt(t, seg2, true, 0), segs[1], []string{"SEG-TFDT"}},
+		{"timeline with $Time$", init, &tt, withoutTfdt(t, seg2, true, 0), segs[1], []string{"SEG-TFDT"}},
+		{"timeline with $Time$ and sidx", init, &tt, cat(sidx.Bytes(), withoutTfdt(t, seg2, true, 0)), segs[1], []string{"SEG-START-UNKNOWN"}},
+		{"timeline with $Time$, second fragment", init, &tt, withoutTfdt(t, cat(seg1, seg2), true, 1), segs[0], nil},
+		{"timeline with $Time$, later Partial Segment", init, &tt, withoutTfdt(t, seg2, true, 0), part, []string{"SEG-START-UNKNOWN"}},
+		{"start not checked", init, video, withoutTfdt(t, seg2, true, 0), segs[3], []string{"SEG-START-UNKNOWN"}},
+		{"timeline duration checked", init, &tl, withoutTfdt(t, seg2, true, 0), longer, []string{"SEG-START-UNKNOWN", "SEG-DURATION"}},
+		{"timeline duration with edit list", &elst, &tl, withoutTfdt(t, seg2, true, 0), longer, []string{"SEG-START-UNKNOWN"}},
+		{"second fragment continues the first", init, video, withoutTfdt(t, cat(seg1, seg3), false, 1), segs[0], []string{"SEG-TFDT"}},
+		{"third fragment after an inferred one", init, video, withoutTfdt(t, cat(seg1, seg2, seg3), false, 1), segs[0], []string{"SEG-TFDT"}},
+		{"later tfdt after a relative start", init, video, withoutTfdt(t, cat(seg1, seg3), true, 0), segs[0], []string{"SEG-START-UNKNOWN"}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, f := CheckMedia(c.data, c.init, c.rep, c.seg, false)
+			// Segments of several fragments are longer than one segment, and the
+			// segments are not CMAF fragments.
+			f = slices.DeleteFunc(f, func(x report.Finding) bool {
+				return x.Rule == "SEG-DURATION" && c.seg == segs[0] || strings.HasPrefix(x.Rule, "SEG-CMAF-")
+			})
+			if got := ruleIDs(f); !slices.Equal(got, c.want) {
+				t.Errorf("got %v, want %v", f, c.want)
+			}
+		})
+	}
+
+	// The decode times of a fragment without tfdt continue the previous fragment.
+	m23, _ := CheckMedia(cat(seg2, seg3), init, video, segs[1], false)
+	inferred, _ := CheckMedia(withoutTfdt(t, cat(seg2, seg3), false, 1), init, video, segs[1], false)
+	if inferred.StartUnknown || inferred.DecodeTime != m23.DecodeTime || inferred.EPT != m23.EPT || inferred.Duration != m23.Duration {
+		t.Errorf("second fragment without tfdt: got %+v, want %+v", inferred, m23)
+	}
+	relative, _ := CheckMedia(withoutTfdt(t, seg2, true, 0), init, video, segs[1], false)
+	if !relative.StartUnknown || relative.DecodeTime != 0 || !math.IsNaN(relative.PeriodEPT(video)) {
+		t.Errorf("first fragment without tfdt: start unknown %v, decode time %d, Period EPT %f",
+			relative.StartUnknown, relative.DecodeTime, relative.PeriodEPT(video))
+	}
+
+	// Segment 4 without tfdt continues segment 2, unlike segment 4 with it.
+	m2, _ := CheckMedia(seg2, init, video, segs[1], false)
+	if got, want := m2.PeriodEPT(video), m2.EPT-float64(video.PTO)/float64(video.Timescale); got != want {
+		t.Errorf("Period EPT of segment 2: got %f, want %f", got, want)
+	}
+	m4, _ := CheckMedia(withoutTfdt(t, seg4, true, 0), init, video, segs[3], false)
+	if f := CheckContinuity(m2, m4, init, video, segs[3]); len(f) > 0 {
+		t.Errorf("continuity to a segment without tfdt: %v", f)
+	}
+	if f := CheckContinuity(m4, m2, init, video, segs[1]); len(f) > 0 {
+		t.Errorf("continuity from a segment without tfdt: %v", f)
+	}
+}
+
 func TestSequenceNumbers(t *testing.T) {
 	rep := reps(t)[1]
 	segs, _ := rep.Segments(0, rep.PeriodDur)

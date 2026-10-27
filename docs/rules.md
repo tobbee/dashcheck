@@ -2,7 +2,7 @@
 
 <!-- Generated from the rule registry and dashif-checks.json by `go test ./internal/coverage -update`. Do not edit. -->
 
-All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 65 rules marked **dashcheck** have no counterpart in that tool.
+All 268 rules that dashcheck reports, as `dashcheck -rules` lists them. Severities follow the spec wording: **error** for SHALL, **warning** for SHOULD, and **info** for information. The last column names the checks of the [DASH-IF Conformance tool](dashif-coverage.md) that a rule covers. The 66 rules marked **dashcheck** have no counterpart in that tool.
 
 | Group | Rules | dashcheck only |
 |---|---:|---:|
@@ -10,7 +10,7 @@ All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [MPD](#mpd) | 64 | 22 |
 | [MPD updates](#mpd-updates) | 5 | 3 |
 | [Segment addressing](#segment-addressing) | 7 | 6 |
-| [Segments](#segments) | 30 | 13 |
+| [Segments](#segments) | 32 | 14 |
 | [Live timing and HTTP](#live-timing-and-http) | 13 | 13 |
 | [DASH-IF IOP](#dash-if-iop) | 22 | 4 |
 | [CMAF](#cmaf) | 19 | 2 |
@@ -20,7 +20,7 @@ All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | [Dolby AC-4](#dolby-ac-4) | 7 | 0 |
 | [CTA WAVE](#cta-wave) | 3 | 0 |
 | [DASH-HLS interoperability (CTA-5005)](#dash-hls-interoperability-cta-5005) | 9 | 0 |
-| **Total** | **266** | **65** |
+| **Total** | **268** | **66** |
 
 ## MPD syntax
 
@@ -144,7 +144,9 @@ All 266 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | SEG-SEQUENCE-NUMBER | warning | The chunks of a segment should share one mfhd sequence_number, which should increase from segment to segment (a convention checked with -sequence-numbers, not a CMAF requirement) |  | **dashcheck** |
 | SEG-SIDX-SPAN | error | The sidx box of an indexed segment must index all of it: no movie fragment before its first or after its last subsegment | ISO/IEC 23009-1 6.3.5.4, 8.12.4.2 | LL-48 |
 | SEG-SSR-SAP | error | The Partial Segments that SegmentSequenceProperties@cadence selects must start with a SAP type of at most @sapType | ISO/IEC 23009-1 5.3.5.7 | **dashcheck** |
-| SEG-STRUCTURE | error | A media segment must have moof with traf, tfdt and trun, and mdat | ISO/IEC 23000-19 | LL-12 |
+| SEG-START-UNKNOWN | info | A segment whose first fragment has no tfdt box starts where the previous segment ended, so its start is not checked | ISO/IEC 14496-12 8.8.12 | **dashcheck** |
+| SEG-STRUCTURE | error | A media segment must have moof with traf and trun, and mdat | ISO/IEC 23009-1 6.3.5.2 | LL-12 |
+| SEG-TFDT | error | A traf must have a tfdt box in a CMAF track, in a segment with the msdh brand, and in the first fragment of a segment with SegmentTimeline and $Time$ but no sidx | ISO/IEC 23000-19 Table 5, ISO/IEC 23009-1 6.3.5.3, 7.3.5 | LL-12 |
 | SEG-TRACKID | error | tfhd@track_ID must match the track in the initialization segment |  | **dashcheck** |
 | SEG-UNSUPPORTED | info | Segments in formats other than ISOBMFF are not checked |  | **dashcheck** |
 | XCHK-CODECS | error | @codecs must match the sample entry type |  | DVB-85, LL-23 |

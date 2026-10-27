@@ -316,7 +316,7 @@ func hlsPresentationRules(reps []*addressing.Rep, inits []*Init) []report.Findin
 // Fragments of all media types ending within one sample duration of the
 // Period end keeps them within one sample duration of each other.
 func CheckHLSInteropSplice(rep *addressing.Rep, init *Init, media *Media, seg addressing.Segment) []report.Finding {
-	if rep.LastPeriod || rep.PeriodDur <= 0 || media == nil || media.Samples == 0 || init.Timescale == 0 || rep.Timescale == 0 {
+	if rep.LastPeriod || rep.PeriodDur <= 0 || media == nil || media.Samples == 0 || media.StartUnknown || init.Timescale == 0 || rep.Timescale == 0 {
 		return nil
 	}
 	ts := float64(init.Timescale)
