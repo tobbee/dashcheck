@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The browser tool's examples are grouped as live, on demand and with errors. New examples: low latency
+  with 0.5 s chunks, on-demand MP4 with sidx (DASH-IF), CMAF (CTA WAVE), and a server clock 10 s behind.
+
 ### Fixed
 - `dashcheck` keeps the drive letter of a local MPD on Windows, which it lost when the MPD was not on the
   current drive. Local paths with `#`, `%` or `?` work on all platforms.

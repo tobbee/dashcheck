@@ -106,7 +106,16 @@ button.link { border: none; background: none; color: var(--accent); padding: 7px
 .grid { display: grid; grid-template-columns: max-content 1fr; gap: 8px 12px; align-items: center; margin-top: 8px; }
 .grid input { min-width: 0; }
 
-.examples { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+.examples { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+.examples dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.examples dd { margin: 0; }
 .foot { padding-bottom: 24px; font-size: 13px; }
 a { color: var(--accent); }
 
