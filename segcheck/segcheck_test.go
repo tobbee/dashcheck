@@ -420,6 +420,11 @@ func TestFragmentContinuity(t *testing.T) {
 // fragments, counted over all segments, removed, and without styp boxes if
 // noStyp is set.
 func withoutTfdt(t *testing.T, data []byte, noStyp bool, frags ...int) []byte {
+	return withoutBox(t, data, "tfdt", noStyp, frags...)
+}
+
+// withoutBox is withoutTfdt for the tfdt or trun boxes.
+func withoutBox(t *testing.T, data []byte, box string, noStyp bool, frags ...int) []byte {
 	t.Helper()
 	mf, err := mp4.DecodeFile(bytes.NewReader(data))
 	if err != nil {
@@ -433,8 +438,13 @@ func withoutTfdt(t *testing.T, data []byte, noStyp bool, frags ...int) []byte {
 		for _, frag := range ms.Fragments {
 			if slices.Contains(frags, i) {
 				traf := frag.Moof.Traf
-				traf.Tfdt = nil
-				traf.Children = slices.DeleteFunc(traf.Children, func(b mp4.Box) bool { return b.Type() == "tfdt" })
+				switch box {
+				case "tfdt":
+					traf.Tfdt = nil
+				case "trun":
+					traf.Trun, traf.Truns = nil, nil
+				}
+				traf.Children = slices.DeleteFunc(traf.Children, func(b mp4.Box) bool { return b.Type() == box })
 			}
 			i++
 		}
@@ -538,6 +548,26 @@ func TestNoTfdt(t *testing.T) {
 	}
 	if f := CheckContinuity(m4, m2, init, video, segs[1]); len(f) > 0 {
 		t.Errorf("continuity from a segment without tfdt: %v", f)
+	}
+}
+
+// TestNoTrun checks that a traf without trun, which has no samples, is
+// allowed outside CMAF, and that the next fragment continues it.
+func TestNoTrun(t *testing.T) {
+	video := reps(t)[1]
+	init, _ := CheckInit(read(t, "V300/init.mp4"), video, video.Loc())
+	segs, _ := video.Segments(0, video.PeriodDur)
+	seg1, seg2 := read(t, "V300/1.m4s"), read(t, "V300/2.m4s")
+	// The fragment without trun starts where segment 1 ends, and so does segment 2.
+	media, f := CheckMedia(withoutBox(t, bytes.Join([][]byte{seg1, seg2, seg2}, nil), "trun", false, 1), init, video, segs[0], false)
+	// The segment is longer than one segment.
+	f = slices.DeleteFunc(f, func(x report.Finding) bool { return x.Rule == "SEG-DURATION" })
+	if len(f) > 0 {
+		t.Errorf("fragment without trun: %v", f)
+	}
+	m12, _ := CheckMedia(bytes.Join([][]byte{seg1, seg2}, nil), init, video, segs[0], false)
+	if media == nil || media.Samples != m12.Samples || media.Duration != m12.Duration {
+		t.Errorf("fragment without trun: got %+v, want the samples of %+v", media, m12)
 	}
 }
 

@@ -66,6 +66,9 @@ func TestCMAFFragment(t *testing.T) {
 		{"two trun boxes", 0, func(frag *mp4.Fragment, _ *Media) {
 			_ = frag.Moof.Traf.AddChild(frag.Moof.Traf.Trun)
 		}, []string{"SEG-CMAF-CHUNK"}},
+		{"no trun box", 0, func(frag *mp4.Fragment, _ *Media) {
+			frag.Moof.Traf.Trun, frag.Moof.Traf.Truns = nil, nil
+		}, []string{"SEG-CMAF-CHUNK"}},
 		{"two traf boxes", 0, func(frag *mp4.Fragment, _ *Media) {
 			_ = frag.Moof.AddChild(frag.Moof.Traf)
 		}, []string{"SEG-CMAF-CHUNK"}},

@@ -184,7 +184,7 @@ func cmafMediaRules(rep *addressing.Rep, init *Init, media *Media, mf *mp4.File,
 				f = append(f, RuleCMAFChunk.New(loc, "moof %d has %d traf boxes", fi, n))
 			}
 			for _, traf := range frag.Moof.Trafs {
-				if n := len(traf.Truns); n > 1 {
+				if n := len(traf.Truns); n != 1 {
 					f = append(f, RuleCMAFChunk.New(loc, "traf in moof %d has %d trun boxes", fi, n))
 				}
 				for _, trun := range traf.Truns {
