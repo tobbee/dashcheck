@@ -1,0 +1,4 @@
+# LF on all platforms: tests compare generated docs and testdata byte for byte.
+* text=auto eol=lf
+# The MPEG schema files are kept as published, some with CRLF.
+schema/xsd/** -text
