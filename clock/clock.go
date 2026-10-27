@@ -79,6 +79,15 @@ type Measurement struct {
 	Resolution time.Duration
 }
 
+// Source names the time source: its URL, or for the direct scheme, whose
+// value is a time that differs in each MPD, the scheme.
+func (meas *Measurement) Source() string {
+	if meas.Scheme == SchemeDirect {
+		return SchemeDirect + " (the time in the MPD)"
+	}
+	return meas.Value
+}
+
 // Measure queries one UTCTiming source. mpdResp is the response that
 // delivered the MPD and is used for the direct scheme.
 func Measure(ctx context.Context, f fetch.Fetcher, scheme, value string, mpdResp *fetch.Response) (*Measurement, error) {
@@ -169,6 +178,7 @@ func Sync(ctx context.Context, f fetch.Fetcher, timings []*m.DescriptorType, ref
 	var findings []report.Finding
 	var chosen *Measurement
 	var measured []*Measurement
+	var locs []report.Location // of measured
 	for i, u := range timings {
 		loc := report.Location{Path: fmt.Sprintf("MPD/UTCTiming[%d]", i)}
 		meas, err := Measure(ctx, f, string(u.SchemeIdUri), u.Value, mpdResp)
@@ -181,6 +191,7 @@ func Sync(ctx context.Context, f fetch.Fetcher, timings []*m.DescriptorType, ref
 			continue
 		}
 		measured = append(measured, meas)
+		locs = append(locs, loc)
 		if chosen == nil {
 			chosen = meas
 		}
@@ -208,19 +219,23 @@ func Sync(ctx context.Context, f fetch.Fetcher, timings []*m.DescriptorType, ref
 		findings = append(findings, RuleLocal.New(report.Location{URL: reference},
 			"this computer's clock is %s the reference clock %s (round trip %v)",
 			Describe(-ref.Offset), host(reference), ref.RTT.Round(time.Millisecond)))
-		for _, meas := range measured {
+		for i, meas := range measured {
 			// Both offsets are relative to the local clock, so their difference is source minus reference.
 			skew := meas.Offset - ref.Offset
 			tol := MaxSkew + (meas.RTT+ref.RTT)/2 + meas.Resolution/2
 			if math.Abs(float64(skew)) > float64(tol) {
-				findings = append(findings, RuleSkew.New(report.Location{URL: meas.Value},
-					"UTCTiming source %s is %s the reference clock %s", meas.Value, Describe(skew), host(reference)))
+				loc := report.Location{URL: meas.Value}
+				if meas.Scheme == SchemeDirect {
+					loc = locs[i]
+				}
+				findings = append(findings, RuleSkew.New(loc,
+					"UTCTiming source %s is %s the reference clock %s", meas.Source(), Describe(skew), host(reference)))
 			}
 		}
 	}
 	switch {
 	case chosen != nil:
-		return &Offset{Offset: chosen.Offset, Source: chosen.Value}, chosen.Value, findings
+		return &Offset{Offset: chosen.Offset, Source: chosen.Source()}, chosen.Source(), findings
 	case ref != nil:
 		return &Offset{Offset: ref.Offset, Source: ref.Value}, ref.Value, findings
 	default:

@@ -9,6 +9,7 @@ import (
 
 	m "github.com/Eyevinn/dash-mpd/mpd"
 	"github.com/tobbee/dashcheck/fetch"
+	"github.com/tobbee/dashcheck/report"
 )
 
 // fakeFetcher serves times that are offset from the local clock.
@@ -66,11 +67,25 @@ func TestSyncDirect(t *testing.T) {
 	at := time.Now().Truncate(time.Second).Add(900 * time.Millisecond)
 	mpdResp := &fetch.Response{Start: at, End: at}
 	ff := fakeFetcher{"https://ref": 3 * time.Second}
-	value := at.Add(3 * time.Second).UTC().Format("2006-01-02T15:04:05Z")
-	timings := []*m.DescriptorType{{SchemeIdUri: "urn:mpeg:dash:utc:direct:2014", Value: value}}
-	_, source, findings := Sync(context.Background(), ff, timings, "https://ref", mpdResp)
-	if source != value || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
+	direct := func(ahead time.Duration) []*m.DescriptorType {
+		value := at.Add(ahead).UTC().Format("2006-01-02T15:04:05Z")
+		return []*m.DescriptorType{{SchemeIdUri: "urn:mpeg:dash:utc:direct:2014", Value: value}}
+	}
+	// The value is a time, so the scheme names the source.
+	const name = "urn:mpeg:dash:utc:direct:2014 (the time in the MPD)"
+	_, source, findings := Sync(context.Background(), ff, direct(3*time.Second), "https://ref", mpdResp)
+	if source != name || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
 		t.Errorf("source %s, findings %v", source, findings)
+	}
+
+	_, _, findings = Sync(context.Background(), ff, direct(13*time.Second), "https://ref", mpdResp)
+	if len(findings) != 2 || findings[1].Rule != "CLOCK-SKEW" {
+		t.Fatalf("10 s ahead: findings %v", findings)
+	}
+	skew := findings[1]
+	if !strings.HasPrefix(skew.Message, "UTCTiming source "+name+" is ") || !strings.Contains(skew.Message, "s ahead of") ||
+		skew.Location != (report.Location{Path: "MPD/UTCTiming[0]"}) {
+		t.Errorf("10 s ahead: %q at %+v", skew.Message, skew.Location)
 	}
 }
 
