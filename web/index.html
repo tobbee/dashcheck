@@ -62,13 +62,26 @@
             <input id="reference" type="url" value="https://time.akamai.com/?iso&amp;ms">
           </div>
         </details>
-        <p class="examples">Examples:
-          <a href="#" data-url="https://livesim2.dashif.org/livesim2/testpic_2s/Manifest.mpd">live $Number$</a> ·
-          <a href="#" data-url="https://livesim2.dashif.org/livesim2/segtimeline_1/testpic_2s/Manifest.mpd">live SegmentTimeline</a> ·
-          <a href="#" data-url="https://livesim2.dashif.org/livesim2/chunkdur_0.25/ato_7/testpic4_8s/Manifest300.mpd">low latency</a> ·
-          <a href="#" data-url="https://livesim2.dashif.org/livesim2/timeoffset_10/testpic_2s/Manifest.mpd">server clock 10 s ahead</a> ·
-          <a href="#" data-url="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd">on-demand (sidx)</a>
-        </p>
+        <div class="examples">
+          <span class="label">Examples</span>
+          <dl>
+            <dt>Live</dt>
+            <dd><a href="#" data-url="https://livesim2.dashif.org/livesim2/testpic_2s/Manifest.mpd"
+                title="DASH-IF livesim2, SegmentTemplate with $Number$">$Number$</a> ·
+              <a href="#" data-url="https://livesim2.dashif.org/livesim2/segtimeline_1/testpic_2s/Manifest.mpd"
+                title="DASH-IF livesim2, SegmentTimeline with $Time$">SegmentTimeline</a> ·
+              <a href="#" data-url="https://livesim2.dashif.org/livesim2/chunkdur_0.5/ato_1.5/testpic_2s/Manifest.mpd"
+                title="DASH-IF livesim2, 0.5 s chunks of 2 s segments, each available as soon as its first chunk is">low latency</a></dd>
+            <dt>On demand</dt>
+            <dd><a href="#" data-url="https://dash.akamaized.net/dash264/TestCases/4c/1/dash.mpd"
+                title="DASH-IF test vector, IOP on-demand profile with a sidx in each file">sidx</a> ·
+              <a href="#" data-url="https://dash-large-files.akamaized.net/WAVE/vectors/cfhd_sets/12.5_25_50/t1/2023-09-01/stream.mpd"
+                title="CTA WAVE test vector, CMAF 1080p AVC">CMAF (CTA WAVE)</a></dd>
+            <dt>With errors</dt>
+            <dd><a href="#" data-url="https://livesim2.dashif.org/livesim2/timeoffset_-10/testpic_2s/Manifest.mpd"
+                title="DASH-IF livesim2 with its clock 10 s behind: segments are not available when they should be">server clock 10 s behind</a></dd>
+          </dl>
+        </div>
       </form>
     </section>
 
