@@ -73,7 +73,8 @@ var (
 	})
 	RuleCodecs = report.Register(report.Rule{
 		ID: "MPD-CODECS", Severity: report.Warning,
-		Desc: "@codecs should be present on the AdaptationSet or the Representation, except for images", SpecRef: "DASH-IF IOP",
+		Desc:    "@codecs should be present on the AdaptationSet or the Representation, except for images and side-loaded subtitle files",
+		SpecRef: "DASH-IF IOP",
 	})
 	RuleContentType = report.Register(report.Rule{
 		ID: "MPD-CONTENTTYPE", Severity: report.Warning,
@@ -233,8 +234,11 @@ func Rules(md *m.MPD) []report.Finding {
 					f = append(f, RuleMimeType.New(rLoc, "no @mimeType on Representation or AdaptationSet"))
 				}
 				// Images, such as thumbnail tiles, have no codecs parameter (DASH-IF IOP 4.3 6.2.6).
-				isImage := strings.HasPrefix(cmp.Or(rep.MimeType, as.MimeType), "image/")
-				if rep.Codecs == "" && as.Codecs == "" && !isImage {
+				// Side-loaded TTML and WebVTT files are identified by @mimeType alone (6.4.5).
+				mimeType := cmp.Or(rep.MimeType, as.MimeType)
+				isImage := strings.HasPrefix(mimeType, "image/")
+				isSideLoadedText := mimeType == "application/ttml+xml" || mimeType == "text/vtt"
+				if rep.Codecs == "" && as.Codecs == "" && !isImage && !isSideLoadedText {
 					f = append(f, RuleCodecs.New(rLoc, "no @codecs on Representation or AdaptationSet"))
 				}
 				if rep.SegmentTemplate != nil && rep.SegmentTemplate.SegmentTimeline != nil {

@@ -42,7 +42,7 @@ All 268 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-BITSTREAMSWITCHING | error | With Period@bitstreamSwitching true, no AdaptationSet may set it to false | ISO/IEC 23009-1 5.3.2 | SCH-9 |
 | MPD-CHAINING | error | Chaining and fallback descriptors need a @value, and fallback must be on the MPD level | ISO/IEC 23009-1 5.11 | SCH-68, SCH-69, SCH-70 |
 | MPD-CHANNEL-POSITIONS | error | outputChannelPositionList values must be space-separated lists | ISO/IEC 23009-1 5.8.4.7 | SCH-63 |
-| MPD-CODECS | warning | @codecs should be present on the AdaptationSet or the Representation, except for images | DASH-IF IOP | **dashcheck** |
+| MPD-CODECS | warning | @codecs should be present on the AdaptationSet or the Representation, except for images and side-loaded subtitle files | DASH-IF IOP | **dashcheck** |
 | MPD-COMMON-BOTH | info | A common attribute is on both the AdaptationSet and a Representation, which ISO/IEC 23009-1 allows but the DASH-IF Conformance tool reports as an error | ISO/IEC 23009-1 5.3.7.1 | SCH-22 |
 | MPD-CONTENTCOMPONENT | error | ContentComponent ids must be unique and must not repeat AdaptationSet attributes | ISO/IEC 23009-1 5.3.4 | SCH-21, SCH-33 |
 | MPD-CONTENTTYPE | warning | AdaptationSet@contentType should agree with @mimeType | ISO/IEC 23009-1 5.3.3 | **dashcheck** |
