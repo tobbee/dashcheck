@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -64,7 +65,7 @@ func fetchFile(req Request) (*Response, error) {
 		return nil, err
 	}
 	start := time.Now()
-	data, err := os.ReadFile(u.Path)
+	data, err := os.ReadFile(filePath(u))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &Response{URL: req.URL, Status: 404, Start: start, End: time.Now()}, nil
@@ -81,6 +82,25 @@ func fetchFile(req Request) (*Response, error) {
 		data = nil
 	}
 	return &Response{URL: req.URL, Status: status, Body: data, Start: start, End: time.Now()}, nil
+}
+
+// FileURL returns the file URL of an absolute local path, such as file:///home/me/stream.mpd,
+// or file:///C:/media/stream.mpd on Windows. Characters such as # and % are escaped.
+func FileURL(abs string) string {
+	p := filepath.ToSlash(abs)
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p // in file://C:/media, C: would be the host
+	}
+	return (&url.URL{Scheme: "file", Path: p}).String()
+}
+
+// filePath returns the local path of a file URL, the reverse of FileURL.
+func filePath(u *url.URL) string {
+	p := u.Path
+	if len(p) > 1 && filepath.VolumeName(p[1:]) != "" {
+		p = p[1:] // /C:/media on Windows
+	}
+	return filepath.FromSlash(p)
 }
 
 func lowerKeys(h map[string][]string) map[string]string {
