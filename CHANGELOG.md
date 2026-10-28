@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-28
+
 ### Changed
-- The browser tool's examples are grouped as live, on demand and with errors. New examples: low latency
-  with 0.5 s chunks, on-demand MP4 with sidx (DASH-IF), CMAF (CTA WAVE), and as errors `avc1` in
-  `@codecs` for `avc3` (CTA WAVE), on demand without `@subsegmentAlignment` (DASH-IF) and a server
-  clock 10 s behind.
+- The browser tool's examples are grouped as live, on demand and with errors, with new examples from
+  livesim2 (low latency) and the DASH-IF and CTA WAVE test vectors.
 - The browser tool shows 0 errors in green, in the result and in the history.
 - CLOCK-LOCAL (info) only when the local clock is more than 500ms off the reference clock. The clock
   line of the report still gives the offset.
@@ -154,7 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The browser tool, published on GitHub Pages for each release, counts visits and checks with
   GoatCounter, without cookies or MPD URLs.
 
-[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/tobbee/dashcheck/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/tobbee/dashcheck/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/tobbee/dashcheck/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/tobbee/dashcheck/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/tobbee/dashcheck/compare/v0.1.2...v0.2.0
