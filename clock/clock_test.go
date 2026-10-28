@@ -117,7 +117,7 @@ func TestSyncWholeSeconds(t *testing.T) {
 	} {
 		timings := []*m.DescriptorType{{SchemeIdUri: scheme, Value: "https://whole"}}
 		_, source, findings := Sync(context.Background(), ff, timings, "https://ref", nil)
-		if source != name || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
+		if source != name || len(findings) != 0 {
 			t.Errorf("%s: source %s, findings %v", scheme, source, findings)
 		}
 	}
@@ -135,7 +135,7 @@ func (cf *countingFetcher) Fetch(ctx context.Context, req fetch.Request) (*fetch
 }
 
 func TestSyncReusesReference(t *testing.T) {
-	cf := &countingFetcher{fakeFetcher{"https://ref": -45 * time.Millisecond}, map[string]int{}}
+	cf := &countingFetcher{fakeFetcher{"https://ref": -745 * time.Millisecond}, map[string]int{}}
 	timings := []*m.DescriptorType{{SchemeIdUri: "urn:mpeg:dash:utc:http-xsdate:2014", Value: "https://ref"}}
 	_, source, findings := Sync(context.Background(), cf, timings, "https://ref", nil)
 	if cf.calls["https://ref"] != 1 {
@@ -144,9 +144,15 @@ func TestSyncReusesReference(t *testing.T) {
 	if source != "UTCTiming http-xsdate https://ref" || len(findings) != 1 || findings[0].Rule != "CLOCK-LOCAL" {
 		t.Fatalf("source %s, findings %v", source, findings)
 	}
-	// The fake server truncates to milliseconds, so the offset may read 45 or 46 ms.
+	// The fake server truncates to milliseconds, so the offset may read 745 or 746 ms.
 	msg := findings[0].Message
-	if !strings.HasPrefix(msg, "this computer's clock is 4") || !strings.Contains(msg, "ms ahead of the reference clock ref (round trip") {
+	if !strings.HasPrefix(msg, "this computer's clock is 74") || !strings.Contains(msg, "ms ahead of the reference clock ref (round trip") {
 		t.Errorf("message %q", msg)
+	}
+
+	// A local clock within the tolerance is not worth a note.
+	cf.fakeFetcher["https://ref"] = -45 * time.Millisecond
+	if _, _, findings = Sync(context.Background(), cf, timings, "https://ref", nil); len(findings) != 0 {
+		t.Errorf("45 ms: findings %v", findings)
 	}
 }
