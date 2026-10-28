@@ -64,7 +64,7 @@ var (
 	})
 	RuleLocal = report.Register(report.Rule{
 		ID: "CLOCK-LOCAL", Severity: report.Info,
-		Desc: "The offset between the local clock and the reference clock",
+		Desc: fmt.Sprintf("The local clock is more than %v off the reference clock", MaxSkew),
 	})
 )
 
@@ -218,9 +218,13 @@ func Sync(ctx context.Context, f fetch.Fetcher, timings []*m.DescriptorType, ref
 		}
 	}
 	if ref != nil {
-		findings = append(findings, RuleLocal.New(report.Location{URL: reference},
-			"this computer's clock is %s the reference clock %s (round trip %v)",
-			Describe(-ref.Offset), host(reference), ref.RTT.Round(time.Millisecond)))
+		// The checks use the synchronized clock, so the local clock is only
+		// worth a note when it is further off than CLOCK-SKEW allows a source.
+		if tol := MaxSkew + ref.RTT/2 + ref.Resolution/2; math.Abs(float64(ref.Offset)) > float64(tol) {
+			findings = append(findings, RuleLocal.New(report.Location{URL: reference},
+				"this computer's clock is %s the reference clock %s (round trip %v)",
+				Describe(-ref.Offset), host(reference), ref.RTT.Round(time.Millisecond)))
+		}
 		for i, meas := range measured {
 			// Both offsets are relative to the local clock, so their difference is source minus reference.
 			skew := meas.Offset - ref.Offset

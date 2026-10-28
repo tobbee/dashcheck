@@ -162,7 +162,7 @@ All 268 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 
 | Rule | Severity | Description | Spec | DASH-IF checks |
 |---|---|---|---|---|
-| CLOCK-LOCAL | info | The offset between the local clock and the reference clock |  | **dashcheck** |
+| CLOCK-LOCAL | info | The local clock is more than 500ms off the reference clock |  | **dashcheck** |
 | CLOCK-SKEW | warning | A UTCTiming source should be within 500ms of the reference clock |  | **dashcheck** |
 | CLOCK-SOURCE | error | Each UTCTiming source must respond with a parseable time | ISO/IEC 23009-1 (UTCTiming) | **dashcheck** |
 | CLOCK-UNSUPPORTED | info | UTCTiming schemes that the checker cannot measure are skipped |  | **dashcheck** |
