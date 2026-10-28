@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with 0.5 s chunks, on-demand MP4 with sidx (DASH-IF), CMAF (CTA WAVE), and as errors `avc1` in
   `@codecs` for `avc3` (CTA WAVE), on demand without `@subsegmentAlignment` (DASH-IF) and a server
   clock 10 s behind.
+- The browser tool shows 0 errors in green, in the result and in the history.
 
 ### Fixed
 - `dashcheck` keeps the drive letter of a local MPD on Windows, which it lost when the MPD was not on the

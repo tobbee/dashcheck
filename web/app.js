@@ -196,6 +196,7 @@ function render(rpt) {
   const findings = rpt.findings || [];
   const counts = severityCounts(findings);
   $('nError').textContent = counts.error;
+  $('nError').closest('.chip').classList.toggle('pass', counts.error === 0);
   $('nWarning').textContent = counts.warning;
   $('nInfo').textContent = counts.info;
 
@@ -304,7 +305,8 @@ function renderHistory() {
   }));
 }
 
-// mini is a small count of findings of one severity, dimmed when zero.
+// mini is a small count of findings of one severity, dimmed when zero, but
+// green for no errors.
 function mini(sev, n, label) {
   return el('span', { class: n ? `mini ${sev}` : `mini ${sev} zero`, title: `${n} ${label}` }, String(n));
 }

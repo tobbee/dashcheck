@@ -12,6 +12,8 @@
   --warning-bg: #fff4d6;
   --info: #3b5b85;
   --info-bg: #e8f0fb;
+  --pass: #1a7432;
+  --pass-bg: #dcf5e3;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -30,6 +32,8 @@
     --warning-bg: #352a10;
     --info: #8bb4ec;
     --info-bg: #1b2a3d;
+    --pass: #56d364;
+    --pass-bg: #15301e;
   }
 }
 
@@ -138,6 +142,7 @@ a { color: var(--accent); }
 .mini.warning { color: var(--warning); background: var(--warning-bg); }
 .mini.info { color: var(--info); background: var(--info-bg); }
 .mini.zero { opacity: 0.35; }
+.mini.error.zero { color: var(--pass); background: var(--pass-bg); opacity: 1; }
 .history-item .target { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px; }
 .history-item button:not(.link) { padding: 2px 10px; font-size: 13px; }
 .history-item .remove { border: none; color: var(--muted); padding: 2px 6px; }
@@ -156,6 +161,7 @@ a { color: var(--accent); }
 .chip.error { color: var(--error); background: var(--error-bg); border-color: transparent; }
 .chip.warning { color: var(--warning); background: var(--warning-bg); border-color: transparent; }
 .chip.info { color: var(--info); background: var(--info-bg); border-color: transparent; }
+.chip.error.pass { color: var(--pass); background: var(--pass-bg); }
 .chip[aria-pressed="false"] { opacity: 0.4; }
 
 .group { margin-bottom: 16px; }
