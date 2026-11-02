@@ -184,7 +184,7 @@ All 268 rules that dashcheck reports, as `dashcheck -rules` lists them. Severiti
 | MPD-IOP-AUDIO | error | IOP audio must signal @lang, @audioSamplingRate and AudioChannelConfiguration | DASH-IF IOP 3.2.4 | SCH-93, SCH-108 |
 | MPD-IOP-CODECS | error | IOP @codecs must have a single value | DASH-IF IOP 3.2.13 | SCH-109 |
 | MPD-IOP-CP | error | IOP ContentProtection must be on the AdaptationSet, and mp4protection must have cenc:default_KID | DASH-IF IOP 7 | SCH-115, SCH-116, SCH-117 |
-| MPD-IOP-CP-DRM | warning | IOP DRM ContentProtection descriptors (urn:uuid) should have cenc:pssh and a @value with the DRM name and version | DASH-IF IOP 7.7.2 | **dashcheck** |
+| MPD-IOP-CP-DRM | warning | IOP DRM ContentProtection descriptors (urn:uuid) should have a @value with the DRM name and version, and cenc:pssh (not required for FairPlay, as in IOP v5 Part 6) | DASH-IF IOP 7.7.2 | **dashcheck** |
 | MPD-IOP-DEPENDENCY | error | A Dolby Vision enhancement layer @dependencyId must refer to an earlier Representation | DASH-IF IOP 10 | SCH-110 |
 | MPD-IOP-LIVE | error | A dynamic IOP MPD must use the live profile, and live AdaptationSets must have @segmentAlignment true | DASH-IF IOP 3.2.2.2 | SCH-85, SCH-97 |
 | MPD-IOP-MIMETYPE | error | IOP AdaptationSets must use an allowed @mimeType, the same for all Representations | DASH-IF IOP 3.2.13 | SCH-99, SCH-104 |
