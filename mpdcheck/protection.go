@@ -19,6 +19,7 @@ import (
 const (
 	schemeCADescriptor = "urn:mpeg:dash:13818:1:CA_descriptor:2011"
 	schemeClearKey     = "urn:uuid:e2719d58-a985-b3c9-781a-b030af78d30e"
+	schemeFairPlay     = "urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2"
 )
 
 var (

@@ -109,9 +109,15 @@ var (
 		Desc:    "IOP ContentProtection must be on the AdaptationSet, and mp4protection must have cenc:default_KID",
 		SpecRef: "DASH-IF IOP 7",
 	})
+	// IOP v4.3 7.7.2 asks for cenc:pssh in every DRM descriptor, FairPlay
+	// included, but FairPlay clients build the license request from the
+	// server certificate and an asset ID (dashif:Laurl, dashif:Certurl), not
+	// from a pssh, and packagers rarely write a FairPlay pssh. IOP v5 Part 6
+	// no longer asks for cenc:pssh (7.3) and allows protected content without
+	// any pssh box (6.3), so the FairPlay descriptor is only checked for @value.
 	RuleIOPDRM = report.Register(report.Rule{
 		ID: "MPD-IOP-CP-DRM", Severity: report.Warning,
-		Desc:    "IOP DRM ContentProtection descriptors (urn:uuid) should have cenc:pssh and a @value with the DRM name and version",
+		Desc:    "IOP DRM ContentProtection descriptors (urn:uuid) should have a @value with the DRM name and version, and cenc:pssh (not required for FairPlay, as in IOP v5 Part 6)",
 		SpecRef: "DASH-IF IOP 7.7.2",
 	})
 	RuleAudioChannelConfig = report.Register(report.Rule{
@@ -306,7 +312,7 @@ func adaptationSetProfileRules(p *m.Period, ai int, as *m.AdaptationSetType, asP
 			if !strings.HasPrefix(strings.ToLower(string(cp.SchemeIdUri)), "urn:uuid:") || strings.EqualFold(string(cp.SchemeIdUri), schemeClearKey) {
 				continue
 			}
-			if cp.Pssh == nil {
+			if cp.Pssh == nil && !strings.EqualFold(string(cp.SchemeIdUri), schemeFairPlay) {
 				f = append(f, RuleIOPDRM.New(cpLoc, "%s descriptor without cenc:pssh", cp.SchemeIdUri))
 			}
 			if cp.Value == "" {
